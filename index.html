@@ -152,7 +152,8 @@ body {
         	<center>
 				<script src='https://www.google.com/recaptcha/api.js' async defer></script>
 			    <form id="comment_form" action="doSomething" method="post">
-			      <div class="g-recaptcha" data-sitekey="6Lf7KZ4UAAAAAEXg17TcCvrTwdMRt81KZMPcwR_5"></div>
+			      <div class="g-recaptcha" id="rcaptcha" data-sitekey="6Lf7KZ4UAAAAAEXg17TcCvrTwdMRt81KZMPcwR_5"></div>
+				  <input type="button" onclick="checkRecaptcha();" value="submit"></input>
 			    </form>
         	</center>
     	</div>
@@ -205,9 +206,7 @@ window.onload = function () {
     }, 200);
 }
 </script>
-<script src='https://www.google.com/recaptcha/api.js'></script>
 <script>
-
 function get_action(form) 
 {
     var v = grecaptcha.getResponse();
@@ -222,35 +221,31 @@ function get_action(form)
         return true; 
     }
 }
-
-function doSomething(){
-	<?php
-        $captcha;
-        if(isset($_POST['g-recaptcha-response'])){
-          $captcha=$_POST['g-recaptcha-response'];
-        }
-        if(!$captcha){
-          echo '<h2>Please check the the captcha form.</h2>';
-          exit;
-        }
-        $secretKey = "6Lf7KZ4UAAAAAO9CHEfltSxyM7sjP6PCrLEda6HL";
-        $ip = $_SERVER['REMOTE_ADDR'];
-        // post request to server
-        $url = 'https://www.google.com/recaptcha/api/siteverify?secret=' . urlencode($secretKey) .  '&response=' . urlencode($captcha);
-        $response = file_get_contents($url);
-        $responseKeys = json_decode($response,true);
-        // should return JSON with success as true
-        if($responseKeys["success"]) {
-                echo '<h2>Thanks for posting comment</h2>';
-                document.getElementById("ac-wrapper").style.display = "block";
-
-        } else {
-                echo '<h2>You are spammer!</h2>';
-        }
-        $style = "style='display:none'"; 
-?>
+</script>
+<script> 
+function checkRecaptcha() {
+  var response = grecaptcha.getResponse();
+  if(response.length == 0) { 
+    //reCaptcha not verified
+    alert("no pass"); 
+  }
+  else { 
+    //reCaptch verified
+    alert("pass"); 
+    document.getElementById("ac-wrapper").style.display="hidden";
+  }
 }
-
+/* implement on the backend
+function backend_API_challenge() {
+    var response = grecaptcha.getResponse();
+    $.ajax({
+        type: "POST",
+        url: 'https://www.google.com/recaptcha/api/siteverify',
+        data: {"secret" : "(your-secret-key)", "response" : response, "remoteip":"localhost"},
+        contentType: 'application/x-www-form-urlencoded',
+        success: function(data) { console.log(data); }
+    });
+}*/
 </script>
 <div class="footer">
   <h2>Footer</h2>

@@ -177,8 +177,8 @@ body {
   <a href="extracurs.html">Extra-curriculars</a>
   <a href="hobbies.html">Hobbies/Interests</a>
 </div>
- <div class="tab">
-  <button class="tablinks" onclick="openCity(event, 'Java')">Java</button>
+ <div class="tab" onload>
+  <button class="tablinks" id="defaultOpen" onclick="openCity(event, 'Java')">Java</button>
   <button class="tablinks" onclick="openCity(event, 'C')">C</button>
   <button class="tablinks" onclick="openCity(event, 'C++')">C++</button>
   <button class="tablinks" onclick="openCity(event, 'Python')">Python</button>
@@ -236,6 +236,7 @@ function openCity(evt, cityName) {
   document.getElementById(cityName).style.display = "block";
   evt.currentTarget.className += " active";
 } 
+document.getElementById("defaultOpen").click();
 </script>
 
 </html>

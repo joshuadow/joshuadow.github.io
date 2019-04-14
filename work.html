@@ -100,6 +100,7 @@ body {
 
 /* Footer */
 .footer {
+  position: fixed;
   padding: 20px;
   text-align: center;
   background: #009;
@@ -177,7 +178,7 @@ body {
   <a href="extracurs.html">Extra-curriculars</a>
   <a href="hobbies.html">Hobbies/Interests</a>
 </div>
- <div class="tab" onload>
+ <div class="tab" onload="selectDefault()">
   <button class="tablinks" id="defaultOpen" onclick="openCity(event, 'Java')">Java</button>
   <button class="tablinks" onclick="openCity(event, 'C')">C</button>
   <button class="tablinks" onclick="openCity(event, 'C++')">C++</button>
@@ -211,9 +212,9 @@ body {
   <h3>Others</h3>
   <p>Tokyo is the capital of Japan.</p>
 </div> 
-<!--<div class="footer">
+<div class="footer">
   <h2>Footer</h2>
-</div> -->
+</div>
 </body>
 <script>
 function openCity(evt, cityName) {
@@ -236,7 +237,11 @@ function openCity(evt, cityName) {
   document.getElementById(cityName).style.display = "block";
   evt.currentTarget.className += " active";
 } 
-document.getElementById("defaultOpen").click();
+</script>
+<script type="text/javascript">
+	function selectDefault(){
+		document.getElementById("defaultOpen").click();
+	}
 </script>
 
 </html>

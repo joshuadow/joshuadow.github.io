@@ -154,8 +154,27 @@ body {
 window.onload = function () {
     setTimeout(function () {
         PopUp('show');
-    }, 1000);
+    }, 200);
 }
+</script>
+<script src='https://www.google.com/recaptcha/api.js'></script>
+<script>
+
+function get_action(form) 
+{
+    var v = grecaptcha.getResponse();
+    if(v.length == 0)
+    {
+        document.getElementById('captcha').innerHTML="You can't leave Captcha Code empty";
+        return false;
+    }
+    else
+    {
+         document.getElementById('captcha').innerHTML="Captcha completed";
+        return true; 
+    }
+}
+
 </script>
 <body>
 <div class="header">
@@ -172,7 +191,8 @@ window.onload = function () {
 <div id="ac-wrapper" style='display:none'>
     <div id="popup">
         <center>
-             <h2>Popup Content Here</h2>    
+         	<div class="g-recaptcha" id="rcaptcha"  data-sitekey="site key"></div>
+			<span id="captcha" style="color:red" /></span>   
             <input type="submit" name="submit" value="Submit" onClick="PopUp('hide')" />
         </center>
     </div>

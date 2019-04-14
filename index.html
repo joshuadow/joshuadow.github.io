@@ -234,17 +234,6 @@ function checkRecaptcha() {
     document.getElementById("ac-wrapper").style.display = "none";
   }
 }
-/* implement on the backend
-function backend_API_challenge() {
-    var response = grecaptcha.getResponse();
-    $.ajax({
-        type: "POST",
-        url: 'https://www.google.com/recaptcha/api/siteverify',
-        data: {"secret" : "(your-secret-key)", "response" : response, "remoteip":"localhost"},
-        contentType: 'application/x-www-form-urlencoded',
-        success: function(data) { console.log(data); }
-    });
-}*/
 </script>
 <div class="footer">
   <h2>Footer</h2>

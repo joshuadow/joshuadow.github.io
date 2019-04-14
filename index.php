@@ -16,9 +16,7 @@
         // should return JSON with success as true
         if($responseKeys["success"]) {
                 echo '<h2>Thanks for posting comment</h2>';
-                <style type="text/css">
-			      	ac-wrapper{ display:none; }
-		      	</style>
+                document.getElementById("ac-wrapper").style.display = "block";
 
         } else {
                 echo '<h2>You are spammer!</h2>';

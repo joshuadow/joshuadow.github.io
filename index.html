@@ -146,6 +146,65 @@ body {
 }
 </style>
 </head>
+<body>
+	<div id="ac-wrapper" style='display:none'>
+    	<div id="popup">
+        	<center>
+	        	<?php
+				  if ($response != null && $response->success) {
+				    echo "Hi " . $_POST["name"] . " (" . $_POST["email"] . "), thanks for submitting the form!";
+				  } else {
+				?>
+	         	  <form action="" method="post">
+			 
+			      <div class="g-recaptcha" data-sitekey="6LcDKZ4UAAAAAFFLp_LY254iOXTtJSu0cW3P6rXd"></div>
+			 
+			      <input type="submit" value="Submit" />
+	
+			    </form>
+			 	<?php } ?>
+			    <!--js-->
+		    	<script src='https://www.google.com/recaptcha/api.js?render=6LcDKZ4UAAAAAFFLp_LY254iOXTtJSu0cW3P6rXd'></script>
+        	</center>
+    	</div>
+	</div>
+<div class="header">
+  <h1>Josh Dow</h1>
+  <p>A self-made website portfolio</p>
+</div>
+
+<div class="navbar">
+  <a href="index.html" class="active">Home</a>
+  <a href="work.html">Work</a>
+  <a href="extracurs.html">Extra-curriculars</a>
+  <a href="hobbies.html">Hobbies/Interests</a>
+</div>
+<div class="row">
+  <div class="side">
+    <h2>About Me</h2>
+    <h5>Photo of me:</h5>
+    <img src="JD.jpg" height="400" width="200" class="center" padding="20">
+    <p>Some text about me in culpa qui officia deserunt mollit anim..</p>
+    <h3>More Text</h3>
+    <p>Lorem ipsum dolor sit ame.</p>
+    <div class="fakeimg" style="height:60px;">Image</div><br>
+    <div class="fakeimg" style="height:60px;">Image</div><br>
+    <div class="fakeimg" style="height:60px;">Image</div>
+  </div>
+  <div class="main">
+    <h2>TITLE HEADING</h2>
+    <h5>Title description, Dec 7, 2017</h5>
+    <div class="fakeimg" style="height:200px;">Image</div>
+    <p>Some text..</p>
+    <p>Sunt in culpa qui officia deserunt mollit anim id est laborum consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco.</p>
+    <br>
+    <h2>TITLE HEADING</h2>
+    <h5>Title description, Sep 2, 2017</h5>
+    <div class="fakeimg" style="height:200px;">Image</div>
+    <p>Some text..</p>
+    <p>Sunt in culpa qui officia deserunt mollit anim id est laborum consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco.</p>
+  </div>
+</div>
 <script type="text/javascript">
     function PopUp(hideOrshow) {
     if (hideOrshow == 'hide') document.getElementById('ac-wrapper').style.display = "none";
@@ -176,66 +235,6 @@ function get_action(form)
 }
 
 </script>
-<body>
-<div class="header">
-  <h1>Josh Dow</h1>
-  <p>A self-made website portfolio</p>
-</div>
-
-<div class="navbar">
-  <a href="index.html" class="active">Home</a>
-  <a href="work.html">Work</a>
-  <a href="extracurs.html">Extra-curriculars</a>
-  <a href="hobbies.html">Hobbies/Interests</a>
-</div>
-<div id="ac-wrapper" style='display:none'>
-    <div id="popup">
-        <center>
-        	<?php
-			  if ($response != null && $response->success) {
-			    echo "Hi " . $_POST["name"] . " (" . $_POST["email"] . "), thanks for submitting the form!";
-			  } else {
-			?>
-         	  <form action="" method="post">
-		 
-		      <div class="g-recaptcha" data-sitekey="6LcDKZ4UAAAAAFFLp_LY254iOXTtJSu0cW3P6rXd"></div>
-		 
-		      <input type="submit" value="Submit" />
-	
-		    </form>
-		 	<?php } ?>
-		    <!--js-->
-		    <script src='https://www.google.com/recaptcha/api.js'></script>
-        </center>
-    </div>
-</div>
-<div class="row">
-  <div class="side">
-    <h2>About Me</h2>
-    <h5>Photo of me:</h5>
-    <img src="JD.jpg" height="400" width="200" class="center" padding="20">
-    <p>Some text about me in culpa qui officia deserunt mollit anim..</p>
-    <h3>More Text</h3>
-    <p>Lorem ipsum dolor sit ame.</p>
-    <div class="fakeimg" style="height:60px;">Image</div><br>
-    <div class="fakeimg" style="height:60px;">Image</div><br>
-    <div class="fakeimg" style="height:60px;">Image</div>
-  </div>
-  <div class="main">
-    <h2>TITLE HEADING</h2>
-    <h5>Title description, Dec 7, 2017</h5>
-    <div class="fakeimg" style="height:200px;">Image</div>
-    <p>Some text..</p>
-    <p>Sunt in culpa qui officia deserunt mollit anim id est laborum consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco.</p>
-    <br>
-    <h2>TITLE HEADING</h2>
-    <h5>Title description, Sep 2, 2017</h5>
-    <div class="fakeimg" style="height:200px;">Image</div>
-    <p>Some text..</p>
-    <p>Sunt in culpa qui officia deserunt mollit anim id est laborum consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco.</p>
-  </div>
-</div>
-
 <div class="footer">
   <h2>Footer</h2>
 </div>

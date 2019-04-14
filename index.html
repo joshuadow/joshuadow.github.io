@@ -191,9 +191,21 @@ function get_action(form)
 <div id="ac-wrapper" style='display:none'>
     <div id="popup">
         <center>
-         	<div class="g-recaptcha" id="rcaptcha"  data-sitekey="6LcDKZ4UAAAAAFFLp_LY254iOXTtJSu0cW3P6rXd"></div>
-			<span id="captcha" style="color:red" /></span>   
-            <input type="submit" name="submit" value="Submit" onClick="PopUp('hide')" />
+        	<?php
+			  if ($response != null && $response->success) {
+			    echo "Hi " . $_POST["name"] . " (" . $_POST["email"] . "), thanks for submitting the form!";
+			  } else {
+			?>
+         	  <form action="" method="post">
+		 
+		      <div class="g-recaptcha" data-sitekey="6LcDKZ4UAAAAAFFLp_LY254iOXTtJSu0cW3P6rXd"></div>
+		 
+		      <input type="submit" value="Submit" />
+	
+		    </form>
+		 
+		    <!--js-->
+		    <script src='https://www.google.com/recaptcha/api.js'></script>
         </center>
     </div>
 </div>

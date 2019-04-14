@@ -227,11 +227,10 @@ function checkRecaptcha() {
   var response = grecaptcha.getResponse();
   if(response.length == 0) { 
     //reCaptcha not verified
-    alert("no pass"); 
+    alert("Not correct"); 
   }
   else { 
     //reCaptch verified
-    alert("pass"); 
     document.getElementById("ac-wrapper").style.display="hidden";
   }
 }

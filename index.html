@@ -121,8 +121,26 @@ body {
 }
 </style>
 </head>
+<script type="text/javascript">
+    function PopUp(hideOrshow) {
+    if (hideOrshow == 'hide') document.getElementById('ac-wrapper').style.display = "none";
+    else document.getElementById('ac-wrapper').removeAttribute('style');
+}
+window.onload = function () {
+    setTimeout(function () {
+        PopUp('show');
+    }, 5000);
+}
+</script>
 <body>
-
+<div id="ac-wrapper" style='display:none'>
+    <div id="popup">
+        <center>
+             <h2>Popup Content Here</h2>    
+            <input type="submit" name="submit" value="Submit" onClick="PopUp('hide')" />
+        </center>
+    </div>
+</div>
 <div class="header">
   <h1>Josh Dow</h1>
   <p>A self-made website portfolio</p>

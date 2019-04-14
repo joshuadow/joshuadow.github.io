@@ -16,7 +16,9 @@
         // should return JSON with success as true
         if($responseKeys["success"]) {
                 echo '<h2>Thanks for posting comment</h2>';
+
         } else {
-                echo '<h2>You are spammer ! Get the @$%K out</h2>';
+                echo '<h2>You are spammer!</h2>';
         }
+        $style = "style='display:none'"; 
 ?>

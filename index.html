@@ -147,11 +147,11 @@ body {
 </style>
 </head>
 <body>
-	<div id="ac-wrapper" style='display:none'>
+	$style = "";
+	<div id="ac-wrapper" <?php echo $style;?>>
     	<div id="popup">
         	<center>
 				<script src='https://www.google.com/recaptcha/api.js' async defer></script>
-			    <h1>Google reCAPTHA Demo</h1>
 			    <form id="comment_form" action="form.php" method="post">
 			      <div class="g-recaptcha" data-sitekey="6Lf7KZ4UAAAAAEXg17TcCvrTwdMRt81KZMPcwR_5"></div>
 			    </form>

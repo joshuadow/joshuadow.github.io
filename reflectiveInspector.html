@@ -179,186 +179,186 @@ body {
 
   public class ReflectiveInspector {
 
-          public List<String> already_visited_class = new ArrayList<>();
+    public List<String> already_visited_class = new ArrayList<>();
 
-          public void inspect(Object obj, boolean recursive) throws IllegalAccessException {
-              if(obj == null){
-                  System.out.println("Cannot operate on a NULL object. Exiting now...");
-                  return;
-              }
-              LinkedList recursiveList = new LinkedList();
-              Class classObj = obj.getClass();
-              if(already_visited_class.contains(classObj.getTypeName())){
-                  return;
-              }
-              System.out.println("Currently inspecting object of type: " + classObj.getTypeName());
-              System.out.println("Recursive option is set to: " + recursive);
+    public void inspect(Object obj, boolean recursive) throws IllegalAccessException {
+        if(obj == null){
+            System.out.println("Cannot operate on a NULL object. Exiting now...");
+            return;
+        }
+        LinkedList recursiveList = new LinkedList();
+        Class classObj = obj.getClass();
+        if(already_visited_class.contains(classObj.getTypeName())){
+            return;
+        }
+        System.out.println("Currently inspecting object of type: " + classObj.getTypeName());
+        System.out.println("Recursive option is set to: " + recursive);
 
-              if(classObj.isPrimitive()){
-                  System.out.println("Currently inspecting primitive object: " + classObj.getTypeName());
-                  //Do Some work
-              }
-              else if(!classObj.isArray()){
-                  System.out.println("Declaring Class: " + getDeclaringClass(classObj));
+        if(classObj.isPrimitive()){
+            System.out.println("Currently inspecting primitive object: " + classObj.getTypeName());
+            //Do Some work
+        }
+        else if(!classObj.isArray()){
+            System.out.println("Declaring Class: " + getDeclaringClass(classObj));
 
-                  getInterface(obj,classObj, recursiveList, recursive);
-                  getMethods(classObj);
-                  getConstructors(classObj);
-                  getFields(obj,classObj, recursiveList, recursive);
-                  getFieldValue(classObj);
-                  already_visited_class.add(classObj.getTypeName());
-                  if(recursiveList.size() > 0){
-                      getRecursive(obj,classObj, recursiveList, recursive);
-                  }
+            getInterface(obj,classObj, recursiveList, recursive);
+            getMethods(classObj);
+            getConstructors(classObj);
+            getFields(obj,classObj, recursiveList, recursive);
+            getFieldValue(classObj);
+            already_visited_class.add(classObj.getTypeName());
+            if(recursiveList.size() > 0){
+                getRecursive(obj,classObj, recursiveList, recursive);
+            }
 
-                  if(recursive){
-                      if(classObj.isPrimitive()){
-                          recursive = false;
-                      }
-                      getRecursive(obj,classObj, recursiveList, recursive);
-                  }
-              }
-              else{
-                  for(int i = 0; i < Array.getLength(obj); i++){
-                  /*Have to do this recursively because we need to go through every element of the array (Which could
-                  also be an array, but we have no way of knowing until runtime)
-                   */
-                      inspect(Array.get(obj, i), recursive);
-                  }
-              }
+            if(recursive){
+                if(classObj.isPrimitive()){
+                    recursive = false;
+                }
+                getRecursive(obj,classObj, recursiveList, recursive);
+            }
+        }
+        else{
+            for(int i = 0; i < Array.getLength(obj); i++){
+            /*Have to do this recursively because we need to go through every element of the array (Which could
+            also be an array, but we have no way of knowing until runtime)
+             */
+                inspect(Array.get(obj, i), recursive);
+            }
+        }
 
-          }
+    }
 
-          public void getRecursive(Object obj,Class classObj, LinkedList recursiveList, boolean recursive) throws IllegalAccessException {
-              if(recursiveList.size() == 0){ return;}
-              System.out.println("Recursively inspecting: " + classObj.getName());
-              for(int i = 0; i < recursiveList.size(); i++){
-                  Field f = (Field) recursiveList.get(i);
-                  System.out.println("    Lets deep dive into: " + f.getName());
-                  if(recursive){
-                      inspect(f.get(obj), recursive);
-                  }
+    public void getRecursive(Object obj,Class classObj, LinkedList recursiveList, boolean recursive) throws IllegalAccessException {
+        if(recursiveList.size() == 0){ return;}
+        System.out.println("Recursively inspecting: " + classObj.getName());
+        for(int i = 0; i < recursiveList.size(); i++){
+            Field f = (Field) recursiveList.get(i);
+            System.out.println("    Lets deep dive into: " + f.getName());
+            if(recursive){
+                inspect(f.get(obj), recursive);
+            }
 
-              }
-          }
+        }
+    }
 
-          public void getMethods(Class classObj){
-              Method[] mArr= classObj.getMethods();
-              System.out.println("Methods of " + classObj.getName() + " are: ");
-              for(int i = 0; i < mArr.length; i++){
-                  System.out.println("    " + mArr[i].getName());
-              }
-              System.out.println("\n\n");
-              for(int i = 0; i < mArr.length; i++){
-                  Method method = mArr[i];
-                  System.out.println("    " + method.getName() + " has the following exceptions: ");
-                  for(int j = 0; j < method.getExceptionTypes().length; j++){
-                      System.out.println("        " + method.getExceptionTypes()[j].getName());
-                  }
-                  System.out.println("    " + method.getName() + " has the following parameter types: ");
-                  for(int j = 0; j < method.getParameters().length; j++){
-                      System.out.println("        " + method.getParameters()[j].getParameterizedType());
-                  }
-                  System.out.println("    " + method.getName() + " has the following return type: " + method.getReturnType());
-                  System.out.println("    " + method.getName() + " has the following modifiers: " + Modifier.toString(method.getModifiers()));
-                  System.out.print("\n\n");
-              }
-          }
+    public void getMethods(Class classObj){
+        Method[] mArr= classObj.getMethods();
+        System.out.println("Methods of " + classObj.getName() + " are: ");
+        for(int i = 0; i < mArr.length; i++){
+            System.out.println("    " + mArr[i].getName());
+        }
+        System.out.println("\n\n");
+        for(int i = 0; i < mArr.length; i++){
+            Method method = mArr[i];
+            System.out.println("    " + method.getName() + " has the following exceptions: ");
+            for(int j = 0; j < method.getExceptionTypes().length; j++){
+                System.out.println("        " + method.getExceptionTypes()[j].getName());
+            }
+            System.out.println("    " + method.getName() + " has the following parameter types: ");
+            for(int j = 0; j < method.getParameters().length; j++){
+                System.out.println("        " + method.getParameters()[j].getParameterizedType());
+            }
+            System.out.println("    " + method.getName() + " has the following return type: " + method.getReturnType());
+            System.out.println("    " + method.getName() + " has the following modifiers: " + Modifier.toString(method.getModifiers()));
+            System.out.print("\n\n");
+        }
+    }
 
-          public void getConstructors(Class classObj){
-              Constructor[] conArr = classObj.getConstructors();
-              System.out.println("Constructors of " + classObj.getName() + " are: ");
-              for(int i = 0; i < conArr.length; i++){
-                  System.out.println("    " + conArr[i].getName() + "(" + conArr[i].getParameterCount()+ ")");
-              }
-              System.out.println("\n");
-              for(int i = 0; i < conArr.length; i++){
-                  Constructor constructor = conArr[i];
-                  System.out.println("    " + constructor.getName()+ "(" + conArr[i].getParameterCount()+ ")" + " has the following parameter types: ");
-                  for(int j = 0; j < constructor.getParameters().length; j++){
-                      System.out.println("        " + constructor.getParameters()[j].getParameterizedType());
-                  }
-                  System.out.println("    " + constructor.getName()+ "(" + conArr[i].getParameterCount()+ ")" + " has the following modifiers: " + Modifier.toString(constructor.getModifiers()));
-                  System.out.println("\n");
-              }
-          }
+    public void getConstructors(Class classObj){
+        Constructor[] conArr = classObj.getConstructors();
+        System.out.println("Constructors of " + classObj.getName() + " are: ");
+        for(int i = 0; i < conArr.length; i++){
+            System.out.println("    " + conArr[i].getName() + "(" + conArr[i].getParameterCount()+ ")");
+        }
+        System.out.println("\n");
+        for(int i = 0; i < conArr.length; i++){
+            Constructor constructor = conArr[i];
+            System.out.println("    " + constructor.getName()+ "(" + conArr[i].getParameterCount()+ ")" + " has the following parameter types: ");
+            for(int j = 0; j < constructor.getParameters().length; j++){
+                System.out.println("        " + constructor.getParameters()[j].getParameterizedType());
+            }
+            System.out.println("    " + constructor.getName()+ "(" + conArr[i].getParameterCount()+ ")" + " has the following modifiers: " + Modifier.toString(constructor.getModifiers()));
+            System.out.println("\n");
+        }
+    }
 
-          public void getFields(Object obj, Class classObj, LinkedList recursiveList, boolean recursive) throws IllegalAccessException {
-              Field[] fArr = classObj.getDeclaredFields();
-              System.out.println("Fields of " + classObj.getName() + " are: ");
-              if( fArr == null){
-                  return;
-              }
-              for(int i = 0; i < fArr.length; i++){
-                  Field field= fArr[i];
-                  if(field == null){ continue;}
-                  try {
-                      field.setAccessible(true);
-                      if (!field.getType().isPrimitive()) {
-                          recursiveList.add(field);
-                      }
-                      System.out.println("    " + field.getName());
-                      System.out.println("        " + field.getName() + " has the following type: " + field.getType().getName());
-                      System.out.println("        " + field.getName() + " has the following modifiers: " + Modifier.toString(field.getModifiers()));
-                      if (field.getType() == null && !recursive) {
-                          System.out.println("        " + field.getName() + " is a reference with value: " + field.getClass() + field.hashCode());
-                      } else {
-                          System.out.println("        " + field.getName() + " has value of: " + field.get(obj));
-                      }
-                      if (field.getType().isArray() && field.get(obj) != null) {
-                          System.out.println("        " + field.getName() + " is an array with the following properties: ");
-                          System.out.println("            Length: " + Array.getLength(field.get(obj)));
-                          System.out.println("            Contains type: " + field.getType().getComponentType().getName());
-                          System.out.println("            Elements: ");
-                          for (int j = 0; j < Array.getLength(field.get(obj)); j++) {
-                              System.out.println("                " + Array.get(field.get(obj), j));
-                          }
-                      }
-                  }
-                  catch(InaccessibleObjectException e){
-                      System.out.println("Unable to access" + field.getName() + ". Continuing...");
-                  }
+    public void getFields(Object obj, Class classObj, LinkedList recursiveList, boolean recursive) throws IllegalAccessException {
+        Field[] fArr = classObj.getDeclaredFields();
+        System.out.println("Fields of " + classObj.getName() + " are: ");
+        if( fArr == null){
+            return;
+        }
+        for(int i = 0; i < fArr.length; i++){
+            Field field= fArr[i];
+            if(field == null){ continue;}
+            try {
+                field.setAccessible(true);
+                if (!field.getType().isPrimitive()) {
+                    recursiveList.add(field);
+                }
+                System.out.println("    " + field.getName());
+                System.out.println("        " + field.getName() + " has the following type: " + field.getType().getName());
+                System.out.println("        " + field.getName() + " has the following modifiers: " + Modifier.toString(field.getModifiers()));
+                if (field.getType() == null && !recursive) {
+                    System.out.println("        " + field.getName() + " is a reference with value: " + field.getClass() + field.hashCode());
+                } else {
+                    System.out.println("        " + field.getName() + " has value of: " + field.get(obj));
+                }
+                if (field.getType().isArray() && field.get(obj) != null) {
+                    System.out.println("        " + field.getName() + " is an array with the following properties: ");
+                    System.out.println("            Length: " + Array.getLength(field.get(obj)));
+                    System.out.println("            Contains type: " + field.getType().getComponentType().getName());
+                    System.out.println("            Elements: ");
+                    for (int j = 0; j < Array.getLength(field.get(obj)); j++) {
+                        System.out.println("                " + Array.get(field.get(obj), j));
+                    }
+                }
+            }
+            catch(InaccessibleObjectException e){
+                System.out.println("Unable to access" + field.getName() + ". Continuing...");
+            }
 
-              }
-          }
+        }
+    }
 
-          public void getFieldValue(Class classObj){
-              return;
-          }
+    public void getFieldValue(Class classObj){
+        return;
+    }
 
-          public void getInterface(Object obj,Class classObj, LinkedList recursiveList, boolean recursive) throws IllegalAccessException {
-              Class[] cArr = classObj.getInterfaces();
-              if(!classObj.isInterface()){
-                  System.out.println("Implemented Interfaces: ");
-                  for(int i = 0; i < cArr.length; i++){
-                      System.out.println("    " + cArr[i].getName());
-                  }
-              }
-              else{
-                  for(int i = 0; i < cArr.length; i++){
-                      getMethods(cArr[i]);
-                      getConstructors(cArr[i]);
-                      getFields(obj,cArr[i], recursiveList, recursive);
-                      getFieldValue(cArr[i]);
-                  }
-              }
-          }
+    public void getInterface(Object obj,Class classObj, LinkedList recursiveList, boolean recursive) throws IllegalAccessException {
+        Class[] cArr = classObj.getInterfaces();
+        if(!classObj.isInterface()){
+            System.out.println("Implemented Interfaces: ");
+            for(int i = 0; i < cArr.length; i++){
+                System.out.println("    " + cArr[i].getName());
+            }
+        }
+        else{
+            for(int i = 0; i < cArr.length; i++){
+                getMethods(cArr[i]);
+                getConstructors(cArr[i]);
+                getFields(obj,cArr[i], recursiveList, recursive);
+                getFieldValue(cArr[i]);
+            }
+        }
+    }
 
-          public void getImmSuperClass(Object obj,Class classObj, LinkedList recursiveList, boolean recursive) throws IllegalAccessException {
-              Class superc = classObj.getSuperclass();
-              System.out.println("Immediate Superclass: " + superc.getName());
-              System.out.println("Superclass has the following properties: ");
-              if(superc != null) {
-                  getMethods(superc);
-                  getConstructors(superc);
-                  getFields(obj,superc, recursiveList, recursive);
-                  getFieldValue(superc);
-              }
-          }
+    public void getImmSuperClass(Object obj,Class classObj, LinkedList recursiveList, boolean recursive) throws IllegalAccessException {
+        Class superc = classObj.getSuperclass();
+        System.out.println("Immediate Superclass: " + superc.getName());
+        System.out.println("Superclass has the following properties: ");
+        if(superc != null) {
+            getMethods(superc);
+            getConstructors(superc);
+            getFields(obj,superc, recursiveList, recursive);
+            getFieldValue(superc);
+        }
+    }
 
-          public String getDeclaringClass(Class classObj) {
-              return classObj.getName();
-          }
+    public String getDeclaringClass(Class classObj) {
+        return classObj.getName();
+    }
   }
   </code>
 </pre>

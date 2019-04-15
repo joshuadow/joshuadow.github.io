@@ -99,6 +99,10 @@ body {
 
 /* Footer */
 .footer {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
   padding: 20px;
   text-align: center;
   background: #009;
@@ -219,9 +223,6 @@ body {
   <p>Tokyo is the capital of Japan.</p>
 </div> 
 <div></div>
-<div class="footer">
-  <h2>Footer</h2>
-</div>
 <script>
 function openCity(evt, cityName) {
   // Declare all variables
@@ -272,6 +273,8 @@ function openCity2(evt, cityName) {
 		document.getElementById("defaultOpen2").click();
 	}
 </script>
-
+<div class="footer">
+  <h2>Footer</h2>
+</div>
 </body>
 </html>

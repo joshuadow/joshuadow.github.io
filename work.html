@@ -188,14 +188,12 @@ body {
 <script src="/highlight/highlight.pack.js"></script>
 <script>hljs.initHighlightingOnLoad();</script>
 <div id="Java" class="tabcontent">
-  <h3>Java</h3>
-  <pre>
-  	<code class="java">
-  		public static void main(String[] args){
-  			System.out.println("Hello World!");
-  		}
-  	</code>
-  </pre>
+  <div class="tab">
+  	  <button class="tablinks" onclick="openCity(event, 'ObjectInspector')" id="defaultOpen2">Object Inspector</button>
+  </div>
+  <div id="ObjectInspector" class="tabcontent">
+  	Test thing
+  </div>
 </div>
 <div id="C" class="tabcontent">
   <h3>C</h3>
@@ -243,6 +241,7 @@ function openCity(evt, cityName) {
 <script type="text/javascript">
 	function selectDefault(){
 		document.getElementById("defaultOpen").click();
+		document.getElementById("defaultOpen2").click();
 	}
 </script>
 

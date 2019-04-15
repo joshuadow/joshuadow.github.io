@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Josh Dow</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+* {
+  box-sizing: border-box;
+}
+
+/* Style the body */
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+}
+
+/* Header/logo Title */
+.header {
+  padding: 35px;
+  text-align: center;
+  background: darkred;
+  color: gold;
+}
+
+/* Increase the font size of the heading */
+.header h1 {
+  font-size: 40px;
+}
+
+/* Sticky navbar - toggles between relative and fixed, depending on the scroll position. It is positioned relative until a given offset position is met in the viewport - then it "sticks" in place (like position:fixed). The sticky value is not supported in IE or Edge 15 and earlier versions. However, for these versions the navbar will inherit default position */
+.navbar {
+  overflow: hidden;
+  background-color: black;
+  position: sticky;
+  position: -webkit-sticky;
+  top: 0;
+}
+
+/* Style the navigation bar links */
+.navbar a {
+  float: left;
+  display: block;
+  color: gold;
+  text-align: center;
+  padding: 14px 20px;
+  text-decoration: none;
+}
+
+
+/* Right-aligned link */
+.navbar a.right {
+  float: right;
+}
+
+/* Change color on hover */
+.navbar a:hover {
+  background-color: gold;
+  color: darkred;
+}
+
+/* Active/current link */
+.navbar a.active {
+  background-color: white;
+  color: darkred;
+}
+
+/* Column container */
+.row {  
+  display: -ms-flexbox; /* IE10 */
+  display: flex;
+  -ms-flex-wrap: wrap; /* IE10 */
+  flex-wrap: wrap;
+}
+
+/* Create two unequal columns that sits next to each other */
+/* Sidebar/left column */
+.side {
+  -ms-flex: 30%; /* IE10 */
+  flex: 30%;
+  background-color: #f1f1f1;
+  padding: 20px;
+}
+
+/* Main column */
+.main {   
+  -ms-flex: 70%; /* IE10 */
+  flex: 70%;
+  background-color: white;
+  padding: 20px;
+  overflow: scroll;
+}
+
+/* Fake image, just for this example */
+.fakeimg {
+  background-color: #aaa;
+  width: 100%;
+  padding: 20px;
+}
+
+/* Footer */
+.footer {
+  padding: 20px;
+  text-align: center;
+  background: #009;
+}
+
+#ac-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, .6);
+    z-index: 1001;
+}
+#popup {
+    width: 555px;
+    height: 375px;
+    background: #FFFFFF;
+    border: 5px solid #000;
+    border-radius: 25px;
+    -moz-border-radius: 25px;
+    -webkit-border-radius: 25px;
+    box-shadow: #64686e 0px 0px 3px 3px;
+    -moz-box-shadow: #64686e 0px 0px 3px 3px;
+    -webkit-box-shadow: #64686e 0px 0px 3px 3px;
+    position: relative;
+    top: 150px;
+    left: 500px;
+}
+
+/* Responsive layout - when the screen is less than 700px wide, make the two columns stack on top of each other instead of next to each other */
+@media screen and (max-width: 700px) {
+  .row {   
+    flex-direction: column;
+  }
+}
+
+/* Responsive layout - when the screen is less than 400px wide, make the navigation links stack on top of each other instead of next to each other */
+@media screen and (max-width: 400px) {
+  .navbar a {
+    float: none;
+    width: 100%;
+  }
+}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>Object Inspector</h1>
+  <p>Allows for the reflective inspection of java objects</p>
+</div>
+
+<div class="navbar">
+  <a href="index.html" >Home</a>
+  <a href="work.html">Work</a>
+  <a href="extracurs.html" class="active">Extra-curriculars</a>
+  <a href="hobbies.html">Hobbies/Interests</a>
+</div>
+<link rel="stylesheet" href="/highlight/styles/a11y-dark.css"/>
+<script src="/highlight/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<div>
+  <div class="navbar">
+  <a href="inspector.html">Inspector.java</a>
+  <a href="reflectiveInspector.html" class="active">ReflectiveInspector.java</a>
+  <a href="inspectorTest.html">Unit Tests</a>
+</div>
+<pre>
+  <code class="java">
+    import java.lang.reflect.*;
+    import java.util.ArrayList;
+    import java.util.LinkedList;
+    import java.util.List;
+
+    public class ReflectiveInspector {
+
+            public List<String> already_visited_class = new ArrayList<>();
+
+            public void inspect(Object obj, boolean recursive) throws IllegalAccessException {
+                if(obj == null){
+                    System.out.println("Cannot operate on a NULL object. Exiting now...");
+                    return;
+                }
+                LinkedList recursiveList = new LinkedList();
+                Class classObj = obj.getClass();
+                if(already_visited_class.contains(classObj.getTypeName())){
+                    return;
+                }
+                System.out.println("Currently inspecting object of type: " + classObj.getTypeName());
+                System.out.println("Recursive option is set to: " + recursive);
+
+                if(classObj.isPrimitive()){
+                    System.out.println("Currently inspecting primitive object: " + classObj.getTypeName());
+                    //Do Some work
+                }
+                else if(!classObj.isArray()){
+                    System.out.println("Declaring Class: " + getDeclaringClass(classObj));
+
+                    getInterface(obj,classObj, recursiveList, recursive);
+                    getMethods(classObj);
+                    getConstructors(classObj);
+                    getFields(obj,classObj, recursiveList, recursive);
+                    getFieldValue(classObj);
+                    already_visited_class.add(classObj.getTypeName());
+                    if(recursiveList.size() > 0){
+                        getRecursive(obj,classObj, recursiveList, recursive);
+                    }
+
+                    if(recursive){
+                        if(classObj.isPrimitive()){
+                            recursive = false;
+                        }
+                        getRecursive(obj,classObj, recursiveList, recursive);
+                    }
+                }
+                else{
+                    for(int i = 0; i < Array.getLength(obj); i++){
+                    /*Have to do this recursively because we need to go through every element of the array (Which could
+                    also be an array, but we have no way of knowing until runtime)
+                     */
+                        inspect(Array.get(obj, i), recursive);
+                    }
+                }
+
+            }
+
+            public void getRecursive(Object obj,Class classObj, LinkedList recursiveList, boolean recursive) throws IllegalAccessException {
+                if(recursiveList.size() == 0){ return;}
+                System.out.println("Recursively inspecting: " + classObj.getName());
+                for(int i = 0; i < recursiveList.size(); i++){
+                    Field f = (Field) recursiveList.get(i);
+                    System.out.println("    Lets deep dive into: " + f.getName());
+                    if(recursive){
+                        inspect(f.get(obj), recursive);
+                    }
+
+                }
+            }
+
+            public void getMethods(Class classObj){
+                Method[] mArr= classObj.getMethods();
+                System.out.println("Methods of " + classObj.getName() + " are: ");
+                for(int i = 0; i < mArr.length; i++){
+                    System.out.println("    " + mArr[i].getName());
+                }
+                System.out.println("\n\n");
+                for(int i = 0; i < mArr.length; i++){
+                    Method method = mArr[i];
+                    System.out.println("    " + method.getName() + " has the following exceptions: ");
+                    for(int j = 0; j < method.getExceptionTypes().length; j++){
+                        System.out.println("        " + method.getExceptionTypes()[j].getName());
+                    }
+                    System.out.println("    " + method.getName() + " has the following parameter types: ");
+                    for(int j = 0; j < method.getParameters().length; j++){
+                        System.out.println("        " + method.getParameters()[j].getParameterizedType());
+                    }
+                    System.out.println("    " + method.getName() + " has the following return type: " + method.getReturnType());
+                    System.out.println("    " + method.getName() + " has the following modifiers: " + Modifier.toString(method.getModifiers()));
+                    System.out.print("\n\n");
+                }
+            }
+
+            public void getConstructors(Class classObj){
+                Constructor[] conArr = classObj.getConstructors();
+                System.out.println("Constructors of " + classObj.getName() + " are: ");
+                for(int i = 0; i < conArr.length; i++){
+                    System.out.println("    " + conArr[i].getName() + "(" + conArr[i].getParameterCount()+ ")");
+                }
+                System.out.println("\n");
+                for(int i = 0; i < conArr.length; i++){
+                    Constructor constructor = conArr[i];
+                    System.out.println("    " + constructor.getName()+ "(" + conArr[i].getParameterCount()+ ")" + " has the following parameter types: ");
+                    for(int j = 0; j < constructor.getParameters().length; j++){
+                        System.out.println("        " + constructor.getParameters()[j].getParameterizedType());
+                    }
+                    System.out.println("    " + constructor.getName()+ "(" + conArr[i].getParameterCount()+ ")" + " has the following modifiers: " + Modifier.toString(constructor.getModifiers()));
+                    System.out.println("\n");
+                }
+            }
+
+            public void getFields(Object obj, Class classObj, LinkedList recursiveList, boolean recursive) throws IllegalAccessException {
+                Field[] fArr = classObj.getDeclaredFields();
+                System.out.println("Fields of " + classObj.getName() + " are: ");
+                if( fArr == null){
+                    return;
+                }
+                for(int i = 0; i < fArr.length; i++){
+                    Field field= fArr[i];
+                    if(field == null){ continue;}
+                    try {
+                        field.setAccessible(true);
+                        if (!field.getType().isPrimitive()) {
+                            recursiveList.add(field);
+                        }
+                        System.out.println("    " + field.getName());
+                        System.out.println("        " + field.getName() + " has the following type: " + field.getType().getName());
+                        System.out.println("        " + field.getName() + " has the following modifiers: " + Modifier.toString(field.getModifiers()));
+                        if (field.getType() == null && !recursive) {
+                            System.out.println("        " + field.getName() + " is a reference with value: " + field.getClass() + field.hashCode());
+                        } else {
+                            System.out.println("        " + field.getName() + " has value of: " + field.get(obj));
+                        }
+                        if (field.getType().isArray() && field.get(obj) != null) {
+                            System.out.println("        " + field.getName() + " is an array with the following properties: ");
+                            System.out.println("            Length: " + Array.getLength(field.get(obj)));
+                            System.out.println("            Contains type: " + field.getType().getComponentType().getName());
+                            System.out.println("            Elements: ");
+                            for (int j = 0; j < Array.getLength(field.get(obj)); j++) {
+                                System.out.println("                " + Array.get(field.get(obj), j));
+                            }
+                        }
+                    }
+                    catch(InaccessibleObjectException e){
+                        System.out.println("Unable to access" + field.getName() + ". Continuing...");
+                    }
+
+                }
+            }
+
+            public void getFieldValue(Class classObj){
+                return;
+            }
+
+            public void getInterface(Object obj,Class classObj, LinkedList recursiveList, boolean recursive) throws IllegalAccessException {
+                Class[] cArr = classObj.getInterfaces();
+                if(!classObj.isInterface()){
+                    System.out.println("Implemented Interfaces: ");
+                    for(int i = 0; i < cArr.length; i++){
+                        System.out.println("    " + cArr[i].getName());
+                    }
+                }
+                else{
+                    for(int i = 0; i < cArr.length; i++){
+                        getMethods(cArr[i]);
+                        getConstructors(cArr[i]);
+                        getFields(obj,cArr[i], recursiveList, recursive);
+                        getFieldValue(cArr[i]);
+                    }
+                }
+            }
+
+            public void getImmSuperClass(Object obj,Class classObj, LinkedList recursiveList, boolean recursive) throws IllegalAccessException {
+                Class superc = classObj.getSuperclass();
+                System.out.println("Immediate Superclass: " + superc.getName());
+                System.out.println("Superclass has the following properties: ");
+                if(superc != null) {
+                    getMethods(superc);
+                    getConstructors(superc);
+                    getFields(obj,superc, recursiveList, recursive);
+                    getFieldValue(superc);
+                }
+            }
+
+            public String getDeclaringClass(Class classObj) {
+                return classObj.getName();
+            }
+    }
+  </code>
+</pre>
+</div>
+</div>
+<div class="footer">
+  <h2>Footer</h2>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Josh Dow</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+* {
+  box-sizing: border-box;
+}
+
+/* Style the body */
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+}
+
+/* Header/logo Title */
+.header {
+  padding: 35px;
+  text-align: center;
+  background: darkred;
+  color: gold;
+}
+
+/* Increase the font size of the heading */
+.header h1 {
+  font-size: 40px;
+}
+
+/* Sticky navbar - toggles between relative and fixed, depending on the scroll position. It is positioned relative until a given offset position is met in the viewport - then it "sticks" in place (like position:fixed). The sticky value is not supported in IE or Edge 15 and earlier versions. However, for these versions the navbar will inherit default position */
+.navbar {
+  overflow: hidden;
+  background-color: black;
+  position: sticky;
+  position: -webkit-sticky;
+  top: 0;
+}
+
+/* Style the navigation bar links */
+.navbar a {
+  float: left;
+  display: block;
+  color: gold;
+  text-align: center;
+  padding: 14px 20px;
+  text-decoration: none;
+}
+
+
+/* Right-aligned link */
+.navbar a.right {
+  float: right;
+}
+
+/* Change color on hover */
+.navbar a:hover {
+  background-color: gold;
+  color: darkred;
+}
+
+/* Active/current link */
+.navbar a.active {
+  background-color: white;
+  color: darkred;
+}
+
+/* Column container */
+.row {  
+  display: -ms-flexbox; /* IE10 */
+  display: flex;
+  -ms-flex-wrap: wrap; /* IE10 */
+  flex-wrap: wrap;
+}
+
+/* Create two unequal columns that sits next to each other */
+/* Sidebar/left column */
+.side {
+  -ms-flex: 30%; /* IE10 */
+  flex: 30%;
+  background-color: #f1f1f1;
+  padding: 20px;
+}
+
+/* Main column */
+.main {   
+  -ms-flex: 70%; /* IE10 */
+  flex: 70%;
+  background-color: white;
+  padding: 20px;
+  overflow: scroll;
+}
+
+/* Fake image, just for this example */
+.fakeimg {
+  background-color: #aaa;
+  width: 100%;
+  padding: 20px;
+}
+
+/* Footer */
+.footer {
+  padding: 20px;
+  text-align: center;
+  background: #009;
+}
+
+#ac-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, .6);
+    z-index: 1001;
+}
+#popup {
+    width: 555px;
+    height: 375px;
+    background: #FFFFFF;
+    border: 5px solid #000;
+    border-radius: 25px;
+    -moz-border-radius: 25px;
+    -webkit-border-radius: 25px;
+    box-shadow: #64686e 0px 0px 3px 3px;
+    -moz-box-shadow: #64686e 0px 0px 3px 3px;
+    -webkit-box-shadow: #64686e 0px 0px 3px 3px;
+    position: relative;
+    top: 150px;
+    left: 500px;
+}
+
+/* Responsive layout - when the screen is less than 700px wide, make the two columns stack on top of each other instead of next to each other */
+@media screen and (max-width: 700px) {
+  .row {   
+    flex-direction: column;
+  }
+}
+
+/* Responsive layout - when the screen is less than 400px wide, make the navigation links stack on top of each other instead of next to each other */
+@media screen and (max-width: 400px) {
+  .navbar a {
+    float: none;
+    width: 100%;
+  }
+}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>Object Inspector</h1>
+  <p>Allows for the reflective inspection of java objects</p>
+</div>
+
+<div class="navbar">
+  <a href="index.html" >Home</a>
+  <a href="work.html">Work</a>
+  <a href="extracurs.html" class="active">Extra-curriculars</a>
+  <a href="hobbies.html">Hobbies/Interests</a>
+</div>
+<link rel="stylesheet" href="/highlight/styles/a11y-dark.css"/>
+<script src="/highlight/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+<div>
+  <div class="navbar">
+  <a href="inspector.html">Inspector.java</a>
+  <a href="reflectiveInspector.html">ReflectiveInspector.java</a>
+  <a href="inspectorTest.html" class="active">Unit Tests</a>
+</div>
+<pre>
+  <code class="java">
+    import org.junit.After;
+    import org.junit.Before;
+    import org.junit.jupiter.api.Test;
+    import java.io.ByteArrayOutputStream;
+    import java.io.PrintStream;
+    import java.lang.reflect.*;
+    import java.util.LinkedList;
+
+    import static org.hamcrest.core.StringStartsWith.startsWith;
+    import static org.junit.jupiter.api.Assertions.*;
+
+
+    class InspectorTest {
+        int[] intArr = {1,2,3,4};
+        int[][] intArr2D = {{1,2,3},{4,5,6}};
+        byte[] byteArr = {80, 101, 32, 45, 76};
+        Object[] objArr = {3, "Hello", 1.0, 3.1415927892837848, intArr, intArr2D, byteArr};
+        Inspector ins = new Inspector();
+        @Test
+        void testDeclaringClass() {
+            for(int i = 0; i < objArr.length; i++){
+                assertEquals(objArr[i].getClass().getName(), ins.inspectDeclaringClass(objArr[i].getClass()));
+            }
+        }
+
+        @Test
+        void testSuperClass() {
+            for(int i = 0; i < objArr.length; i++){
+                assertEquals(objArr[i].getClass().getSuperclass().getName(), ins.inspectImmediateSuperClass(objArr[i].getClass()));
+            }
+        }
+
+        @Test
+        void testInterfaces() {
+            for(int i = 0; i < objArr.length; i++){
+                String result = "";
+                Class[] interArr = objArr[i].getClass().getInterfaces();
+                for(int j = 0; j < interArr.length; j++) {
+                    result = result + interArr[j].getName() + ", ";
+                }
+                    result = result.trim();
+                    result = result.substring(0, result.length() - 1);
+                    assertEquals(result, ins.inspectInterfaces(objArr[i].getClass()));
+            }
+        }
+
+        @Test
+        void testMethods() {
+            for(int i = 0; i < objArr.length; i++){
+                String result = "";
+                Method[] mArr = objArr[i].getClass().getMethods();
+                for(int x = 0; x < mArr.length; x++) {
+                    Class[] execps = mArr[x].getExceptionTypes();
+                    Class[] params = mArr[x].getParameterTypes();
+                    Class rtype = mArr[x].getReturnType();
+                    String modifies = Modifier.toString(mArr[x].getModifiers());
+                    result = result + "\n";
+                    result = result + "         " + mArr[x].getName() + "\n";
+                    result = result + "             exceptions: ";
+                    for(int j = 0; j < execps.length; j++){
+                        result = result + execps[j].getName() + ", ";
+                    }
+                    if (execps.length != 0) {
+                        result = result.trim();
+                        result = result.substring(0, result.length() - 1);
+                    }
+                    result = result + "\n             parameters: ";
+                    for(int j = 0; j < params.length; j++){
+                        result = result + params[j].getName() + ", ";
+                    }
+                    if(params.length != 0){
+                        result = result.trim();
+                        result = result.substring(0, result.length() - 1);
+                    }
+                    result = result + "\n             return type: ";
+                    result = result + rtype.getName();
+                    result = result + "\n             modifiers: ";
+                    result = result + modifies;
+                }
+                assertEquals(result, ins.inspectMethods(objArr[i].getClass()));
+            }
+        }
+
+        @Test
+        void testConstructors() {
+            for(int i = 0; i < objArr.length; i++) {
+                String result = "";
+                Constructor[] constr = objArr[i].getClass().getConstructors();
+                for(int x = 0; x < constr.length; x++){
+                    Class[] params = constr[x].getParameterTypes();
+                    String modifies = Modifier.toString(constr[x].getModifiers());
+                    result = result + "\n";
+                    result = result + "         " + constr[x].getName() + "(";
+                    for(int j = 0; j < params.length; j++){
+                        result = result + params[j].getName() + ", ";
+                    }
+                    if(params.length != 0){
+                        result = result.trim();
+                        result = result.substring(0, result.length() - 1);
+                    }
+                    result = result + ")\n";
+                    result = result + "           with modifiers: " + modifies;
+                }
+                assertEquals(result, ins.inspectConstructors(objArr[i].getClass()));
+            }
+        }
+
+        @Test
+        void testFields() {
+            for(int i = 0; i < objArr.length; i++){
+                String result = "";
+                Field[] fields = objArr[i].getClass().getDeclaredFields();
+                for(int j = 0; j < fields.length; j++){
+                    fields[j].setAccessible(true);
+                    String type = fields[j].getType().getName();
+                    String modifier = Modifier.toString(fields[j].getModifiers());
+                    result = result + "\n";
+                    result = result + "         " + fields[j].getName() + "\n";
+                    result = result + "             type: " + type + "\n";
+                    result = result + "             modifiers: " + modifier + "\n";
+                    try {
+                        result = result + "             value: " + fields[j].get(objArr[i]);
+                    }
+                    catch(Exception e){
+                        result = result + "             Could not get value due to permissions";
+                    }
+                    if(fields[j].getType().isArray()) {
+                        result = result + "\n";
+                        result = result + "         " + fields[j].getName() + " is an array with the following properties: \n";
+                        result = result + "             Contains Type: " + fields[j].getType().getComponentType().getName() + "\n";
+                        try {
+                            result = result + "             Length: " + Array.getLength(fields[j].get(objArr[i])) + "\n";
+                        } catch (Exception e) {
+                            result = result + "             Could not access length\n";
+                        }
+                        result = result + "             Elements: {";
+                        try {
+                            for (int k = 0; k < Array.getLength(fields[j].get(objArr[i])); k++) {
+                                Object ele = Array.get(fields[j].get(objArr[i]), k);
+                                result = result + ele + ", ";
+
+                            }
+                            if (Array.getLength(fields[j].get(objArr[i])) != 0) {
+                                result = result.trim();
+                                result = result.substring(0, result.length() - 1);
+                            }
+                            result = result + "}";
+
+                        } catch (IllegalArgumentException e) {
+                            e.printStackTrace();
+                            result = result + "Expected Array: got type " + fields[j].getType() + "}".toUpperCase();
+                        } catch (IllegalAccessException e) {
+                            result = result + "Could not access elements}".toUpperCase();
+                        }
+                    }
+                }
+                assertEquals(result.trim(), ins.inspectFields(objArr[i].getClass(), objArr[i], new LinkedList()).trim());
+            }
+        }
+
+    }
+  </code>
+</pre>
+</div>
+</div>
+<div class="footer">
+  <h2>Footer</h2>
+</div>
+
+</body>
+</html>

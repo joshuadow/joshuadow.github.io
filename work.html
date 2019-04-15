@@ -1,676 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-<script>
-	$(function() {
-		$('#ins').click(function() {
-			$('#javaSec').html(`
-			import java.lang.reflect.*;
-			import java.util.ArrayList;
-			import java.util.Arrays;
-			import java.util.LinkedList;
-			import java.util.List;
-
-			public class Inspector{
-
-			    static final String[] PRIMITIVE_TYPE_NAMES = {"byte", "int", "short","long","boolean","double","float","char"};
-			    static LinkedList<Object> checked_things = new LinkedList<>();
-
-
-			    public void inspect(Object obj, boolean recursive){
-			        if(obj == null){
-			            //System.out.println("    Cannot inspect a null object");
-			            return;
-			        }
-			        if(checked_things.contains(obj)){
-			            System.out.println("#### ALREADY INSPECTED " + obj + ". CONTINUING... ####");
-			            return;
-			        }
-			        System.out.println("#### Currently Inspecting: " + obj + " with recursive set to: " + recursive + " ####\n");
-
-			        LinkedList toCheckRecursively = new LinkedList();
-			        Class classObj = obj.getClass();
-
-			        if(!classObj.isArray()){
-
-			            inspectNonArray(classObj, obj, toCheckRecursively);
-
-			            if(classObj.getSuperclass() != null){
-
-			                inspectSuperClassDetails(classObj, obj, toCheckRecursively);
-			            }
-			            if(classObj.isInterface()) {
-			                Class[] interf = classObj.getInterfaces();
-
-			                for (int i = 0; i < interf.length; i++) {
-			                    inspectSuperInterfaces(classObj, interf[i], toCheckRecursively);
-			                }
-
-			            }
-			            if(recursive){
-			                System.out.println("#### Inspecting Recursive Fields & Objects for: " + obj + " ####");
-
-			                recursiveInspection(obj, recursive, toCheckRecursively);
-			            }
-			            checked_things.add(obj);
-			        }
-			        else{
-			            inspectArray(obj, recursive);
-			        }
-			    }
-
-			    private void inspectArray(Object obj, boolean recursive) {
-			        boolean skipPrimitive = false;
-			        Class componentName = obj.getClass().getComponentType();
-			        for(int j = 0; j < PRIMITIVE_TYPE_NAMES.length ; j++) {
-			            if (PRIMITIVE_TYPE_NAMES[j].equals(componentName.getName())) {
-			                // we have an array of primitive type
-			                System.out.print("    FOUND PRIMITIVE ARRAY OF TYPE: " + componentName + " WITH VALUES: {");
-			                ArrayList<String> foundPrimitives = new ArrayList<>();
-			                for (int i = 0; i < Array.getLength(obj); i++) {
-			                    foundPrimitives.add(""  + Array.get(obj, i));
-			                }
-			                System.out.println(String.join(",", foundPrimitives) + "}\n\n");
-
-			                skipPrimitive = true;
-			            }
-			        }
-			        if(!skipPrimitive) {
-			            for(int i = 0; i < Array.getLength(obj); i++) {
-			                inspect(Array.get(obj, i), recursive);
-			            }
-			        }
-			    }
-
-			    private void inspectSuperInterfaces(Class classObj, Class interf, LinkedList toCheckRecursively) {
-			        String supersMethods = inspectMethods(interf);
-			        String supersConstructors = inspectConstructors(interf);
-			        String supersFields = inspectFields(interf, classObj, toCheckRecursively);
-
-			        printInterfaceDetails(interf, supersMethods, supersConstructors, supersFields);
-			    }
-
-			    private void inspectSuperClassDetails(Class classObj, Object obj, LinkedList toCheckRecursively) {
-			        String supersMethods = inspectMethods(classObj.getSuperclass());
-			        String supersConstructors = inspectConstructors(classObj.getSuperclass());
-			        String supersFields = inspectFields(classObj.getSuperclass(), classObj, toCheckRecursively);
-
-			        printSuperClassDetails(classObj, supersMethods, supersConstructors, supersFields);
-			    }
-
-			    private void inspectNonArray(Class classObj, Object obj, LinkedList toCheckRecursively) {
-			        String declaringClass = inspectDeclaringClass(classObj);
-			        String immediateSuperClass = inspectImmediateSuperClass(classObj);
-			        String className = classObj.getName();
-			        String interfaces = inspectInterfaces(classObj);
-			        String methods = inspectMethods(classObj);
-			        String constructors = inspectConstructors(classObj);
-			        String fields = inspectFields(classObj, obj, toCheckRecursively);
-
-			        printClassObjDetails(declaringClass, immediateSuperClass, className, interfaces, methods, constructors, fields);
-			    }
-
-			    private void printInterfaceDetails(Class interf, String supersMethods, String supersConstructors, String supersFields) {
-			        System.out.println("#### Inspecting SuperInterface ####\n");
-			        System.out.println("#### Inspecting SuperInterface Methods ####");
-			        System.out.println("    Methods for " + interf.getName() + " are: \n         " + supersMethods + "\n\n");
-			        System.out.println("#### Inspecting SuperClass Constructors ####");
-			        System.out.println("    Constructors for " + interf.getName() + " are: \n     " + supersConstructors + "\n\n");
-			        System.out.println("#### Inspecting SuperClass Fields ####");
-			        System.out.println("    Fields for " + interf.getName() + " are: " + supersFields + "\n\n");
-			    }
-
-			    private void printSuperClassDetails(Class classObj, String supersMethods, String supersConstructors, String supersFields) {
-			        System.out.println("#### Inspecting SuperClass ####\n");
-			        System.out.println("#### Inspecting SuperClass Methods ####");
-			        System.out.println("    Methods for " + classObj.getSuperclass().getName() + " are: \n         " + supersMethods + "\n\n");
-			        System.out.println("#### Inspecting SuperClass Constructors ####");
-			        System.out.println("    Constructors for " + classObj.getSuperclass().getName() + " are: \n         " + supersConstructors + "\n\n");
-			        System.out.println("#### Inspecting SuperClass Fields ####");
-			        System.out.println("    Fields for " + classObj.getSuperclass().getName() + " are: " + supersFields + "\n\n");
-			    }
-
-			    private void printClassObjDetails(String declaringClass, String immediateSuperClass, String className, String interfaces, String methods, String constructors, String fields) {
-			        System.out.println("#### Inspecting Declaring Class ####");
-			        System.out.println("    Declaring Class for " + className + " is: " + declaringClass + "\n\n");
-			        System.out.println("#### Inspecting Super Class ####");
-			        System.out.println("    Super Class for " + className + " is: " + immediateSuperClass + "\n\n");
-			        System.out.println("#### Inspecting Interfaces ####");
-			        System.out.println("    Interfaces for " + className + " are: " + interfaces + "\n\n");
-			        System.out.println("#### Inspecting Methods ####");
-			        System.out.println("    Methods for " + className + " are: \n         " + methods + "\n\n");
-			        System.out.println("#### Inspecting Constructors ####");
-			        System.out.println("    Constructors for " + className + " are: \n         " + constructors + "\n\n");
-			        System.out.println("#### Inspecting Fields ####");
-			        System.out.println("    Fields for " + className + " are: \n         " + fields + "\n\n");
-			    }
-
-			    public void recursiveInspection(Object obj, boolean recursive, LinkedList toCheckRecursively){
-			        if(toCheckRecursively.size() == 0){
-			            System.out.println("    Nothing to inspect. Continuing...");
-			            return;
-			        }
-			        for(int i = 0; i < toCheckRecursively.size(); i++){
-			            Field field = (Field) toCheckRecursively.get(i);
-			            field.setAccessible(true);
-			            System.out.println("    #### Currently inspecting " + field.getName() + " ####\n");
-			            try {
-			                inspect(field.get(obj), recursive);
-			                checked_things.add(obj);
-			            }
-			            catch(NullPointerException e){
-			                System.out.println("    COULD NOT GET NULL FROM OBJECT. CONTINUING...");
-			            }
-			            catch(IllegalAccessException e){
-			                System.out.println("    COULD NOT ACCESS FIELD FROM OBJECT. CONTINUING...");
-			            }
-			        }
-			    }
-
-			    public String inspectFields(Class classObj, Object obj, LinkedList toCheckRecursively){
-			        String fieldsResult = "";
-			        Field[] fields = classObj.getDeclaredFields();
-			        for(int i = 0; i < fields.length; i++){
-			            fields[i].setAccessible(true);
-			            if(!fields[i].getType().isPrimitive() && fields[i] != null){
-			                toCheckRecursively.add(fields[i]);
-			            }
-			            String type = fields[i].getType().getName();
-			            String modifier = Modifier.toString(fields[i].getModifiers());
-			            fieldsResult = fieldsResult + "\n";
-			            fieldsResult = fieldsResult + "         " + fields[i].getName() + "\n";
-			            fieldsResult = fieldsResult + "             type: " + type + "\n";
-			            fieldsResult = fieldsResult + "             modifiers: " + modifier + "\n";
-			            try {
-			                fieldsResult = fieldsResult + "             value: " + fields[i].get(obj);
-			            }
-			            catch(Exception e){
-			                fieldsResult = fieldsResult + "             Could not get value due to permissions";
-			            }
-			            if(fields[i].getType().isArray()){
-			                fieldsResult = fieldsResult + "\n";
-			                fieldsResult = fieldsResult + "         " + fields[i].getName() + " is an array with the following properties: \n";
-			                fieldsResult = fieldsResult + "             Contains Type: " + fields[i].getType().getComponentType().getName() + "\n";
-			                try {
-			                    fieldsResult = fieldsResult + "             Length: " + Array.getLength(fields[i].get(obj)) +"\n";
-			                }
-			                catch (Exception e){
-			                    fieldsResult = fieldsResult + "             Could not access length\n";
-			                }
-			                fieldsResult = fieldsResult + "             Elements: {";
-			                try {
-			                    for (int j = 0; j < Array.getLength(fields[i].get(obj)); j++) {
-			                        Object ele = Array.get(fields[i].get(obj), j);
-			                        fieldsResult = fieldsResult + ele + ", ";
-
-			                    }
-			                    if(Array.getLength(fields[i].get(obj)) != 0){
-			                        fieldsResult = fieldsResult.trim();
-			                        fieldsResult = fieldsResult.substring(0, fieldsResult.length() - 1);
-			                    }
-			                    fieldsResult = fieldsResult + "}";
-
-			                }
-			                catch(IllegalArgumentException e){
-			                    e.printStackTrace();
-			                    fieldsResult = fieldsResult + "Expected Array: got type " + fields[i].getType() + "}".toUpperCase();
-			                }
-			                catch(IllegalAccessException e){
-			                    fieldsResult = fieldsResult + "Could not access elements}".toUpperCase();
-			                }
-			            }
-			        }
-
-			        return fieldsResult;
-			    }
-
-			    public String inspectConstructors(Class classObj){
-			        String constrResult = "";
-			        Constructor[] cArr = classObj.getConstructors();
-			        for(int i = 0; i < cArr.length; i++){
-			            cArr[i].setAccessible(true);
-			            Class[] params = cArr[i].getParameterTypes();
-			            String modifies = Modifier.toString(cArr[i].getModifiers());
-			            constrResult = constrResult + "\n";
-			            constrResult = constrResult + "         " + cArr[i].getName() + "(";
-			            for(int j = 0; j < params.length; j++){
-			                constrResult = constrResult + params[j].getName() + ", ";
-			            }
-			            if(params.length != 0){
-			                constrResult = constrResult.trim();
-			                constrResult = constrResult.substring(0, constrResult.length() - 1);
-			            }
-			            constrResult = constrResult + ")\n";
-			            constrResult = constrResult + "           with modifiers: " + modifies;
-			        }
-
-			        return constrResult;
-			    }
-
-			    public String inspectMethods(Class classObj){
-			        String methodsResult = "";
-			        Method[] mArr = classObj.getMethods();
-			        for(int i = 0; i < mArr.length; i++){
-			            mArr[i].setAccessible(true);
-			            Class[] execps = mArr[i].getExceptionTypes();
-			            Class[] params = mArr[i].getParameterTypes();
-			            Class rtype = mArr[i].getReturnType();
-			            String modifies = Modifier.toString(mArr[i].getModifiers());
-			            methodsResult = methodsResult + "\n";
-			            methodsResult = methodsResult + "         " + mArr[i].getName() + "\n";
-			            methodsResult = methodsResult + "             exceptions: ";
-			            for(int j = 0; j < execps.length; j++){
-			                methodsResult = methodsResult + execps[j].getName() + ", ";
-			            }
-			            if (execps.length != 0) {
-			                methodsResult = methodsResult.trim();
-			                methodsResult = methodsResult.substring(0, methodsResult.length() - 1);
-			            }
-			            methodsResult = methodsResult + "\n             parameters: ";
-			            for(int j = 0; j < params.length; j++){
-			                methodsResult = methodsResult + params[j].getName() + ", ";
-			            }
-			            if(params.length != 0){
-			                methodsResult = methodsResult.trim();
-			                methodsResult = methodsResult.substring(0, methodsResult.length() - 1);
-			            }
-			            methodsResult = methodsResult + "\n             return type: ";
-			            methodsResult = methodsResult + rtype.getName();
-			            methodsResult = methodsResult + "\n             modifiers: ";
-			            methodsResult = methodsResult + modifies;
-			        }
-
-			        return methodsResult;
-			    }
-
-			    public String inspectInterfaces(Class classObj) {
-			        Class[] interArr = classObj.getInterfaces();
-			        String interfaceResult = "";
-			        if(interArr.length < 1){
-			            return "No implemented interfaces";
-			        }
-			        else{
-			            for(int i = 0; i < interArr.length; i++){
-			                interfaceResult = interfaceResult + interArr[i].getName() + ", ";
-			            }
-			            interfaceResult = interfaceResult.trim();
-			            interfaceResult = interfaceResult.substring(0, interfaceResult.length() - 1);
-			            return interfaceResult;
-			        }
-			    }
-
-			    public String inspectDeclaringClass(Class classObj){
-			        return classObj.getName();
-			    }
-
-			    public String inspectImmediateSuperClass(Class classObj){
-			        return classObj.getSuperclass().getName();
-			    }
-			}`);	
-		});
-		$('#ri').click(function() {
-			$('#javaSec').html(`
-			import java.lang.reflect.*;
-			import java.util.ArrayList;
-			import java.util.LinkedList;
-			import java.util.List;
-
-			public class ReflectiveInspector {
-
-			        public List<String> already_visited_class = new ArrayList<>();
-
-			        public void inspect(Object obj, boolean recursive) throws IllegalAccessException {
-			            if(obj == null){
-			                System.out.println("Cannot operate on a NULL object. Exiting now...");
-			                return;
-			            }
-			            LinkedList recursiveList = new LinkedList();
-			            Class classObj = obj.getClass();
-			            if(already_visited_class.contains(classObj.getTypeName())){
-			                return;
-			            }
-			            System.out.println("Currently inspecting object of type: " + classObj.getTypeName());
-			            System.out.println("Recursive option is set to: " + recursive);
-
-			            if(classObj.isPrimitive()){
-			                System.out.println("Currently inspecting primitive object: " + classObj.getTypeName());
-			                //Do Some work
-			            }
-			            else if(!classObj.isArray()){
-			                System.out.println("Declaring Class: " + getDeclaringClass(classObj));
-
-			                getInterface(obj,classObj, recursiveList, recursive);
-			                getMethods(classObj);
-			                getConstructors(classObj);
-			                getFields(obj,classObj, recursiveList, recursive);
-			                getFieldValue(classObj);
-			                already_visited_class.add(classObj.getTypeName());
-			                if(recursiveList.size() > 0){
-			                    getRecursive(obj,classObj, recursiveList, recursive);
-			                }
-
-			                if(recursive){
-			                    if(classObj.isPrimitive()){
-			                        recursive = false;
-			                    }
-			                    getRecursive(obj,classObj, recursiveList, recursive);
-			                }
-			            }
-			            else{
-			                for(int i = 0; i < Array.getLength(obj); i++){
-			                /*Have to do this recursively because we need to go through every element of the array (Which could
-			                also be an array, but we have no way of knowing until runtime)
-			                 */
-			                    inspect(Array.get(obj, i), recursive);
-			                }
-			            }
-
-			        }
-
-			        public void getRecursive(Object obj,Class classObj, LinkedList recursiveList, boolean recursive) throws IllegalAccessException {
-			            if(recursiveList.size() == 0){ return;}
-			            System.out.println("Recursively inspecting: " + classObj.getName());
-			            for(int i = 0; i < recursiveList.size(); i++){
-			                Field f = (Field) recursiveList.get(i);
-			                System.out.println("    Lets deep dive into: " + f.getName());
-			                if(recursive){
-			                    inspect(f.get(obj), recursive);
-			                }
-
-			            }
-			        }
-
-			        public void getMethods(Class classObj){
-			            Method[] mArr= classObj.getMethods();
-			            System.out.println("Methods of " + classObj.getName() + " are: ");
-			            for(int i = 0; i < mArr.length; i++){
-			                System.out.println("    " + mArr[i].getName());
-			            }
-			            System.out.println("\n\n");
-			            for(int i = 0; i < mArr.length; i++){
-			                Method method = mArr[i];
-			                System.out.println("    " + method.getName() + " has the following exceptions: ");
-			                for(int j = 0; j < method.getExceptionTypes().length; j++){
-			                    System.out.println("        " + method.getExceptionTypes()[j].getName());
-			                }
-			                System.out.println("    " + method.getName() + " has the following parameter types: ");
-			                for(int j = 0; j < method.getParameters().length; j++){
-			                    System.out.println("        " + method.getParameters()[j].getParameterizedType());
-			                }
-			                System.out.println("    " + method.getName() + " has the following return type: " + method.getReturnType());
-			                System.out.println("    " + method.getName() + " has the following modifiers: " + Modifier.toString(method.getModifiers()));
-			                System.out.print("\n\n");
-			            }
-			        }
-
-			        public void getConstructors(Class classObj){
-			            Constructor[] conArr = classObj.getConstructors();
-			            System.out.println("Constructors of " + classObj.getName() + " are: ");
-			            for(int i = 0; i < conArr.length; i++){
-			                System.out.println("    " + conArr[i].getName() + "(" + conArr[i].getParameterCount()+ ")");
-			            }
-			            System.out.println("\n");
-			            for(int i = 0; i < conArr.length; i++){
-			                Constructor constructor = conArr[i];
-			                System.out.println("    " + constructor.getName()+ "(" + conArr[i].getParameterCount()+ ")" + " has the following parameter types: ");
-			                for(int j = 0; j < constructor.getParameters().length; j++){
-			                    System.out.println("        " + constructor.getParameters()[j].getParameterizedType());
-			                }
-			                System.out.println("    " + constructor.getName()+ "(" + conArr[i].getParameterCount()+ ")" + " has the following modifiers: " + Modifier.toString(constructor.getModifiers()));
-			                System.out.println("\n");
-			            }
-			        }
-
-			        public void getFields(Object obj, Class classObj, LinkedList recursiveList, boolean recursive) throws IllegalAccessException {
-			            Field[] fArr = classObj.getDeclaredFields();
-			            System.out.println("Fields of " + classObj.getName() + " are: ");
-			            if( fArr == null){
-			                return;
-			            }
-			            for(int i = 0; i < fArr.length; i++){
-			                Field field= fArr[i];
-			                if(field == null){ continue;}
-			                try {
-			                    field.setAccessible(true);
-			                    if (!field.getType().isPrimitive()) {
-			                        recursiveList.add(field);
-			                    }
-			                    System.out.println("    " + field.getName());
-			                    System.out.println("        " + field.getName() + " has the following type: " + field.getType().getName());
-			                    System.out.println("        " + field.getName() + " has the following modifiers: " + Modifier.toString(field.getModifiers()));
-			                    if (field.getType() == null && !recursive) {
-			                        System.out.println("        " + field.getName() + " is a reference with value: " + field.getClass() + field.hashCode());
-			                    } else {
-			                        System.out.println("        " + field.getName() + " has value of: " + field.get(obj));
-			                    }
-			                    if (field.getType().isArray() && field.get(obj) != null) {
-			                        System.out.println("        " + field.getName() + " is an array with the following properties: ");
-			                        System.out.println("            Length: " + Array.getLength(field.get(obj)));
-			                        System.out.println("            Contains type: " + field.getType().getComponentType().getName());
-			                        System.out.println("            Elements: ");
-			                        for (int j = 0; j < Array.getLength(field.get(obj)); j++) {
-			                            System.out.println("                " + Array.get(field.get(obj), j));
-			                        }
-			                    }
-			                }
-			                catch(InaccessibleObjectException e){
-			                    System.out.println("Unable to access" + field.getName() + ". Continuing...");
-			                }
-
-			            }
-			        }
-
-			        public void getFieldValue(Class classObj){
-			            return;
-			        }
-
-			        public void getInterface(Object obj,Class classObj, LinkedList recursiveList, boolean recursive) throws IllegalAccessException {
-			            Class[] cArr = classObj.getInterfaces();
-			            if(!classObj.isInterface()){
-			                System.out.println("Implemented Interfaces: ");
-			                for(int i = 0; i < cArr.length; i++){
-			                    System.out.println("    " + cArr[i].getName());
-			                }
-			            }
-			            else{
-			                for(int i = 0; i < cArr.length; i++){
-			                    getMethods(cArr[i]);
-			                    getConstructors(cArr[i]);
-			                    getFields(obj,cArr[i], recursiveList, recursive);
-			                    getFieldValue(cArr[i]);
-			                }
-			            }
-			        }
-
-			        public void getImmSuperClass(Object obj,Class classObj, LinkedList recursiveList, boolean recursive) throws IllegalAccessException {
-			            Class superc = classObj.getSuperclass();
-			            System.out.println("Immediate Superclass: " + superc.getName());
-			            System.out.println("Superclass has the following properties: ");
-			            if(superc != null) {
-			                getMethods(superc);
-			                getConstructors(superc);
-			                getFields(obj,superc, recursiveList, recursive);
-			                getFieldValue(superc);
-			            }
-			        }
-
-			        public String getDeclaringClass(Class classObj) {
-			            return classObj.getName();
-			        }
-			}`);
-		});
-		$('#it').click(function() {
-			$('#javaSec').html(`import org.junit.After;
-			import org.junit.Before;
-			import org.junit.jupiter.api.Test;
-			import java.io.ByteArrayOutputStream;
-			import java.io.PrintStream;
-			import java.lang.reflect.*;
-			import java.util.LinkedList;
-
-			import static org.hamcrest.core.StringStartsWith.startsWith;
-			import static org.junit.jupiter.api.Assertions.*;
-
-
-			class InspectorTest {
-			    int[] intArr = {1,2,3,4};
-			    int[][] intArr2D = {{1,2,3},{4,5,6}};
-			    byte[] byteArr = {80, 101, 32, 45, 76};
-			    Object[] objArr = {3, "Hello", 1.0, 3.1415927892837848, intArr, intArr2D, byteArr};
-			    Inspector ins = new Inspector();
-			    @Test
-			    void testDeclaringClass() {
-			        for(int i = 0; i < objArr.length; i++){
-			            assertEquals(objArr[i].getClass().getName(), ins.inspectDeclaringClass(objArr[i].getClass()));
-			        }
-			    }
-
-			    @Test
-			    void testSuperClass() {
-			        for(int i = 0; i < objArr.length; i++){
-			            assertEquals(objArr[i].getClass().getSuperclass().getName(), ins.inspectImmediateSuperClass(objArr[i].getClass()));
-			        }
-			    }
-
-			    @Test
-			    void testInterfaces() {
-			        for(int i = 0; i < objArr.length; i++){
-			            String result = "";
-			            Class[] interArr = objArr[i].getClass().getInterfaces();
-			            for(int j = 0; j < interArr.length; j++) {
-			                result = result + interArr[j].getName() + ", ";
-			            }
-			                result = result.trim();
-			                result = result.substring(0, result.length() - 1);
-			                assertEquals(result, ins.inspectInterfaces(objArr[i].getClass()));
-			        }
-			    }
-
-			    @Test
-			    void testMethods() {
-			        for(int i = 0; i < objArr.length; i++){
-			            String result = "";
-			            Method[] mArr = objArr[i].getClass().getMethods();
-			            for(int x = 0; x < mArr.length; x++) {
-			                Class[] execps = mArr[x].getExceptionTypes();
-			                Class[] params = mArr[x].getParameterTypes();
-			                Class rtype = mArr[x].getReturnType();
-			                String modifies = Modifier.toString(mArr[x].getModifiers());
-			                result = result + "\n";
-			                result = result + "         " + mArr[x].getName() + "\n";
-			                result = result + "             exceptions: ";
-			                for(int j = 0; j < execps.length; j++){
-			                    result = result + execps[j].getName() + ", ";
-			                }
-			                if (execps.length != 0) {
-			                    result = result.trim();
-			                    result = result.substring(0, result.length() - 1);
-			                }
-			                result = result + "\n             parameters: ";
-			                for(int j = 0; j < params.length; j++){
-			                    result = result + params[j].getName() + ", ";
-			                }
-			                if(params.length != 0){
-			                    result = result.trim();
-			                    result = result.substring(0, result.length() - 1);
-			                }
-			                result = result + "\n             return type: ";
-			                result = result + rtype.getName();
-			                result = result + "\n             modifiers: ";
-			                result = result + modifies;
-			            }
-			            assertEquals(result, ins.inspectMethods(objArr[i].getClass()));
-			        }
-			    }
-
-			    @Test
-			    void testConstructors() {
-			        for(int i = 0; i < objArr.length; i++) {
-			            String result = "";
-			            Constructor[] constr = objArr[i].getClass().getConstructors();
-			            for(int x = 0; x < constr.length; x++){
-			                Class[] params = constr[x].getParameterTypes();
-			                String modifies = Modifier.toString(constr[x].getModifiers());
-			                result = result + "\n";
-			                result = result + "         " + constr[x].getName() + "(";
-			                for(int j = 0; j < params.length; j++){
-			                    result = result + params[j].getName() + ", ";
-			                }
-			                if(params.length != 0){
-			                    result = result.trim();
-			                    result = result.substring(0, result.length() - 1);
-			                }
-			                result = result + ")\n";
-			                result = result + "           with modifiers: " + modifies;
-			            }
-			            assertEquals(result, ins.inspectConstructors(objArr[i].getClass()));
-			        }
-			    }
-
-			    @Test
-			    void testFields() {
-			        for(int i = 0; i < objArr.length; i++){
-			            String result = "";
-			            Field[] fields = objArr[i].getClass().getDeclaredFields();
-			            for(int j = 0; j < fields.length; j++){
-			                fields[j].setAccessible(true);
-			                String type = fields[j].getType().getName();
-			                String modifier = Modifier.toString(fields[j].getModifiers());
-			                result = result + "\n";
-			                result = result + "         " + fields[j].getName() + "\n";
-			                result = result + "             type: " + type + "\n";
-			                result = result + "             modifiers: " + modifier + "\n";
-			                try {
-			                    result = result + "             value: " + fields[j].get(objArr[i]);
-			                }
-			                catch(Exception e){
-			                    result = result + "             Could not get value due to permissions";
-			                }
-			                if(fields[j].getType().isArray()) {
-			                    result = result + "\n";
-			                    result = result + "         " + fields[j].getName() + " is an array with the following properties: \n";
-			                    result = result + "             Contains Type: " + fields[j].getType().getComponentType().getName() + "\n";
-			                    try {
-			                        result = result + "             Length: " + Array.getLength(fields[j].get(objArr[i])) + "\n";
-			                    } catch (Exception e) {
-			                        result = result + "             Could not access length\n";
-			                    }
-			                    result = result + "             Elements: {";
-			                    try {
-			                        for (int k = 0; k < Array.getLength(fields[j].get(objArr[i])); k++) {
-			                            Object ele = Array.get(fields[j].get(objArr[i]), k);
-			                            result = result + ele + ", ";
-
-			                        }
-			                        if (Array.getLength(fields[j].get(objArr[i])) != 0) {
-			                            result = result.trim();
-			                            result = result.substring(0, result.length() - 1);
-			                        }
-			                        result = result + "}";
-
-			                    } catch (IllegalArgumentException e) {
-			                        e.printStackTrace();
-			                        result = result + "Expected Array: got type " + fields[j].getType() + "}".toUpperCase();
-			                    } catch (IllegalAccessException e) {
-			                        result = result + "Could not access elements}".toUpperCase();
-			                    }
-			                }
-			            }
-			            assertEquals(result.trim(), ins.inspectFields(objArr[i].getClass(), objArr[i], new LinkedList()).trim());
-			        }
-			    }
-
-			}`);
-		});
-	});
-</script>
-
-
-
-
-
-
 <title>Josh Dow</title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -769,13 +99,16 @@ body {
 
 /* Footer */
 .footer {
-  position: absolute;
+  position: fixed;
   right: 0;
   bottom: 0;
   left: 0;
   padding: 20px;
   text-align: center;
   background: #009;
+  height: 50px;
+  font-size: small;
+  color: white;
 }
 
 /* Style the tab */
@@ -838,6 +171,13 @@ body {
   font-size: 12px;
 }
 
+pre {
+  overflow: auto;
+  background-color: #ffffff;
+  border: 1px solid #898989;
+  padding: 5px;
+  max-height: 500px;
+}
 
 /* Right-aligned link */
 .navbar2 a.right {
@@ -900,8 +240,8 @@ body {
 {
     position: absolute;
     top: 0;
-    right: -150px;
-    width: 150px;
+    right: -300px;
+    width: 300px;
     list-style: none;
     padding: 0;
     margin: 0;
@@ -920,7 +260,7 @@ body {
     position: absolute;
     top: 30px;
     left: 0;
-    width: 150px;
+    width: 250px;
     list-style: none;
     padding: 0;
     margin: 0;
@@ -947,7 +287,7 @@ body {
     position: relative;
     float: left;
     height: 30px;
-    width: 150px;
+    width: 100px;
     background: #999999;
 }
 .top-level-menu > li:hover { background: #CCCCCC; }
@@ -990,28 +330,44 @@ body {
 }
 </style>
 </head>
-<body onload="selectDefault()">
+<body>
 <div class="header">
   <h1>Work</h1>
   <p>Projects</p>
 </div>
-
 <div class="navbar">
   <a href="index.html" >Home</a>
   <a href="work.html" class="active">Work</a>
   <a href="extracurs.html">Extra-curriculars</a>
   <a href="hobbies.html">Hobbies/Interests</a>
 </div>
+<link rel="stylesheet" href="highlight/styles/a11y-dark.css"/>
+<script src="highlight/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
 <ul class="top-level-menu">
     <li>
     	<a href="#">Java</a>
     	<ul class="second-level-menu">
     		<li>
-    			<a href="inspector.html">Reflective Object Inspector</a>
+    			<a href="#">Reflective Object Inspector</a>
     			<ul class="third-level-menu">
-    				<li><a href="#" id="ins">Inspector.java</li>
-					<li><a href="#" id="ri">ReflectiveInspector.java</li>
-					<li><a href="#" id="it">InspectorTest.java</li>
+    				<li><a href="javascript:;" id="ins" onclick="showVis(this);return false;">Inspector.java</li>
+					<li><a href="javascript:;" id="ri" onclick="showVis(this);return false;">ReflectiveInspector.java</li>
+					<li><a href="javascript:;" id="it" onclick="showVis(this);return false;">InspectorTest.java</li>
+    			</ul>
+    		</li>
+    		<li>
+    			<a href="#">Object Serializer/Deserializer></a>
+    			<ul class="third-level-menu" id="visMenu">
+    				<li><a href="javascript:;" id="vis" onclick="showVis(this);return false;">Visualizer.java</li>
+					<li><a href="javascript:;" id="visc" onclick="showVis(this);return false;">VisualizerController.java</li>
+					<li><a href="javascript:;" id="ser" onclick="showVis(this);return false;">Serializer.java</li>
+					<li><a href="javascript:;" id="der" onclick="showVis(this);return false;">Deserializer.java</li>
+					<li><a href="javascript:;" id="cli" onclick="showVis(this);return false;">Client.java</li>
+					<li><a href="javascript:;" id="obj" onclick="showVis(this);return false;">ObjectCreator.java</li>
+					<li><a href="javascript:;" id="objr" onclick="showVis(this);return false;">ObjectCreatorReflective.java</li>
+					<li><a href="javascript:;" id="objc" onclick="showVis(this);return false;">ObjectCreatorController.java</li>
+					<li><a href="javascript:;" id="srv" onclick="showVis(this);return false;">Server.java</li>
     			</ul>
     		</li>
     	</ul>
@@ -1020,13 +376,3659 @@ body {
     	<a href="#">Python</a>
     </li>
 </ul>
-<div>
+<div id="javaSec1" style="display: none; overflow-y: scroll; width: 1200px">
 <pre>
-	<code class="java" id="javaSec">
-		Test
-	</code>
+<code class="java" style="float: left;">
+
+	import java.lang.reflect.*;
+	import java.util.ArrayList;
+	import java.util.Arrays;
+	import java.util.LinkedList;
+	import java.util.List;
+
+	public class Inspector{
+
+	    static final String[] PRIMITIVE_TYPE_NAMES = {"byte", "int", "short","long","boolean","double","float","char"};
+	    static LinkedList &ltObject&gt checked_things = new LinkedList&lt&gt();
+
+
+	    public void inspect(Object obj, boolean recursive){
+	        if(obj == null){
+	            //System.out.println("    Cannot inspect a null object");
+	            return;
+	        }
+	        if(checked_things.contains(obj)){
+	            System.out.println("#### ALREADY INSPECTED " + obj + ". CONTINUING... ####");
+	            return;
+	        }
+	        System.out.println("#### Currently Inspecting: " + obj + " with recursive set to: " + recursive + " ####\n");
+
+	        LinkedList toCheckRecursively = new LinkedList();
+	        Class classObj = obj.getClass();
+
+	        if(!classObj.isArray()){
+
+	            inspectNonArray(classObj, obj, toCheckRecursively);
+
+	            if(classObj.getSuperclass() != null){
+
+	                inspectSuperClassDetails(classObj, obj, toCheckRecursively);
+	            }
+	            if(classObj.isInterface()) {
+	                Class[] interf = classObj.getInterfaces();
+
+	                for (int i = 0; i &lt interf.length; i++) {
+	                    inspectSuperInterfaces(classObj, interf[i], toCheckRecursively);
+	                }
+
+	            }
+	            if(recursive){
+	                System.out.println("#### Inspecting Recursive Fields & Objects for: " + obj + " ####");
+
+	                recursiveInspection(obj, recursive, toCheckRecursively);
+	            }
+	            checked_things.add(obj);
+	        }
+	        else{
+	            inspectArray(obj, recursive);
+	        }
+	    }
+
+	    private void inspectArray(Object obj, boolean recursive) {
+	        boolean skipPrimitive = false;
+	        Class componentName = obj.getClass().getComponentType();
+	        for(int j = 0; j &lt PRIMITIVE_TYPE_NAMES.length ; j++) {
+	            if (PRIMITIVE_TYPE_NAMES[j].equals(componentName.getName())) {
+	                // we have an array of primitive type
+	                System.out.print("    FOUND PRIMITIVE ARRAY OF TYPE: " + componentName + " WITH VALUES: {");
+	                ArrayList&ltString&gt foundPrimitives = new ArrayList&lt&gt();
+	                for (int i = 0; i &lt Array.getLength(obj); i++) {
+	                    foundPrimitives.add(""  + Array.get(obj, i));
+	                }
+	                System.out.println(String.join(",", foundPrimitives) + "}\n\n");
+
+	                skipPrimitive = true;
+	            }
+	        }
+	        if(!skipPrimitive) {
+	            for(int i = 0; i &lt Array.getLength(obj); i++) {
+	                inspect(Array.get(obj, i), recursive);
+	            }
+	        }
+	    }
+
+	    private void inspectSuperInterfaces(Class classObj, Class interf, LinkedList toCheckRecursively) {
+	        String supersMethods = inspectMethods(interf);
+	        String supersConstructors = inspectConstructors(interf);
+	        String supersFields = inspectFields(interf, classObj, toCheckRecursively);
+
+	        printInterfaceDetails(interf, supersMethods, supersConstructors, supersFields);
+	    }
+
+	    private void inspectSuperClassDetails(Class classObj, Object obj, LinkedList toCheckRecursively) {
+	        String supersMethods = inspectMethods(classObj.getSuperclass());
+	        String supersConstructors = inspectConstructors(classObj.getSuperclass());
+	        String supersFields = inspectFields(classObj.getSuperclass(), classObj, toCheckRecursively);
+
+	        printSuperClassDetails(classObj, supersMethods, supersConstructors, supersFields);
+	    }
+
+	    private void inspectNonArray(Class classObj, Object obj, LinkedList toCheckRecursively) {
+	        String declaringClass = inspectDeclaringClass(classObj);
+	        String immediateSuperClass = inspectImmediateSuperClass(classObj);
+	        String className = classObj.getName();
+	        String interfaces = inspectInterfaces(classObj);
+	        String methods = inspectMethods(classObj);
+	        String constructors = inspectConstructors(classObj);
+	        String fields = inspectFields(classObj, obj, toCheckRecursively);
+
+	        printClassObjDetails(declaringClass, immediateSuperClass, className, interfaces, methods, constructors, fields);
+	    }
+
+	    private void printInterfaceDetails(Class interf, String supersMethods, String supersConstructors, String supersFields) {
+	        System.out.println("#### Inspecting SuperInterface ####\n");
+	        System.out.println("#### Inspecting SuperInterface Methods ####");
+	        System.out.println("    Methods for " + interf.getName() + " are: \n         " + supersMethods + "\n\n");
+	        System.out.println("#### Inspecting SuperClass Constructors ####");
+	        System.out.println("    Constructors for " + interf.getName() + " are: \n     " + supersConstructors + "\n\n");
+	        System.out.println("#### Inspecting SuperClass Fields ####");
+	        System.out.println("    Fields for " + interf.getName() + " are: " + supersFields + "\n\n");
+	    }
+
+	    private void printSuperClassDetails(Class classObj, String supersMethods, String supersConstructors, String supersFields) {
+	        System.out.println("#### Inspecting SuperClass ####\n");
+	        System.out.println("#### Inspecting SuperClass Methods ####");
+	        System.out.println("    Methods for " + classObj.getSuperclass().getName() + " are: \n         " + supersMethods + "\n\n");
+	        System.out.println("#### Inspecting SuperClass Constructors ####");
+	        System.out.println("    Constructors for " + classObj.getSuperclass().getName() + " are: \n         " + supersConstructors + "\n\n");
+	        System.out.println("#### Inspecting SuperClass Fields ####");
+	        System.out.println("    Fields for " + classObj.getSuperclass().getName() + " are: " + supersFields + "\n\n");
+	    }
+
+	    private void printClassObjDetails(String declaringClass, String immediateSuperClass, String className, String interfaces, String methods, String constructors, String fields) {
+	        System.out.println("#### Inspecting Declaring Class ####");
+	        System.out.println("    Declaring Class for " + className + " is: " + declaringClass + "\n\n");
+	        System.out.println("#### Inspecting Super Class ####");
+	        System.out.println("    Super Class for " + className + " is: " + immediateSuperClass + "\n\n");
+	        System.out.println("#### Inspecting Interfaces ####");
+	        System.out.println("    Interfaces for " + className + " are: " + interfaces + "\n\n");
+	        System.out.println("#### Inspecting Methods ####");
+	        System.out.println("    Methods for " + className + " are: \n         " + methods + "\n\n");
+	        System.out.println("#### Inspecting Constructors ####");
+	        System.out.println("    Constructors for " + className + " are: \n         " + constructors + "\n\n");
+	        System.out.println("#### Inspecting Fields ####");
+	        System.out.println("    Fields for " + className + " are: \n         " + fields + "\n\n");
+	    }
+
+	    public void recursiveInspection(Object obj, boolean recursive, LinkedList toCheckRecursively){
+	        if(toCheckRecursively.size() == 0){
+	            System.out.println("    Nothing to inspect. Continuing...");
+	            return;
+	        }
+	        for(int i = 0; i &lt toCheckRecursively.size(); i++){
+	            Field field = (Field) toCheckRecursively.get(i);
+	            field.setAccessible(true);
+	            System.out.println("    #### Currently inspecting " + field.getName() + " ####\n");
+	            try {
+	                inspect(field.get(obj), recursive);
+	                checked_things.add(obj);
+	            }
+	            catch(NullPointerException e){
+	                System.out.println("    COULD NOT GET NULL FROM OBJECT. CONTINUING...");
+	            }
+	            catch(IllegalAccessException e){
+	                System.out.println("    COULD NOT ACCESS FIELD FROM OBJECT. CONTINUING...");
+	            }
+	        }
+	    }
+
+	    public String inspectFields(Class classObj, Object obj, LinkedList toCheckRecursively){
+	        String fieldsResult = "";
+	        Field[] fields = classObj.getDeclaredFields();
+	        for(int i = 0; i &lt fields.length; i++){
+	            fields[i].setAccessible(true);
+	            if(!fields[i].getType().isPrimitive() && fields[i] != null){
+	                toCheckRecursively.add(fields[i]);
+	            }
+	            String type = fields[i].getType().getName();
+	            String modifier = Modifier.toString(fields[i].getModifiers());
+	            fieldsResult = fieldsResult + "\n";
+	            fieldsResult = fieldsResult + "         " + fields[i].getName() + "\n";
+	            fieldsResult = fieldsResult + "             type: " + type + "\n";
+	            fieldsResult = fieldsResult + "             modifiers: " + modifier + "\n";
+	            try {
+	                fieldsResult = fieldsResult + "             value: " + fields[i].get(obj);
+	            }
+	            catch(Exception e){
+	                fieldsResult = fieldsResult + "             Could not get value due to permissions";
+	            }
+	            if(fields[i].getType().isArray()){
+	                fieldsResult = fieldsResult + "\n";
+	                fieldsResult = fieldsResult + "         " + fields[i].getName() + " is an array with the following properties: \n";
+	                fieldsResult = fieldsResult + "             Contains Type: " + fields[i].getType().getComponentType().getName() + "\n";
+	                try {
+	                    fieldsResult = fieldsResult + "             Length: " + Array.getLength(fields[i].get(obj)) +"\n";
+	                }
+	                catch (Exception e){
+	                    fieldsResult = fieldsResult + "             Could not access length\n";
+	                }
+	                fieldsResult = fieldsResult + "             Elements: {";
+	                try {
+	                    for (int j = 0; j &lt Array.getLength(fields[i].get(obj)); j++) {
+	                        Object ele = Array.get(fields[i].get(obj), j);
+	                        fieldsResult = fieldsResult + ele + ", ";
+
+	                    }
+	                    if(Array.getLength(fields[i].get(obj)) != 0){
+	                        fieldsResult = fieldsResult.trim();
+	                        fieldsResult = fieldsResult.substring(0, fieldsResult.length() - 1);
+	                    }
+	                    fieldsResult = fieldsResult + "}";
+
+	                }
+	                catch(IllegalArgumentException e){
+	                    e.printStackTrace();
+	                    fieldsResult = fieldsResult + "Expected Array: got type " + fields[i].getType() + "}".toUpperCase();
+	                }
+	                catch(IllegalAccessException e){
+	                    fieldsResult = fieldsResult + "Could not access elements}".toUpperCase();
+	                }
+	            }
+	        }
+
+	        return fieldsResult;
+	    }
+
+	    public String inspectConstructors(Class classObj){
+	        String constrResult = "";
+	        Constructor[] cArr = classObj.getConstructors();
+	        for(int i = 0; i &lt cArr.length; i++){
+	            cArr[i].setAccessible(true);
+	            Class[] params = cArr[i].getParameterTypes();
+	            String modifies = Modifier.toString(cArr[i].getModifiers());
+	            constrResult = constrResult + "\n";
+	            constrResult = constrResult + "         " + cArr[i].getName() + "(";
+	            for(int j = 0; j &lt params.length; j++){
+	                constrResult = constrResult + params[j].getName() + ", ";
+	            }
+	            if(params.length != 0){
+	                constrResult = constrResult.trim();
+	                constrResult = constrResult.substring(0, constrResult.length() - 1);
+	            }
+	            constrResult = constrResult + ")\n";
+	            constrResult = constrResult + "           with modifiers: " + modifies;
+	        }
+
+	        return constrResult;
+	    }
+
+	    public String inspectMethods(Class classObj){
+	        String methodsResult = "";
+	        Method[] mArr = classObj.getMethods();
+	        for(int i = 0; i &lt mArr.length; i++){
+	            mArr[i].setAccessible(true);
+	            Class[] execps = mArr[i].getExceptionTypes();
+	            Class[] params = mArr[i].getParameterTypes();
+	            Class rtype = mArr[i].getReturnType();
+	            String modifies = Modifier.toString(mArr[i].getModifiers());
+	            methodsResult = methodsResult + "\n";
+	            methodsResult = methodsResult + "         " + mArr[i].getName() + "\n";
+	            methodsResult = methodsResult + "             exceptions: ";
+	            for(int j = 0; j &lt execps.length; j++){
+	                methodsResult = methodsResult + execps[j].getName() + ", ";
+	            }
+	            if (execps.length != 0) {
+	                methodsResult = methodsResult.trim();
+	                methodsResult = methodsResult.substring(0, methodsResult.length() - 1);
+	            }
+	            methodsResult = methodsResult + "\n             parameters: ";
+	            for(int j = 0; j &lt params.length; j++){
+	                methodsResult = methodsResult + params[j].getName() + ", ";
+	            }
+	            if(params.length != 0){
+	                methodsResult = methodsResult.trim();
+	                methodsResult = methodsResult.substring(0, methodsResult.length() - 1);
+	            }
+	            methodsResult = methodsResult + "\n             return type: ";
+	            methodsResult = methodsResult + rtype.getName();
+	            methodsResult = methodsResult + "\n             modifiers: ";
+	            methodsResult = methodsResult + modifies;
+	        }
+
+	        return methodsResult;
+	    }
+
+	    public String inspectInterfaces(Class classObj) {
+	        Class[] interArr = classObj.getInterfaces();
+	        String interfaceResult = "";
+	        if(interArr.length &lt 1){
+	            return "No implemented interfaces";
+	        }
+	        else{
+	            for(int i = 0; i &lt interArr.length; i++){
+	                interfaceResult = interfaceResult + interArr[i].getName() + ", ";
+	            }
+	            interfaceResult = interfaceResult.trim();
+	            interfaceResult = interfaceResult.substring(0, interfaceResult.length() - 1);
+	            return interfaceResult;
+	        }
+	    }
+
+	    public String inspectDeclaringClass(Class classObj){
+	        return classObj.getName();
+	    }
+
+	    public String inspectImmediateSuperClass(Class classObj){
+	        return classObj.getSuperclass().getName();
+	    }
+	}
+</code>
 </pre>
 </div>
+<div id="javaSec2" style="display: none; overflow-y: scroll; width: 1200px">
+<pre>
+<code class="java">
+
+	import java.lang.reflect.*;
+	import java.util.ArrayList;
+	import java.util.LinkedList;
+	import java.util.List;
+
+	public class ReflectiveInspector {
+
+	        public List<String> already_visited_class = new ArrayList<>();
+
+	        public void inspect(Object obj, boolean recursive) throws IllegalAccessException {
+	            if(obj == null){
+	                System.out.println("Cannot operate on a NULL object. Exiting now...");
+	                return;
+	            }
+	            LinkedList recursiveList = new LinkedList();
+	            Class classObj = obj.getClass();
+	            if(already_visited_class.contains(classObj.getTypeName())){
+	                return;
+	            }
+	            System.out.println("Currently inspecting object of type: " + classObj.getTypeName());
+	            System.out.println("Recursive option is set to: " + recursive);
+
+	            if(classObj.isPrimitive()){
+	                System.out.println("Currently inspecting primitive object: " + classObj.getTypeName());
+	                //Do Some work
+	            }
+	            else if(!classObj.isArray()){
+	                System.out.println("Declaring Class: " + getDeclaringClass(classObj));
+
+	                getInterface(obj,classObj, recursiveList, recursive);
+	                getMethods(classObj);
+	                getConstructors(classObj);
+	                getFields(obj,classObj, recursiveList, recursive);
+	                getFieldValue(classObj);
+	                already_visited_class.add(classObj.getTypeName());
+	                if(recursiveList.size() > 0){
+	                    getRecursive(obj,classObj, recursiveList, recursive);
+	                }
+
+	                if(recursive){
+	                    if(classObj.isPrimitive()){
+	                        recursive = false;
+	                    }
+	                    getRecursive(obj,classObj, recursiveList, recursive);
+	                }
+	            }
+	            else{
+	                for(int i = 0; i < Array.getLength(obj); i++){
+	                /*Have to do this recursively because we need to go through every element of the array (Which could
+	                also be an array, but we have no way of knowing until runtime)
+	                 */
+	                    inspect(Array.get(obj, i), recursive);
+	                }
+	            }
+
+	        }
+
+	        public void getRecursive(Object obj,Class classObj, LinkedList recursiveList, boolean recursive) throws IllegalAccessException {
+	            if(recursiveList.size() == 0){ return;}
+	            System.out.println("Recursively inspecting: " + classObj.getName());
+	            for(int i = 0; i < recursiveList.size(); i++){
+	                Field f = (Field) recursiveList.get(i);
+	                System.out.println("    Lets deep dive into: " + f.getName());
+	                if(recursive){
+	                    inspect(f.get(obj), recursive);
+	                }
+
+	            }
+	        }
+
+	        public void getMethods(Class classObj){
+	            Method[] mArr= classObj.getMethods();
+	            System.out.println("Methods of " + classObj.getName() + " are: ");
+	            for(int i = 0; i < mArr.length; i++){
+	                System.out.println("    " + mArr[i].getName());
+	            }
+	            System.out.println("\n\n");
+	            for(int i = 0; i < mArr.length; i++){
+	                Method method = mArr[i];
+	                System.out.println("    " + method.getName() + " has the following exceptions: ");
+	                for(int j = 0; j < method.getExceptionTypes().length; j++){
+	                    System.out.println("        " + method.getExceptionTypes()[j].getName());
+	                }
+	                System.out.println("    " + method.getName() + " has the following parameter types: ");
+	                for(int j = 0; j < method.getParameters().length; j++){
+	                    System.out.println("        " + method.getParameters()[j].getParameterizedType());
+	                }
+	                System.out.println("    " + method.getName() + " has the following return type: " + method.getReturnType());
+	                System.out.println("    " + method.getName() + " has the following modifiers: " + Modifier.toString(method.getModifiers()));
+	                System.out.print("\n\n");
+	            }
+	        }
+
+	        public void getConstructors(Class classObj){
+	            Constructor[] conArr = classObj.getConstructors();
+	            System.out.println("Constructors of " + classObj.getName() + " are: ");
+	            for(int i = 0; i < conArr.length; i++){
+	                System.out.println("    " + conArr[i].getName() + "(" + conArr[i].getParameterCount()+ ")");
+	            }
+	            System.out.println("\n");
+	            for(int i = 0; i < conArr.length; i++){
+	                Constructor constructor = conArr[i];
+	                System.out.println("    " + constructor.getName()+ "(" + conArr[i].getParameterCount()+ ")" + " has the following parameter types: ");
+	                for(int j = 0; j < constructor.getParameters().length; j++){
+	                    System.out.println("        " + constructor.getParameters()[j].getParameterizedType());
+	                }
+	                System.out.println("    " + constructor.getName()+ "(" + conArr[i].getParameterCount()+ ")" + " has the following modifiers: " + Modifier.toString(constructor.getModifiers()));
+	                System.out.println("\n");
+	            }
+	        }
+
+	        public void getFields(Object obj, Class classObj, LinkedList recursiveList, boolean recursive) throws IllegalAccessException {
+	            Field[] fArr = classObj.getDeclaredFields();
+	            System.out.println("Fields of " + classObj.getName() + " are: ");
+	            if( fArr == null){
+	                return;
+	            }
+	            for(int i = 0; i < fArr.length; i++){
+	                Field field= fArr[i];
+	                if(field == null){ continue;}
+	                try {
+	                    field.setAccessible(true);
+	                    if (!field.getType().isPrimitive()) {
+	                        recursiveList.add(field);
+	                    }
+	                    System.out.println("    " + field.getName());
+	                    System.out.println("        " + field.getName() + " has the following type: " + field.getType().getName());
+	                    System.out.println("        " + field.getName() + " has the following modifiers: " + Modifier.toString(field.getModifiers()));
+	                    if (field.getType() == null && !recursive) {
+	                        System.out.println("        " + field.getName() + " is a reference with value: " + field.getClass() + field.hashCode());
+	                    } else {
+	                        System.out.println("        " + field.getName() + " has value of: " + field.get(obj));
+	                    }
+	                    if (field.getType().isArray() && field.get(obj) != null) {
+	                        System.out.println("        " + field.getName() + " is an array with the following properties: ");
+	                        System.out.println("            Length: " + Array.getLength(field.get(obj)));
+	                        System.out.println("            Contains type: " + field.getType().getComponentType().getName());
+	                        System.out.println("            Elements: ");
+	                        for (int j = 0; j < Array.getLength(field.get(obj)); j++) {
+	                            System.out.println("                " + Array.get(field.get(obj), j));
+	                        }
+	                    }
+	                }
+	                catch(InaccessibleObjectException e){
+	                    System.out.println("Unable to access" + field.getName() + ". Continuing...");
+	                }
+
+	            }
+	        }
+
+	        public void getFieldValue(Class classObj){
+	            return;
+	        }
+
+	        public void getInterface(Object obj,Class classObj, LinkedList recursiveList, boolean recursive) throws IllegalAccessException {
+	            Class[] cArr = classObj.getInterfaces();
+	            if(!classObj.isInterface()){
+	                System.out.println("Implemented Interfaces: ");
+	                for(int i = 0; i < cArr.length; i++){
+	                    System.out.println("    " + cArr[i].getName());
+	                }
+	            }
+	            else{
+	                for(int i = 0; i < cArr.length; i++){
+	                    getMethods(cArr[i]);
+	                    getConstructors(cArr[i]);
+	                    getFields(obj,cArr[i], recursiveList, recursive);
+	                    getFieldValue(cArr[i]);
+	                }
+	            }
+	        }
+
+	        public void getImmSuperClass(Object obj,Class classObj, LinkedList recursiveList, boolean recursive) throws IllegalAccessException {
+	            Class superc = classObj.getSuperclass();
+	            System.out.println("Immediate Superclass: " + superc.getName());
+	            System.out.println("Superclass has the following properties: ");
+	            if(superc != null) {
+	                getMethods(superc);
+	                getConstructors(superc);
+	                getFields(obj,superc, recursiveList, recursive);
+	                getFieldValue(superc);
+	            }
+	        }
+
+	        public String getDeclaringClass(Class classObj) {
+	            return classObj.getName();
+	        }
+	}
+</code>
+</pre>
+</div>
+<div id="javaSec3" style="display: none; overflow-y: scroll; width: 1200px">
+<pre>
+<code class="java">
+
+	import org.junit.After;
+	import org.junit.Before;
+	import org.junit.jupiter.api.Test;
+	import java.io.ByteArrayOutputStream;
+	import java.io.PrintStream;
+	import java.lang.reflect.*;
+	import java.util.LinkedList;
+
+	import static org.hamcrest.core.StringStartsWith.startsWith;
+	import static org.junit.jupiter.api.Assertions.*;
+
+
+	class InspectorTest {
+	    int[] intArr = {1,2,3,4};
+	    int[][] intArr2D = {{1,2,3},{4,5,6}};
+	    byte[] byteArr = {80, 101, 32, 45, 76};
+	    Object[] objArr = {3, "Hello", 1.0, 3.1415927892837848, intArr, intArr2D, byteArr};
+	    Inspector ins = new Inspector();
+	    @Test
+	    void testDeclaringClass() {
+	        for(int i = 0; i < objArr.length; i++){
+	            assertEquals(objArr[i].getClass().getName(), ins.inspectDeclaringClass(objArr[i].getClass()));
+	        }
+	    }
+
+	    @Test
+	    void testSuperClass() {
+	        for(int i = 0; i < objArr.length; i++){
+	            assertEquals(objArr[i].getClass().getSuperclass().getName(), ins.inspectImmediateSuperClass(objArr[i].getClass()));
+	        }
+	    }
+
+	    @Test
+	    void testInterfaces() {
+	        for(int i = 0; i < objArr.length; i++){
+	            String result = "";
+	            Class[] interArr = objArr[i].getClass().getInterfaces();
+	            for(int j = 0; j < interArr.length; j++) {
+	                result = result + interArr[j].getName() + ", ";
+	            }
+	                result = result.trim();
+	                result = result.substring(0, result.length() - 1);
+	                assertEquals(result, ins.inspectInterfaces(objArr[i].getClass()));
+	        }
+	    }
+
+	    @Test
+	    void testMethods() {
+	        for(int i = 0; i < objArr.length; i++){
+	            String result = "";
+	            Method[] mArr = objArr[i].getClass().getMethods();
+	            for(int x = 0; x < mArr.length; x++) {
+	                Class[] execps = mArr[x].getExceptionTypes();
+	                Class[] params = mArr[x].getParameterTypes();
+	                Class rtype = mArr[x].getReturnType();
+	                String modifies = Modifier.toString(mArr[x].getModifiers());
+	                result = result + "\n";
+	                result = result + "         " + mArr[x].getName() + "\n";
+	                result = result + "             exceptions: ";
+	                for(int j = 0; j < execps.length; j++){
+	                    result = result + execps[j].getName() + ", ";
+	                }
+	                if (execps.length != 0) {
+	                    result = result.trim();
+	                    result = result.substring(0, result.length() - 1);
+	                }
+	                result = result + "\n             parameters: ";
+	                for(int j = 0; j < params.length; j++){
+	                    result = result + params[j].getName() + ", ";
+	                }
+	                if(params.length != 0){
+	                    result = result.trim();
+	                    result = result.substring(0, result.length() - 1);
+	                }
+	                result = result + "\n             return type: ";
+	                result = result + rtype.getName();
+	                result = result + "\n             modifiers: ";
+	                result = result + modifies;
+	            }
+	            assertEquals(result, ins.inspectMethods(objArr[i].getClass()));
+	        }
+	    }
+
+	    @Test
+	    void testConstructors() {
+	        for(int i = 0; i < objArr.length; i++) {
+	            String result = "";
+	            Constructor[] constr = objArr[i].getClass().getConstructors();
+	            for(int x = 0; x < constr.length; x++){
+	                Class[] params = constr[x].getParameterTypes();
+	                String modifies = Modifier.toString(constr[x].getModifiers());
+	                result = result + "\n";
+	                result = result + "         " + constr[x].getName() + "(";
+	                for(int j = 0; j < params.length; j++){
+	                    result = result + params[j].getName() + ", ";
+	                }
+	                if(params.length != 0){
+	                    result = result.trim();
+	                    result = result.substring(0, result.length() - 1);
+	                }
+	                result = result + ")\n";
+	                result = result + "           with modifiers: " + modifies;
+	            }
+	            assertEquals(result, ins.inspectConstructors(objArr[i].getClass()));
+	        }
+	    }
+
+	    @Test
+	    void testFields() {
+	        for(int i = 0; i < objArr.length; i++){
+	            String result = "";
+	            Field[] fields = objArr[i].getClass().getDeclaredFields();
+	            for(int j = 0; j < fields.length; j++){
+	                fields[j].setAccessible(true);
+	                String type = fields[j].getType().getName();
+	                String modifier = Modifier.toString(fields[j].getModifiers());
+	                result = result + "\n";
+	                result = result + "         " + fields[j].getName() + "\n";
+	                result = result + "             type: " + type + "\n";
+	                result = result + "             modifiers: " + modifier + "\n";
+	                try {
+	                    result = result + "             value: " + fields[j].get(objArr[i]);
+	                }
+	                catch(Exception e){
+	                    result = result + "             Could not get value due to permissions";
+	                }
+	                if(fields[j].getType().isArray()) {
+	                    result = result + "\n";
+	                    result = result + "         " + fields[j].getName() + " is an array with the following properties: \n";
+	                    result = result + "             Contains Type: " + fields[j].getType().getComponentType().getName() + "\n";
+	                    try {
+	                        result = result + "             Length: " + Array.getLength(fields[j].get(objArr[i])) + "\n";
+	                    } catch (Exception e) {
+	                        result = result + "             Could not access length\n";
+	                    }
+	                    result = result + "             Elements: {";
+	                    try {
+	                        for (int k = 0; k < Array.getLength(fields[j].get(objArr[i])); k++) {
+	                            Object ele = Array.get(fields[j].get(objArr[i]), k);
+	                            result = result + ele + ", ";
+
+	                        }
+	                        if (Array.getLength(fields[j].get(objArr[i])) != 0) {
+	                            result = result.trim();
+	                            result = result.substring(0, result.length() - 1);
+	                        }
+	                        result = result + "}";
+
+	                    } catch (IllegalArgumentException e) {
+	                        e.printStackTrace();
+	                        result = result + "Expected Array: got type " + fields[j].getType() + "}".toUpperCase();
+	                    } catch (IllegalAccessException e) {
+	                        result = result + "Could not access elements}".toUpperCase();
+	                    }
+	                }
+	            }
+	            assertEquals(result.trim(), ins.inspectFields(objArr[i].getClass(), objArr[i], new LinkedList()).trim());
+	        }
+	    }
+
+	}
+</code>
+</pre>
+</div>
+
+<div id="javaSec4" style="display: none; overflow-y: scroll; width: 1200px">
+<pre>
+<code class="java">
+
+	import javafx.application.Application;
+	import javafx.fxml.FXMLLoader;
+	import javafx.scene.Parent;
+	import javafx.scene.Scene;
+	import javafx.stage.Stage;
+	import org.jdom2.Attribute;
+	import org.jdom2.Document;
+	import org.jdom2.Element;
+
+	import java.lang.reflect.InvocationTargetException;
+	import java.util.ArrayList;
+	import java.util.List;
+
+	import static javafx.application.Application.launch;
+
+	public class Visualizer extends Application {
+
+	    @Override
+	    public void start(Stage primaryStage) throws Exception {
+	        Parent thing = FXMLLoader.load(getClass().getResource("Visualizer.fxml"));
+
+	        primaryStage.setTitle("Object Getter");
+	        primaryStage.setScene(new Scene(thing, 800, 600));
+	        primaryStage.show();
+	    }
+
+	    public static void main(String[] args){
+	            launch(args);
+	        }
+	    }
+</code>
+</pre>
+</div>
+<div id="javaSec5" style="display: none; overflow-y: scroll; width: 1200px">
+<pre>
+<code class="java">
+
+	import javafx.event.ActionEvent;
+	import javafx.event.EventHandler;
+	import javafx.fxml.FXML;
+	import javafx.scene.Scene;
+	import javafx.scene.control.Button;
+	import javafx.scene.control.TextArea;
+	import javafx.scene.layout.VBox;
+	import javafx.scene.paint.Color;
+	import javafx.scene.text.Font;
+	import javafx.scene.text.Text;
+	import javafx.scene.text.TextAlignment;
+	import javafx.stage.Stage;
+	import org.jdom2.Document;
+
+	import java.io.BufferedReader;
+	import java.io.IOException;
+	import java.io.InputStreamReader;
+	import java.lang.reflect.Array;
+	import java.lang.reflect.Field;
+	import java.lang.reflect.InvocationTargetException;
+	import java.net.MalformedURLException;
+	import java.net.URL;
+	import java.util.ArrayList;
+	import java.util.Arrays;
+	import java.util.Scanner;
+
+
+	public class VisualizerController {
+
+	    @FXML
+	    private Button clientButton;
+
+	    @FXML
+	    private TextArea textArea;
+
+	    @FXML
+	    private TextArea objDisplayArea;
+
+	    public void initialize() throws IOException {
+	        String externalIP = Helper.getMyIP();
+	        if(externalIP.equals("")){
+	            System.out.println("Could not get IP");
+	        }
+	        textArea.appendText("Please enter this IP into the Client: " + externalIP);
+	        clientButton.setOnAction(new EventHandler<ActionEvent>() {
+	            @Override
+	            public void handle(ActionEvent actionEvent) {
+	                startListening();
+	            }
+	        });
+	    }
+
+	    private int getMyPort() {
+	        VBox vb = new VBox();
+	        Text getInfo = new Text("\n\nPlease enter the port you want to listen on: \n");
+	        getInfo.setFont(Font.font(24));
+	        getInfo.setFont(Font.font("Comic Sans"));
+	        getInfo.setTextAlignment(TextAlignment.CENTER);
+	        vb.getChildren().add(getInfo);
+	        TextArea textArea = new TextArea();
+	        textArea.setPromptText("Enter an integer: ");
+	        textArea.setMaxHeight(25);
+	        Button submit = new Button();
+	        submit.setText("Enter Port");
+	        vb.getChildren().add(textArea);
+	        vb.getChildren().add(submit);
+
+	        Scene scene = new Scene(vb, 600, 150);
+	        scene.setFill(Color.RED);
+	        Stage stage = new Stage();
+	        stage.setScene(scene);
+	        stage.setTitle("GETTING PORT");
+	        submit.setOnAction(new EventHandler<ActionEvent>() {
+	            @Override
+	            public void handle(ActionEvent event) {
+	                if(textArea.getText().equals(""))
+	                    return;
+	                else
+	                    stage.close();
+	            }
+	        });
+	        stage.showAndWait();
+	        return Integer.parseInt(textArea.getText());
+	    }
+
+	    public void startListening(){
+	        try {
+	            int myPort = getMyPort();
+	            Server server = new Server();
+	            ArrayList<Document> newDoc = server.start(myPort);
+	            server.shutdown();
+	            Deserializer deserializer = new Deserializer();
+	            ArrayList<Object> remadeObj = deserializer.recreateObject(newDoc);
+	            showNewObjects(remadeObj);
+	        } catch (IOException e) {
+	            System.out.println("Could not start server");
+	        } catch (ClassNotFoundException | NoSuchMethodException e) {
+	            e.printStackTrace();
+	        } catch (InstantiationException e) {
+	            e.printStackTrace();
+	        } catch (IllegalAccessException e) {
+	            e.printStackTrace();
+	        } catch (InvocationTargetException e) {
+	            e.printStackTrace();
+	        } catch (NoSuchFieldException e) {
+	            e.printStackTrace();
+	        }
+	    }
+
+	    public void showNewObjects(ArrayList<Object> remadeObj) throws IllegalAccessException {
+	        objDisplayArea.setText("Object properties:\n");
+	        for(Object ohj : remadeObj){
+	            try {
+	                objDisplayArea.appendText("Object: " + ohj.getClass().getName() + "\n");
+	                for (Field field : ohj.getClass().getDeclaredFields()) {
+	                    field.setAccessible(true);
+	                    ObjectCreatorController.updateDisplayDeep(ohj, field, objDisplayArea);
+	                }
+	            } catch (IndexOutOfBoundsException e) {
+	                ObjectCreatorController.throwIndexError();
+	            }
+	            objDisplayArea.appendText("########################################################");
+	        }
+	    }
+	}
+</code>
+</pre>
+</div>
+<div id="javaSec6" style="display: none; overflow-y: scroll; width: 1200px">
+<pre>
+<code class="java">
+
+	import org.jdom2.Document;
+	import org.jdom2.Element;
+	import org.jdom2.output.Format;
+	import org.jdom2.output.XMLOutputter;
+
+	import java.lang.reflect.Array;
+	import java.lang.reflect.Field;
+	import java.util.*;
+
+	public class Serializer {
+	    private IdentityHashMap<Object, Integer> identityHashMap = new IdentityHashMap<Object, Integer>();
+	    public int counter = 0;
+	    public Document serialize(Object o) throws IllegalAccessException {
+	        this.counter = 0;
+	        Document document = new Document();
+	        XMLOutputter xOut = new XMLOutputter(Format.getPrettyFormat());
+	        Element root = new Element("serialized");
+	        document.addContent(root);
+	        String className = o.getClass().getName();
+	        identityHashMap.put(o, this.counter);
+	        this.counter++;
+	        Element obj = new Element("object");
+	        obj.setAttribute("class", className);
+	        obj.setAttribute("id", identityHashMap.get(o).toString());
+	        if(o.getClass().isArray()){
+	            obj.setAttribute("length", String.valueOf(Array.getLength(o)));
+	        }
+	        root.addContent(obj);
+	        Object[] oArr = ObjectCreatorReflective.checkPrimitive(o.getClass());
+	        recurseElements(o, oArr, obj, root, false);
+
+	        return document;
+	    }
+
+	    private void addReferenceObject(Field f, Object o, Element root) throws IllegalAccessException {
+	        Element obj = new Element("object");
+	        obj.setAttribute("class", f.getType().getName());
+	        obj.setAttribute("id", identityHashMap.get(f.get(o)).toString());
+	        if(checkArray(f)){
+	            obj.setAttribute("length", String.valueOf(Array.getLength(f.get(o))));
+	        }
+	        root.addContent(obj);
+	        Object fgeto = f.get(o);
+	        Object[] oArr = ObjectCreatorReflective.checkPrimitive(fgeto.getClass());
+	        recurseElements(fgeto, oArr, obj, root, false);
+	    }
+
+	    private boolean checkArray(Field f) {
+	        String arrClassName = f.getType().getName();
+	        int dimensions = 0;
+	        for(int i = 0; i < arrClassName.length(); i++){
+	            if(arrClassName.charAt(i) == '[')
+	                dimensions++;
+	        }
+	        if(dimensions > 0){
+	            return true;
+	        }
+	        else{
+	            return false;
+	        }
+	    }
+
+	    private int getDimensions(Object o){
+	        String arrClassName = o.getClass().getName();
+	        int dimensions = 0;
+	        for(int i = 0; i < arrClassName.length(); i++){
+	            if(arrClassName.charAt(i) == '[')
+	                dimensions++;
+	        }
+	        return dimensions;
+	    }
+
+	    public void recurseElements(Object o, Object[] oArr, Element doElement, Element root, boolean flag) throws IllegalAccessException {
+	        if(o == null){
+	            Element nullEle = new Element("value");
+	            nullEle.addContent("null");
+	            doElement.addContent(nullEle);
+	        }
+	        String oName = o.getClass().getName();
+	        if(o.getClass().isPrimitive() || oArr[0].equals(true)){
+	            String primName = oArr[1].toString();
+	            Element primValue = new Element("value");
+	            primElements(primValue, primName, o);
+	            doElement.addContent(primValue);
+	        }
+	        else if(o.getClass().isArray()){
+	            for(int i = 0; i < Array.getLength(o); i++){
+	                Object a = Array.get(o, i);
+	                if(a == null){
+	                    Element nullEle = new Element("value");
+	                    nullEle.addContent("null");
+	                    doElement.addContent(nullEle);
+	                    continue;
+	                }
+	                Object[] dArr = ObjectCreatorReflective.checkPrimitive(a.getClass());
+	                if(getDimensions(o) > 1){
+	                    Element ele2 = new Element("index");
+	                    recurseElements(a, dArr, ele2, root, false);
+	                    doElement.addContent(ele2);
+	                }
+	                //if primitive array
+	                else if(dArr[0].equals(true)) {
+	                    dArr = ObjectCreatorReflective.checkPrimitive(a.getClass());
+	                    recurseElements(a, dArr, doElement, root, false);
+	                }
+	                else{
+	                    Element refer = new Element("reference");
+	                    createNewReference(doElement, root, a, refer);
+
+	                }
+
+	            }
+
+	        }
+	        else if(oName.equals("java.util.HashMap") || oName.equals("java.util.Map") ||
+	                oName.equals("java.util.LinkedHashMap") || oName.equals("java.util.TreeMap")){
+	            Map copy;
+	            if (oName.equals("java.util.HashMap")) {
+	                copy = (HashMap<Object, Object>) o;
+	            } else if (oName.equals("java.util.TreeMap")) {
+	                copy = (TreeMap<Object, Object>) o;
+	            } else if (oName.equals("java.util.LinkedHashMap")) {
+	                copy = (LinkedHashMap<Object, Object>) o;
+	            } else {
+	                copy = (Map<Object, Object>) o;
+	            }
+	            for(Object key : copy.keySet()){
+	                Object[] dArr = ObjectCreatorReflective.checkPrimitive(key.getClass());
+	                Element mapValue = new Element("value");
+	                if(dArr[0].equals(true)) {
+	                    primElements(mapValue, key.getClass().getName(), key);
+	                }
+	                else{
+	                    //recurseElements(key, dArr, mapValue, root, false);
+	                    Element refer = new Element("reference");
+	                    createNewReference(doElement, root, key, refer);
+	                }
+	                mapValue.addContent(",");
+	                dArr = ObjectCreatorReflective.checkPrimitive(copy.get(key).getClass());
+	                if(dArr[0].equals(true)){
+	                    primElements(mapValue, copy.get(key).getClass().getName(), copy.get(key));
+	                }
+	                else{
+	                    //recurseElements(copy.get(key), dArr, mapValue, root, false);
+	                    Element refer = new Element("reference");
+	                    if(!identityHashMap.containsKey(copy.get(key))) {
+	                        identityHashMap.put(copy.get(key), this.counter);
+	                        refer.addContent(String.valueOf(this.counter));
+	                        this.counter++;
+	                        mapValue.addContent(refer);
+	                        addObject(copy.get(key), root);
+	                    }
+	                    else{
+	                        refer.addContent(String.valueOf(identityHashMap.get(copy.get(key))));
+	                        mapValue.addContent(refer);
+	                    }
+	                }
+	                doElement.addContent(mapValue);
+	            }
+	        }
+	        else if(oName.equals("java.util.List") || oName.equals("java.util.ArrayList") || oName.equals("java.LinkedList")){
+	            List copy = null;
+	            if(oName.equals("java.util.ArrayList")){
+	                copy = (ArrayList<Object>) o;
+	            }
+	            else if(oName.equals("java.util.LinkedList")){
+	                copy = (LinkedList<Object>) o;
+	            }
+	            else {
+	                copy = (List<Object>) o;
+	            }
+	            for(int i = 0; i < copy.size(); i++){
+	                Object[] dArr = ObjectCreatorReflective.checkPrimitive(copy.get(i).getClass());
+	                Element listValue = new Element("value");
+	                if(dArr[0].equals(true)){
+	                    primElements(listValue, copy.get(i).getClass().getName(), copy.get(i));
+	                    doElement.addContent(listValue);
+	                }
+	                else{
+	                    //recurseElements(copy.get(i), dArr, listValue, root, false);
+	                    Element refer = new Element("reference");
+	                    if(!identityHashMap.containsKey(copy.get(i))) {
+	                        identityHashMap.put(copy.get(i), this.counter);
+	                        refer.addContent(String.valueOf(this.counter));
+	                        this.counter++;
+	                        doElement.addContent(refer);
+	                        addObject(copy.get(i), root);
+	                    }
+	                    else{
+	                        refer.addContent(String.valueOf(identityHashMap.get(copy.get(i))));
+	                        doElement.addContent(refer);
+	                    }
+	                }
+	            }
+	        }
+	        else if(oName.equals("java.util.Queue")){
+	            Queue<Object> copy = (Queue<Object>) o;
+	            for(Object gh : copy){
+	                Object[] dArr = ObjectCreatorReflective.checkPrimitive(gh.getClass());
+	                Element listValue = new Element("value");
+	                if(dArr[0].equals(true)){
+	                    primElements(listValue, gh.getClass().getName(), gh);
+	                    doElement.addContent(listValue);
+	                }
+	                else{
+	                    //recurseElements(gh, dArr, listValue, root, false);
+	                    Element refer = new Element("reference");
+	                    createNewReference(doElement, root, gh, refer);
+	                }
+	            }
+
+	        }
+	        else if(oName.equals("java.util.Deque") || oName.equals("java.util.ArrayDeque")){
+	            Deque<Object> copy = null;
+	            if(oName.equals("java.util.ArrayDeque")){
+	                copy = (ArrayDeque<Object>) o;
+	            }
+	            else{
+	                copy = (Deque<Object>) o;
+	            }
+	            for(Object dh : copy){
+	                Object[] dArr = ObjectCreatorReflective.checkPrimitive(dh.getClass());
+	                Element listValue = new Element("value");
+	                if(dArr[0].equals(true)){
+	                    primElements(listValue, dh.getClass().getName(), dh);
+	                    doElement.addContent(listValue);
+	                }
+	                else{
+	                    //recurseElements(dh, dArr, listValue, root, false);
+	                    Element refer = new Element("reference");
+	                    createNewReference(doElement, root, dh, refer);
+	                }
+	            }
+	        }
+	        else if(oName.equals("java.util.Set") || oName.equals("java.util.HashSet") || oName.equals("java.util.TreeSet")
+	        || oName.equals("java.util.LinkedHashSet")){
+
+	            Set copy;
+	            if(oName.equals("java.util.HashSet")){
+	                copy = (HashSet<Object>) o;
+	            }
+	            else if(oName.equals("java.util.TreeSet")){
+	                copy = (TreeSet<Object>) o;
+	            }
+	            else if(oName.equals("LinkedHashSet")){
+	                copy = (LinkedHashSet<Object>) o;
+	            }
+	            else
+	                copy = (Set<Object>) o;
+	            for(Object jh : copy){
+	                Object[] dArr = ObjectCreatorReflective.checkPrimitive(jh.getClass());
+	                Element listValue = new Element("value");
+	                if(dArr[0].equals(true)){
+	                    primElements(listValue, jh.getClass().getName(), jh);
+	                    doElement.addContent(listValue);
+	                }
+	                else{
+	                    //recurseElements(jh, dArr, listValue, root, false);
+	                    Element refer = new Element("reference");
+	                    createNewReference(doElement, root, jh, refer);
+	                }
+	            }
+	        }
+
+	        else if(!o.getClass().isPrimitive()) {
+	            for (Field f : o.getClass().getDeclaredFields()) {
+	                f.setAccessible(true);
+	                String fieldName = f.getName();
+	                String declaringClasss = f.getDeclaringClass().getName();
+	                Element field = new Element("field");
+	                field.setAttribute("name", fieldName);
+	                field.setAttribute("declaringclass", declaringClasss);
+	                if(f.get(o) == null){
+	                    field.addContent("null");
+	                    doElement.addContent(field);
+	                    continue;
+	                }
+	                else if (f.getType().isPrimitive() || f.getType().getName().equals("java.lang.String")) {
+	                    Element value = new Element("value");
+	                    value.addContent(f.get(o).toString());
+	                    field.addContent(value);
+	                    doElement.addContent(field);
+	                }
+	                else {
+	                    Element reference = new Element("reference");
+	                    if(identityHashMap.containsKey(f.get(o))){
+	                        reference.addContent(String.valueOf(identityHashMap.get(f.get(o))));
+	                        doElement.addContent(reference);
+	                    }
+	                    else{
+	                        identityHashMap.put(f.get(o), this.counter);
+	                        reference.addContent(String.valueOf(this.counter));
+	                        this.counter++;
+	                        doElement.addContent(reference);
+	                        addReferenceObject(f, o, root);
+	                    }
+	                }
+
+	            }
+	        }
+	    }
+
+	    private void createNewReference(Element doElement, Element root, Object a, Element refer) throws IllegalAccessException {
+	        if(!identityHashMap.containsKey(a)) {
+	            identityHashMap.put(a, this.counter);
+	            refer.addContent(String.valueOf(this.counter));
+	            this.counter++;
+	            doElement.addContent(refer);
+	            addObject(a, root);
+	        }
+	        else{
+	            refer.addContent(String.valueOf(identityHashMap.get(a)));
+	            doElement.addContent(refer);
+	        }
+	    }
+
+	    private void addObject(Object o, Element root) throws IllegalAccessException {
+	        Element obj = new Element("object");
+	        obj.setAttribute("class", o.getClass().getName());
+	        obj.setAttribute("id", identityHashMap.get(o).toString());
+	        if(o.getClass().isArray()){
+	            obj.setAttribute("length", String.valueOf(Array.getLength(o)));
+	        }
+	        root.addContent(obj);
+	        /*for(Field f : o.getClass().getDeclaredFields()) {
+	            f.setAccessible(true);
+	            Object fgeto = f.get(o);
+	            Object[] oArr = ObjectCreatorReflective.checkPrimitive(fgeto.getClass());
+	            recurseElements(fgeto, oArr, obj, root, false);
+	        }*/
+	        Object[] oArr = ObjectCreatorReflective.checkPrimitive(o.getClass());
+	        recurseElements(o, oArr, obj, root, false);
+	    }
+
+	    public void primElements(Element primValue, String primName, Object o){
+	        if(primName.equals("java.lang.Integer")){
+	            int i = (int) o;
+	            primValue.addContent(String.valueOf(i));
+	        }
+	        else if(primName.equals("java.lang.Byte")){
+	            byte b = (byte) o;
+	            primValue.addContent(String.valueOf(b));
+	        }
+	        else if(primName.equals("java.lang.Double")){
+	            double d = (double) o;
+	            primValue.addContent(String.valueOf(d));
+	        }
+	        else if(primName.equals("java.lang.Short")){
+	            short s = (short) o;
+	            primValue.addContent(String.valueOf(s));
+	        }
+	        else if(primName.equals("java.lang.Long")){
+	            long l = (long) o;
+	            primValue.addContent(String.valueOf(l));
+	        }
+	        else if(primName.equals("java.lang.Float")){
+	            float f = (float) o;
+	            primValue.addContent(String.valueOf(f));
+	        }
+	        else if(primName.equals("java.lang.Boolean")){
+	            boolean b = (boolean) o;
+	            primValue.addContent(String.valueOf(b));
+	        }
+	        else if(primName.equals("java.lang.String")){
+	            String s = (String) o;
+	            primValue.addContent(s);
+	        }
+	        else if(primName.equals("java.lang.Character")){
+	            char c = (char) o;
+	            primValue.addContent(String.valueOf(c));
+	        }
+	    }
+
+	}
+</code>
+</pre>
+</div>
+<div id="javaSec7" style="display: none; overflow-y: scroll; width: 1200px">
+<pre>
+<code class="java">
+
+	import org.jdom2.Content;
+	import org.jdom2.Document;
+	import org.jdom2.Element;
+
+	import java.lang.reflect.Array;
+	import java.lang.reflect.Field;
+	import java.lang.reflect.InvocationTargetException;
+	import java.util.*;
+
+	public class Deserializer {
+
+
+	    public Object deserialize(Document doc) throws InvocationTargetException, ClassNotFoundException,
+	            InstantiationException, NoSuchMethodException, IllegalAccessException, NoSuchFieldException {
+
+	        List<Element> myList = doc.getRootElement().getChildren();
+	        HashMap myMap = new HashMap();
+	        createInstances(myMap, myList);
+	        assignValues(myMap,myList);
+	        Object newOb = myMap.get("0");
+	        return newOb;
+	    }
+	    public ArrayList<Object> recreateObject(ArrayList<Document> newDoc) throws ClassNotFoundException, NoSuchMethodException,
+	            IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchFieldException {
+
+
+	        int count = 0;
+	        ArrayList<Object> obj = new ArrayList<>();
+	        for(Document d : newDoc){
+	            Object ogh = deserialize(d);
+	            obj.add(ogh);
+	        }
+	        return obj;
+	    }
+
+	    public static void createInstances(HashMap myMap, List<Element> myList) throws IllegalAccessException, InvocationTargetException, InstantiationException, ClassNotFoundException, NoSuchMethodException {
+	        for (int i=0; i< myList.size(); i++) {
+	            Element listEle = myList.get(i);
+	            Class cls = Class.forName(listEle.getAttributeValue("class"));
+	            Object instance = null;
+	            if(isCollection(cls)){
+	                instance = getNewCollectionInstance(cls);
+	            }
+	            else if (!cls.isArray()) {
+	                instance = cls.getDeclaredConstructor(null).newInstance();
+	            }else
+	                instance = Array.newInstance(cls.getComponentType(), Integer.parseInt(listEle.getAttributeValue("length")));
+	            myMap.put(listEle.getAttributeValue("id"), instance);
+	        }
+	    }
+
+	    private static Object getNewCollectionInstance(Class cls) {
+	        Class c = cls;
+	        String ref = c.getTypeName();
+	        Object toReturn = null;
+	        if(ref.equals("java.util.List") || ref.equals("java.util.ArrayList") || ref.equals("java.util.LinkedList")){
+	            if(ref.equals("java.util.List")){
+	                toReturn = new List<>() {
+	                    @Override
+	                    public int size() {
+	                        return 0;
+	                    }
+
+	                    @Override
+	                    public boolean isEmpty() {
+	                        return false;
+	                    }
+
+	                    @Override
+	                    public boolean contains(Object o) {
+	                        return false;
+	                    }
+
+	                    @Override
+	                    public Iterator<Object> iterator() {
+	                        return null;
+	                    }
+
+	                    @Override
+	                    public Object[] toArray() {
+	                        return new Object[0];
+	                    }
+
+	                    @Override
+	                    public <T> T[] toArray(T[] a) {
+	                        return null;
+	                    }
+
+	                    @Override
+	                    public boolean add(Object o) {
+	                        return false;
+	                    }
+
+	                    @Override
+	                    public boolean remove(Object o) {
+	                        return false;
+	                    }
+
+	                    @Override
+	                    public boolean containsAll(Collection<?> c) {
+	                        return false;
+	                    }
+
+	                    @Override
+	                    public boolean addAll(Collection<?> c) {
+	                        return false;
+	                    }
+
+	                    @Override
+	                    public boolean addAll(int index, Collection<?> c) {
+	                        return false;
+	                    }
+
+	                    @Override
+	                    public boolean removeAll(Collection<?> c) {
+	                        return false;
+	                    }
+
+	                    @Override
+	                    public boolean retainAll(Collection<?> c) {
+	                        return false;
+	                    }
+
+	                    @Override
+	                    public void clear() {
+
+	                    }
+
+	                    @Override
+	                    public Object get(int index) {
+	                        return null;
+	                    }
+
+	                    @Override
+	                    public Object set(int index, Object element) {
+	                        return null;
+	                    }
+
+	                    @Override
+	                    public void add(int index, Object element) {
+
+	                    }
+
+	                    @Override
+	                    public Object remove(int index) {
+	                        return null;
+	                    }
+
+	                    @Override
+	                    public int indexOf(Object o) {
+	                        return 0;
+	                    }
+
+	                    @Override
+	                    public int lastIndexOf(Object o) {
+	                        return 0;
+	                    }
+
+	                    @Override
+	                    public ListIterator<Object> listIterator() {
+	                        return null;
+	                    }
+
+	                    @Override
+	                    public ListIterator<Object> listIterator(int index) {
+	                        return null;
+	                    }
+
+	                    @Override
+	                    public List<Object> subList(int fromIndex, int toIndex) {
+	                        return null;
+	                    }
+	                };
+	            }
+	            else if(ref.equals("java.util.ArrayList")){
+	                toReturn = new ArrayList<>();
+	            }
+	            else if(ref.equals("java.util.LinkedList")){
+	                toReturn = new LinkedList<>();
+	            }
+	        }
+	        else if(ref.equals("java.util.Map") || ref.equals("java.util.HashMap") || ref.equals("java.util.LinkedHashMap") || ref
+	                .equals("java.util.TreeMap")) {
+	            if(ref.equals("java.util.Map")){
+	                toReturn = new Map<>() {
+	                    @Override
+	                    public int size() {
+	                        return 0;
+	                    }
+
+	                    @Override
+	                    public boolean isEmpty() {
+	                        return false;
+	                    }
+
+	                    @Override
+	                    public boolean containsKey(Object key) {
+	                        return false;
+	                    }
+
+	                    @Override
+	                    public boolean containsValue(Object value) {
+	                        return false;
+	                    }
+
+	                    @Override
+	                    public Object get(Object key) {
+	                        return null;
+	                    }
+
+	                    @Override
+	                    public Object put(Object key, Object value) {
+	                        return null;
+	                    }
+
+	                    @Override
+	                    public Object remove(Object key) {
+	                        return null;
+	                    }
+
+	                    @Override
+	                    public void putAll(Map<?, ?> m) {
+
+	                    }
+
+	                    @Override
+	                    public void clear() {
+
+	                    }
+
+	                    @Override
+	                    public Set<Object> keySet() {
+	                        return null;
+	                    }
+
+	                    @Override
+	                    public Collection<Object> values() {
+	                        return null;
+	                    }
+
+	                    @Override
+	                    public Set<Entry<Object, Object>> entrySet() {
+	                        return null;
+	                    }
+	                };
+	            }
+	            else if(ref.equals("java.util.HashMap")){
+	                toReturn = new HashMap<>();
+	            }
+	            else if(ref.equals("java.util.LinkedHashMap")){
+	                toReturn = new LinkedHashMap<>();
+	            }
+	        }
+	        else if(ref.equals("java.util.Queue")){
+	            toReturn = new Queue<>() {
+	                @Override
+	                public int size() {
+	                    return 0;
+	                }
+
+	                @Override
+	                public boolean isEmpty() {
+	                    return false;
+	                }
+
+	                @Override
+	                public boolean contains(Object o) {
+	                    return false;
+	                }
+
+	                @Override
+	                public Iterator<Object> iterator() {
+	                    return null;
+	                }
+
+	                @Override
+	                public Object[] toArray() {
+	                    return new Object[0];
+	                }
+
+	                @Override
+	                public <T> T[] toArray(T[] a) {
+	                    return null;
+	                }
+
+	                @Override
+	                public boolean add(Object o) {
+	                    return false;
+	                }
+
+	                @Override
+	                public boolean remove(Object o) {
+	                    return false;
+	                }
+
+	                @Override
+	                public boolean containsAll(Collection<?> c) {
+	                    return false;
+	                }
+
+	                @Override
+	                public boolean addAll(Collection<?> c) {
+	                    return false;
+	                }
+
+	                @Override
+	                public boolean removeAll(Collection<?> c) {
+	                    return false;
+	                }
+
+	                @Override
+	                public boolean retainAll(Collection<?> c) {
+	                    return false;
+	                }
+
+	                @Override
+	                public void clear() {
+
+	                }
+
+	                @Override
+	                public boolean offer(Object o) {
+	                    return false;
+	                }
+
+	                @Override
+	                public Object remove() {
+	                    return null;
+	                }
+
+	                @Override
+	                public Object poll() {
+	                    return null;
+	                }
+
+	                @Override
+	                public Object element() {
+	                    return null;
+	                }
+
+	                @Override
+	                public Object peek() {
+	                    return null;
+	                }
+	            };
+	        }
+	        else if(ref.equals("java.util.Deque") || ref.equals("java.util.ArrayDeque")){
+	            if(ref.equals("java.util.Deque")){
+	                toReturn = new Deque<>() {
+	                    @Override
+	                    public void addFirst(Object o) {
+
+	                    }
+
+	                    @Override
+	                    public void addLast(Object o) {
+
+	                    }
+
+	                    @Override
+	                    public boolean offerFirst(Object o) {
+	                        return false;
+	                    }
+
+	                    @Override
+	                    public boolean offerLast(Object o) {
+	                        return false;
+	                    }
+
+	                    @Override
+	                    public Object removeFirst() {
+	                        return null;
+	                    }
+
+	                    @Override
+	                    public Object removeLast() {
+	                        return null;
+	                    }
+
+	                    @Override
+	                    public Object pollFirst() {
+	                        return null;
+	                    }
+
+	                    @Override
+	                    public Object pollLast() {
+	                        return null;
+	                    }
+
+	                    @Override
+	                    public Object getFirst() {
+	                        return null;
+	                    }
+
+	                    @Override
+	                    public Object getLast() {
+	                        return null;
+	                    }
+
+	                    @Override
+	                    public Object peekFirst() {
+	                        return null;
+	                    }
+
+	                    @Override
+	                    public Object peekLast() {
+	                        return null;
+	                    }
+
+	                    @Override
+	                    public boolean removeFirstOccurrence(Object o) {
+	                        return false;
+	                    }
+
+	                    @Override
+	                    public boolean removeLastOccurrence(Object o) {
+	                        return false;
+	                    }
+
+	                    @Override
+	                    public boolean add(Object o) {
+	                        return false;
+	                    }
+
+	                    @Override
+	                    public boolean offer(Object o) {
+	                        return false;
+	                    }
+
+	                    @Override
+	                    public Object remove() {
+	                        return null;
+	                    }
+
+	                    @Override
+	                    public Object poll() {
+	                        return null;
+	                    }
+
+	                    @Override
+	                    public Object element() {
+	                        return null;
+	                    }
+
+	                    @Override
+	                    public Object peek() {
+	                        return null;
+	                    }
+
+	                    @Override
+	                    public boolean addAll(Collection<?> c) {
+	                        return false;
+	                    }
+
+	                    @Override
+	                    public boolean removeAll(Collection<?> c) {
+	                        return false;
+	                    }
+
+	                    @Override
+	                    public boolean retainAll(Collection<?> c) {
+	                        return false;
+	                    }
+
+	                    @Override
+	                    public void clear() {
+
+	                    }
+
+	                    @Override
+	                    public void push(Object o) {
+
+	                    }
+
+	                    @Override
+	                    public Object pop() {
+	                        return null;
+	                    }
+
+	                    @Override
+	                    public boolean remove(Object o) {
+	                        return false;
+	                    }
+
+	                    @Override
+	                    public boolean containsAll(Collection<?> c) {
+	                        return false;
+	                    }
+
+	                    @Override
+	                    public boolean contains(Object o) {
+	                        return false;
+	                    }
+
+	                    @Override
+	                    public int size() {
+	                        return 0;
+	                    }
+
+	                    @Override
+	                    public boolean isEmpty() {
+	                        return false;
+	                    }
+
+	                    @Override
+	                    public Iterator<Object> iterator() {
+	                        return null;
+	                    }
+
+	                    @Override
+	                    public Object[] toArray() {
+	                        return new Object[0];
+	                    }
+
+	                    @Override
+	                    public <T> T[] toArray(T[] a) {
+	                        return null;
+	                    }
+
+	                    @Override
+	                    public Iterator<Object> descendingIterator() {
+	                        return null;
+	                    }
+	                };
+	            }
+	            else if(ref.equals("java.util.ArrayDeque")){
+	                toReturn = new ArrayDeque<>();
+	            }
+	        }
+	        else if(ref.equals("java.util.Set") || ref.equals("java.util.HashSet") || ref.equals("java.util.TreeSet") ||
+	                ref.equals("LinkedHashSet")){
+	            if(ref.equals("java.util.Set")){
+	                toReturn = new Set<>() {
+	                    @Override
+	                    public int size() {
+	                        return 0;
+	                    }
+
+	                    @Override
+	                    public boolean isEmpty() {
+	                        return false;
+	                    }
+
+	                    @Override
+	                    public boolean contains(Object o) {
+	                        return false;
+	                    }
+
+	                    @Override
+	                    public Iterator<Object> iterator() {
+	                        return null;
+	                    }
+
+	                    @Override
+	                    public Object[] toArray() {
+	                        return new Object[0];
+	                    }
+
+	                    @Override
+	                    public <T> T[] toArray(T[] a) {
+	                        return null;
+	                    }
+
+	                    @Override
+	                    public boolean add(Object o) {
+	                        return false;
+	                    }
+
+	                    @Override
+	                    public boolean remove(Object o) {
+	                        return false;
+	                    }
+
+	                    @Override
+	                    public boolean containsAll(Collection<?> c) {
+	                        return false;
+	                    }
+
+	                    @Override
+	                    public boolean addAll(Collection<?> c) {
+	                        return false;
+	                    }
+
+	                    @Override
+	                    public boolean retainAll(Collection<?> c) {
+	                        return false;
+	                    }
+
+	                    @Override
+	                    public boolean removeAll(Collection<?> c) {
+	                        return false;
+	                    }
+
+	                    @Override
+	                    public void clear() {
+
+	                    }
+	                };
+	            }
+	            else if(ref.equals("java.util.HashSet")){
+	                toReturn = new HashSet<>();
+	            }
+	            else if(ref.equals("java.util.TreeSet")){
+	                toReturn = new TreeSet<>();
+	            }
+	            else if(ref.equals("java.util.LinkedHashSet")){
+	                toReturn = new LinkedHashSet<>();
+	            }
+	        }
+	        return toReturn;
+	    }
+
+	    private static boolean isCollection(Class cls) {
+	        Class c = cls;
+	        String ref = c.getTypeName();
+	        if(ref.equals("java.util.List") || ref.equals("java.util.ArrayList") || ref.equals("java.util.LinkedList")){
+	            return true;
+	        }
+	        else if(ref.equals("java.util.Map") || ref.equals("java.util.HashMap") || ref.equals("java.util.LinkedHashMap") || ref
+	                .equals("java.util.TreeMap")) {
+	            return true;
+	        }
+	        else if(ref.equals("java.util.Queue")){
+	            return true;
+	        }
+	        else if(ref.equals("java.util.Deque") || ref.equals("java.util.ArrayDeque")){
+	            return true;
+	        }
+	        else if(ref.equals("java.util.Set") || ref.equals("java.util.HashSet") || ref.equals("java.util.TreeSet") ||
+	                ref.equals("LinkedHashSet")){
+	            return true;
+	        }
+	        else{
+	            return false;
+	        }
+	    }
+
+	    public static void assignValues(HashMap myMap, List<Element> myList) throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
+	        for (int i=0; i < myList.size(); i++) {
+	            Element listEle = (Element) myList.get(i);
+	            Object instance = myMap.get(listEle.getAttributeValue("id"));
+	            List<Element> children = listEle.getChildren();
+	            if(isCollection(instance.getClass())){
+	                String ref = instance.getClass().getName();
+	                for(Element child : children) {
+	                    Object copy = null;
+	                    List<Content> content = child.getContent();
+	                    if (ref.equals("java.util.List") || ref.equals("java.util.ArrayList") || ref.equals("java.util.LinkedList")) {
+	                        assert (instance instanceof List);
+	                        if(child.getName().equals("reference")) {
+	                            ((List) instance).add(myMap.get(content.get(0).getValue()));
+	                            myMap.put(listEle.getAttributeValue("id"), instance);
+	                        }
+	                        else {
+	                            ((List) instance).add(content.get(0).getValue());
+	                            myMap.put(listEle.getAttributeValue("id"), instance);
+	                        }
+	                    } else if (ref.equals("java.util.Map") || ref.equals("java.util.HashMap") || ref.equals("java.util.LinkedHashMap") || ref
+	                            .equals("java.util.TreeMap")) {
+	                            assert (instance instanceof Map);
+	                            String sd = content.get(0).getValue();
+	                            String dj = content.get(0).getCType().toString();
+	                            String jg = content.get(2).getValue();
+	                            String test = content.get(2).getCType().toString();
+	                            Object c1 = "";
+	                            Object c2 = "";
+	                            if(dj.equals("Element")){
+	                                c1 = myMap.get(sd);
+	                            }
+	                            else
+	                                c1 = sd;
+	                            if(test.equals("Element")){
+	                                c2 = myMap.get(jg);
+	                            }
+	                            else
+	                                c2 = jg;
+	                            ((Map) instance).put(sd,jg);
+	                            myMap.put(listEle.getAttributeValue("id"), instance);
+	                    } else if (ref.equals("java.util.Queue")) {
+	                        assert (instance instanceof Queue);
+	                        if(child.getName().equals("reference"))
+	                            ((Queue) instance).add(myMap.get(content.get(0).getValue()));
+	                        else
+	                            ((Queue) instance).add(content.get(0).getValue());
+	                        myMap.put(listEle.getAttributeValue("id"), instance);
+	                    } else if (ref.equals("java.util.Deque") || ref.equals("java.util.ArrayDeque")) {
+	                        assert (instance instanceof Deque);
+	                        if(child.getName().equals("reference"))
+	                            ((Deque) instance).add(myMap.get(content.get(0).getValue()));
+	                        else
+	                            ((Deque) instance).add(content.get(0).getValue());
+	                        myMap.put(listEle.getAttributeValue("id"), instance);
+	                    } else if (ref.equals("java.util.Set") || ref.equals("java.util.HashSet") || ref.equals("java.util.TreeSet") ||
+	                            ref.equals("LinkedHashSet")) {
+	                        assert (instance instanceof Set);
+	                        if(child.getName().equals("reference"))
+	                            ((Set) instance).add(myMap.get(content.get(0).getValue()));
+	                        else
+	                            ((Set) instance).add(content.get(0).getValue());
+	                        myMap.put(listEle.getAttributeValue("id"), instance);
+	                    }
+	                }
+
+	            }
+	            else if (!instance.getClass().isArray()) {
+	                for (int j=0; j<children.size(); j++) {
+	                    Element fElt = children.get(j);
+	                    if(fElt.getName().equals("reference")){
+	                        String val = fElt.getContent(0).getValue();
+	                        Object hashValue = myMap.get(val);
+	                        for(Field f : instance.getClass().getDeclaredFields()){
+	                            f.setAccessible(true);
+	                            if(isCollection(f.getType())){
+	                                continue;
+	                            }
+	                            if(f.getType().getName().equals(hashValue.getClass().getName())){
+	                                f.set(instance, hashValue);
+	                            }
+	                        }
+	                    }
+	                    else {
+	                        String className = fElt.getAttributeValue("declaringclass");
+	                        Class fieldDC = Class.forName(className);
+	                        String fieldName = fElt.getAttributeValue("name");
+	                        Field f = fieldDC.getDeclaredField(fieldName);
+	                        f.setAccessible(true);
+	                        if(fElt.getChildren().size() != 0) {
+	                            Element vElt = (Element) fElt.getChildren().get(0);
+	                            f.set(instance, deserializeValue(vElt, f.getType(), myMap));
+	                        }
+	                    }
+	                }
+	            } else {
+	                for (int j=0; j<children.size(); j++) {
+	                    Class comptype = instance.getClass().getComponentType();
+	                    Element idxOrValue = children.get(j);
+	                    int count;
+	                    if(comptype.getName().charAt(0) != '[') {
+	                        if(comptype.getName().charAt(comptype.getName().length() -1) == ';'){
+
+	                        }
+	                        else {
+	                            Array.set(instance, j, deserializeValue(idxOrValue, comptype, myMap));
+	                        }
+	                    }
+	                    else{
+	                        Object object = null;
+	                        int length2 = idxOrValue.getContentSize();
+	                        if (comptype.getName().equals("[I")) {
+	                            object = Array.newInstance(int.class, length2);
+	                            comptype = int.class;
+	                        }
+	                        else if (comptype.getName().equals("[B")) {
+	                            object = Array.newInstance(byte.class, length2);
+	                            comptype = byte.class;
+	                        }
+	                        else if (comptype.getName().equals("[C")) {
+	                            object = Array.newInstance(char.class, length2);
+	                            comptype = char.class;
+	                        }
+	                        else if (comptype.getName().equals("[J")) {
+	                            object = Array.newInstance(long.class, length2);
+	                            comptype = long.class;
+	                        }
+	                        else if (comptype.getName().equals("[S")) {
+	                            object = Array.newInstance(short.class, length2);
+	                            comptype = short.class;
+	                        }
+	                        else if (comptype.getName().equals("[Z")) {
+	                            object = Array.newInstance(boolean.class, length2);
+	                            comptype = boolean.class;
+	                        }
+	                        else if (comptype.getName().equals("[D")) {
+	                            object = Array.newInstance(double.class, length2);
+	                            comptype = double.class;
+	                        }
+	                        else if (comptype.getName().equals("[F")) {
+	                            object = Array.newInstance(float.class, length2);
+	                            comptype = float.class;
+	                        }
+	                        else if(comptype.getName().equals("[Ljava.lang.String;")) {
+	                            object = Array.newInstance(String.class, length2);
+	                            comptype = String.class;
+	                        }
+	                        else {
+	                            object = Array.newInstance(comptype, length2);
+	                        }
+
+	                        for(int k = 0; k < idxOrValue.getContentSize(); k++){
+	                            Element sub = idxOrValue.getChildren().get(k);
+	                            Object idxValue = deserializeValue(sub, comptype, myMap);
+	                            Array.set(object, k, idxValue);
+	                        }
+	                        Array.set(instance, j, object);
+
+	                    }
+	                }
+
+	            }
+	        }
+
+	    }
+
+	    private static Object deserializeValue(Element vElt, Class<?> type, HashMap myMap) {
+	        String valtype = vElt.getName();
+	        if (valtype.equals("null"))
+	            return null;
+	        else if (valtype.equals("reference"))
+	            return myMap.get(vElt.getText());
+	        else {
+	            if (type.equals(boolean.class)) {
+	                if (vElt.getText().equals("true"))
+	                    return Boolean.TRUE;
+	                else
+	                    return Boolean.FALSE;
+	            }
+	            else if (type.equals(byte.class))
+	                return Byte.valueOf(vElt.getText());
+	            else if (type.equals(short.class))
+	                return Short.valueOf(vElt.getText());
+	            else if (type.equals(int.class))
+	                return Integer.valueOf(vElt.getText());
+	            else if (type.equals(long.class))
+	                return Long.valueOf(vElt.getText());
+	            else if (type.equals(float.class))
+	                return Float.valueOf(vElt.getText());
+	            else if (type.equals(double.class))
+	                return Double.valueOf(vElt.getText());
+	            else if (type.equals(char.class))
+	                return vElt.getText().charAt(0);
+	            else
+	                return vElt.getText();
+
+	        }
+	    }
+	}
+</code>
+</pre>
+</div>
+<div id="javaSec8" style="display: none; overflow-y: scroll; width: 1200px">
+<pre>
+<code class="java">
+
+	import org.jdom2.Document;
+	import org.jdom2.output.Format;
+	import org.jdom2.output.XMLOutputter;
+
+	import java.io.*;
+	import java.net.Socket;
+	import java.net.UnknownHostException;
+	import java.util.ArrayList;
+
+	public class Client {
+
+	    private Socket socket = null;
+	    private BufferedReader input = null;
+	    private PrintWriter out = null;
+	    private String ip = "";
+	    private int port = 0;
+	    public Client(String ip, int port) {
+	        this.ip = ip;
+	        this.port = port;
+	    }
+
+	    public void connect(ArrayList<Document> docList){
+	        try {
+	            socket = new Socket(ip, port);
+	            out = new PrintWriter(socket.getOutputStream(), true);
+	            input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+	            System.out.println("Connected");
+	            ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
+	            try {
+	                objectOutputStream.writeObject(docList);
+	            } catch (IOException e) {
+	                System.out.println("Could not send XML");
+	            }
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	        }
+	    }
+	    public void stop() throws IOException {
+	        input.close();
+	        out.close();
+	        socket.close();
+	    }
+
+	}
+</code>
+</pre>
+</div>
+<div id="javaSec9" style="display: none; overflow-y: scroll; width: 1200px">
+<pre>
+<code class="java">
+
+	import javafx.application.Application;
+	import javafx.fxml.FXMLLoader;
+	import javafx.scene.Parent;
+	import javafx.scene.Scene;
+	import javafx.stage.Stage;
+
+	import static javafx.application.Application.launch;
+
+	public class ObjectCreator extends Application {
+
+	    @Override
+	    public void start(Stage primaryStage) throws Exception {
+	        Parent root = FXMLLoader.load(getClass().getResource("ObjectCreator.fxml"));
+
+	        primaryStage.setTitle("Object Creator");
+	        primaryStage.setScene(new Scene(root, 800, 600));
+	        primaryStage.show();
+	    }
+
+	    public static void main(String[] args){
+	        launch(args);
+	    }
+	}
+</code>
+</pre>
+</div>
+<div id="javaSec10" style="display: none; overflow-y: scroll; width: 1200px">
+<pre>
+<code class="java">
+
+	import java.lang.reflect.*;
+	import java.util.*;
+
+	public class ObjectCreatorReflective {
+
+	    public static ArrayList<Object> getObjChecked() {
+	        return OBJ_CHECKED;
+	    }
+
+	    public static void setObjChecked(ArrayList<Object> objChecked) {
+	        OBJ_CHECKED = objChecked;
+	    }
+
+	    private static ArrayList<Object> OBJ_CHECKED = new ArrayList<>();
+
+
+	    public ObjectCreatorReflective(){}
+
+
+	    public static void notPrimitive(Field field, Object obj, int counter) throws IllegalAccessException,
+	            NoSuchMethodException, InvocationTargetException, InstantiationException, ClassNotFoundException {
+	        if(field.getType().isArray()) {
+	            isAnArray(field, obj);
+	            return;
+	        }
+	        Class newCO = Class.forName(field.getType().getName());
+	        Object newField = newCO.getConstructor(new Class[] {}).newInstance();
+	        for(Field f : newField.getClass().getDeclaredFields()) {
+	            f.setAccessible(true);
+	            if(!f.getType().isPrimitive() && !f.getType().getName().equals("java.lang.String")){
+	                String fieldType = field.getType().getName();
+	                String fType = f.getType().getName();
+	                String objType = obj.getClass().getTypeName();
+	                if(counter != 0 && fType.equals(objType))
+	                    continue;
+	                else {
+	                    counter++;
+	                    notPrimitive(f, newField, counter);
+	                }
+	            }
+	            else if(f.getType().isArray()){
+	                isAnArray(f, newField);
+	            }
+	            else if(f.getType().isPrimitive() || f.getType().getName().equals("java.lang.String")) {
+	                ObjectCreatorController.createPopUp(f, newField, obj);
+	            }
+	        }
+	        field.set(obj, newField);
+	    }
+
+	    public static boolean fieldNamesEqual(Object obj, Object parentObj) {
+	        Field[] objField = obj.getClass().getDeclaredFields();
+	        Field[] parentObjField = parentObj.getClass().getDeclaredFields();
+	        boolean result = false;
+	        if(objField.length == parentObjField.length){
+	            for(int i = 0; i < objField.length; i++){
+	                if(objField[i].getName().equals(parentObjField[i].getName()))
+	                    result = true;
+	                else
+	                    result = false;
+	            }
+	        }
+	        return result;
+	    }
+
+	    public static void parseFields(Field field, Object obj, String newStr) throws IllegalAccessException {
+	        Class t = field.getType();
+	        if (t.getName().equals("int"))
+	            field.setInt(obj, Integer.parseInt(newStr));
+	        else if (t.getName().equals("byte"))
+	            field.setByte(obj, Byte.parseByte(newStr));
+	        else if (t.getName().equals("short"))
+	            field.setShort(obj, Short.parseShort(newStr));
+	        else if (t.getName().equals("double"))
+	            field.setDouble(obj, Double.parseDouble(newStr));
+	        else if (t.getName().equals("float"))
+	            field.setFloat(obj, Float.parseFloat(newStr));
+	        else if (t.getName().equals("char")) {
+	            if (newStr.length() > 1) {
+	                ObjectCreatorController.throwRangeError(field);
+	            }
+	            field.setChar(obj, newStr.charAt(0));
+	        } else if (t.getName().equals("boolean")) {
+	            if (newStr.equals("1")) {
+	                newStr = "true";
+	            }
+	            if (newStr.equals("0")) {
+	                newStr = "false";
+	            }
+	            if (!newStr.equals("1") && !newStr.equals("0") && !newStr.equals("false") && !newStr.equals("true")) {
+	                ObjectCreatorController.throwRangeError(field);
+	            }
+	            field.setBoolean(obj, Boolean.parseBoolean(newStr));
+	        } else if (t.getName().equals("long"))
+	            field.setLong(obj, Long.parseLong(newStr));
+	        else if (t.getName().equals("java.lang.String"))
+	            field.set(obj, newStr);
+
+	    }
+
+	    public static void isAnArray(Field field, Object obj) throws ClassNotFoundException, IllegalAccessException,
+	            NoSuchMethodException, InvocationTargetException, InstantiationException {
+
+	        field.setAccessible(true);
+	        String arrClassName = field.getType().getName();
+	        int dimensions = 0;
+	        for(int i = 0; i < arrClassName.length(); i++){
+	            if(arrClassName.charAt(i) == '[')
+	                dimensions++;
+	        }
+	        int length = ObjectCreatorController.getTopLevelElements(1, field);
+	        Object object = null;
+	        if(dimensions == 1) {
+	            arrClassName = arrClassName.substring(1);
+	            if (arrClassName.equals("I"))
+	                object = Array.newInstance(int.class, length);
+	            else if (arrClassName.equals("B"))
+	                object = Array.newInstance(byte.class, length);
+	            else if (arrClassName.equals("C"))
+	                object = Array.newInstance(char.class, length);
+	            else if (arrClassName.equals("J"))
+	                object = Array.newInstance(long.class, length);
+	            else if (arrClassName.equals("S"))
+	                object = Array.newInstance(short.class, length);
+	            else if (arrClassName.equals("Z"))
+	                object = Array.newInstance(boolean.class, length);
+	            else if (arrClassName.equals("D"))
+	                object = Array.newInstance(double.class, length);
+	            else if (arrClassName.equals("F"))
+	                object = Array.newInstance(float.class, length);
+	            else if (arrClassName.equals("Ljava.lang.String;"))
+	                object = Array.newInstance(String.class, length);
+	            else{
+	                object = Array.newInstance(Class.forName(arrClassName.replace(";","").replace("L","")
+	                .replace("[","")), length);
+
+	            }
+
+	            for (int i = 0; i < length; i++) {
+	                if (arrClassName.equals("I")) {
+	                    String j = ObjectCreatorController.getDimensionPopup(0, i, field);
+	                    Array.set(object, i, Integer.parseInt(j));
+	                } else if (arrClassName.equals("B")){
+	                    String j = ObjectCreatorController.getDimensionPopup(0,i,field);
+	                    Array.set(object, i, Byte.parseByte(j));
+	                }
+	                else if (arrClassName.equals("C")){
+	                    String j = ObjectCreatorController.getDimensionPopup(0,i,field);
+	                    Array.set(object, i, j.charAt(0));
+	                }
+	                else if (arrClassName.equals("J")){
+	                    String j = ObjectCreatorController.getDimensionPopup(0,i,field);
+	                    Array.set(object, i, Long.parseLong(j));
+	                }
+	                else if (arrClassName.equals("S")){
+	                    String j = ObjectCreatorController.getDimensionPopup(0,i,field);
+	                    Array.set(object, i, Short.parseShort(j));
+	                }
+	                else if (arrClassName.equals("Z")){
+	                    String j = ObjectCreatorController.getDimensionPopup(0,i,field);
+	                    Array.set(object, i, Boolean.parseBoolean(j));
+	                }
+	                else if (arrClassName.equals("D")){
+	                    String j = ObjectCreatorController.getDimensionPopup(0,i,field);
+	                    Array.set(object, i, Double.parseDouble(j));
+	                }
+	                else if (arrClassName.equals("F")){
+	                    String j = ObjectCreatorController.getDimensionPopup(0,i,field);
+	                    Array.set(object, i, Float.parseFloat(j));
+	                }
+	                else if (arrClassName.equals("Ljava.lang.String;")){
+	                    String j = ObjectCreatorController.getDimensionPopup(0,i,field);
+	                    Array.set(object, i, j);
+	                }
+	                else{
+	                    Class cls = Class.forName(arrClassName.replace("[","").replace("L","")
+	                            .replace(";",""));
+	                    Object objInArr = cls.getConstructor(new Class[] {}).newInstance();
+	                    for(Field f : cls.getDeclaredFields()){
+	                        f.setAccessible(true);
+	                        if(f.getType().isPrimitive() || f.getType().getName().equals("java.lang.String"))
+	                            ObjectCreatorController.getPrimitiveValue(f, objInArr);
+	                        else if(f.getType().isArray())
+	                            isAnArray(f, objInArr);
+	                        else {
+	                            notPrimitive(f, objInArr, 0);
+	                        }
+	                    }
+	                    Array.set(object, i, objInArr);
+	                }
+	            }
+	        }
+	        else if (dimensions == 2){
+	            int length2 = ObjectCreatorController.getTopLevelElements(2,field);
+	            if (arrClassName.equals("[[I"))
+	                object = Array.newInstance(int.class, length, length2);
+	            else if (arrClassName.equals("[[B"))
+	                object = Array.newInstance(byte.class, length, length2);
+	            else if (arrClassName.equals("[[C"))
+	                object = Array.newInstance(char.class, length, length2);
+	            else if (arrClassName.equals("[[J"))
+	                object = Array.newInstance(long.class, length, length2);
+	            else if (arrClassName.equals("[[S"))
+	                object = Array.newInstance(short.class, length, length2);
+	            else if (arrClassName.equals("[[Z"))
+	                object = Array.newInstance(boolean.class, length, length2);
+	            else if (arrClassName.equals("[[D"))
+	                object = Array.newInstance(double.class, length, length2);
+	            else if (arrClassName.equals("[[F"))
+	                object = Array.newInstance(float.class, length, length2);
+	            else if(arrClassName.equals("[[Ljava.lang.String;"))
+	                object = Array.newInstance(String.class, length, length2);
+	            else
+	                object = Array.newInstance(field.getType(), length, length2);
+	            for(int i = 0; i < length; i++){
+	                Object object2 = null;
+	                if (arrClassName.equals("[[I"))
+	                    object2 = Array.newInstance(int.class, length2);
+	                else if (arrClassName.equals("[[B"))
+	                    object2 = Array.newInstance(byte.class, length2);
+	                else if (arrClassName.equals("[[C"))
+	                    object2 = Array.newInstance(char.class, length2);
+	                else if (arrClassName.equals("[[J"))
+	                    object2 = Array.newInstance(long.class, length2);
+	                else if (arrClassName.equals("[[S"))
+	                    object2 = Array.newInstance(short.class, length2);
+	                else if (arrClassName.equals("[[Z"))
+	                    object2 = Array.newInstance(boolean.class, length2);
+	                else if (arrClassName.equals("[[D"))
+	                    object2 = Array.newInstance(double.class, length2);
+	                else if (arrClassName.equals("[[F"))
+	                    object2 = Array.newInstance(float.class, length2);
+	                else if (arrClassName.equals("[[Ljava.lang.String;"))
+	                    object2 = Array.newInstance(String.class, length2);
+	                else
+	                    object2 = Array.newInstance(field.getType(), length2);
+	                for(int j = 0; j < length2; j++){
+	                    String result = ObjectCreatorController.getDimensionPopup(i,j,field);
+	                    if (arrClassName.equals("[[I"))
+	                        Array.set(object2, j, Integer.parseInt(result));
+	                    else if (arrClassName.equals("[[B"))
+	                        Array.set(object2, j, Byte.parseByte(result));
+	                    else if (arrClassName.equals("[[C"))
+	                        Array.set(object2, j, result.charAt(0));
+	                    else if (arrClassName.equals("[[J"))
+	                        Array.set(object2, j, Long.parseLong(result));
+	                    else if (arrClassName.equals("[[S"))
+	                        Array.set(object2, j, Short.parseShort(result));
+	                    else if (arrClassName.equals("[[Z"))
+	                        Array.set(object2, j, Boolean.parseBoolean(result));
+	                    else if (arrClassName.equals("[[D"))
+	                        Array.set(object2, j, Double.parseDouble(result));
+	                    else if (arrClassName.equals("[[F"))
+	                        Array.set(object2, j, Float.parseFloat(result));
+	                    else if (arrClassName.equals("[[Ljava.lang.String;"))
+	                        Array.set(object2, j, result);
+	                    else
+	                        Array.set(object2, j, (Object) result);
+	                }
+	                Array.set(object, i, object2);
+	            }
+	        }
+	        field.set(obj, object);
+	    }
+
+	    public static void isACollection(Field field, Object obj) throws NoSuchMethodException,
+	            IllegalAccessException, InvocationTargetException, InstantiationException, ClassNotFoundException, NoSuchFieldException {
+
+	        String ref = field.getType().getName();
+	        Class c = field.get(obj).getClass();
+	        field.setAccessible(true);
+	        int size = ObjectCreatorController.getCollectionSize(0, c);
+	        if(ref.equals("java.util.List") || ref.equals("java.util.ArrayList") || ref.equals("java.util.LinkedList")){
+	            List copy = null;
+	            if(c.getName().equals("java.util.ArrayList")){
+	                copy = (ArrayList<Object>) field.get(obj);
+	            }
+	            else if(c.getName().equals("java.util.LinkedList")){
+	                copy = (LinkedList<Object>) field.get(obj);
+	            }
+	            else {
+	                copy = (List<Object>) field.get(obj);
+	            }
+	            Object object = null;
+	            Class component = Helper.guessComponents(copy);
+	            while(copy.size() < size){
+	                copy.add(null);
+	            }
+	            for(int i = 0; i < size; i++){
+	                object = getObject(obj, component);
+	                copy.set(i, object);
+	            }
+	            field.set(obj, copy);
+	        }
+	        else if(ref.equals("java.util.Map") || ref.equals("java.util.HashMap") || ref.equals("java.util.LinkedHashMap") || ref
+	        .equals("java.util.TreeMap")) {
+	            Map copy;
+	            if (c.getName().equals("java.util.HashMap")) {
+	                copy = (HashMap<Object, Object>) field.get(obj);
+	            } else if (c.getName().equals("java.util.TreeMap")) {
+	                copy = (TreeMap<Object, Object>) field.get(obj);
+	            } else if (c.getName().equals("java.util.LinkedHashMap")) {
+	                copy = (LinkedHashMap<Object, Object>) field.get(obj);
+	            } else {
+	                copy = (Map<Object, Object>) field.get(obj);
+	            }
+
+	            Class keys = Helper.guessKeyComponents(copy);
+	            Class values = Helper.guessValueComponents(copy);
+	            while(copy.size() < size){
+	                copy.put(null,null);
+	            }
+	            for(int i = 0; i < size; i++){
+	                Object key = null;
+	                key = getObject(obj, keys);
+	                Object value = null;
+	                value = getObject(obj, values);
+	                copy.put(key,value);
+	            }
+	            field.set(obj, copy);
+	        }
+	        else if(ref.equals("java.util.Queue")){
+	            Queue<Object> copy = new Queue<>() {
+	                @Override
+	                public boolean add(Object o) {
+	                    return false;
+	                }
+
+	                @Override
+	                public boolean offer(Object o) {
+	                    return false;
+	                }
+
+	                @Override
+	                public Object remove() {
+	                    return null;
+	                }
+
+	                @Override
+	                public Object poll() {
+	                    return null;
+	                }
+
+	                @Override
+	                public Object element() {
+	                    return null;
+	                }
+
+	                @Override
+	                public Object peek() {
+	                    return null;
+	                }
+
+	                @Override
+	                public int size() {
+	                    return 0;
+	                }
+
+	                @Override
+	                public boolean isEmpty() {
+	                    return false;
+	                }
+
+	                @Override
+	                public boolean contains(Object o) {
+	                    return false;
+	                }
+
+	                @Override
+	                public Iterator<Object> iterator() {
+	                    return null;
+	                }
+
+	                @Override
+	                public Object[] toArray() {
+	                    return new Object[0];
+	                }
+
+	                @Override
+	                public <T> T[] toArray(T[] a) {
+	                    return null;
+	                }
+
+	                @Override
+	                public boolean remove(Object o) {
+	                    return false;
+	                }
+
+	                @Override
+	                public boolean containsAll(Collection<?> c) {
+	                    return false;
+	                }
+
+	                @Override
+	                public boolean addAll(Collection<?> c) {
+	                    return false;
+	                }
+
+	                @Override
+	                public boolean removeAll(Collection<?> c) {
+	                    return false;
+	                }
+
+	                @Override
+	                public boolean retainAll(Collection<?> c) {
+	                    return false;
+	                }
+
+	                @Override
+	                public void clear() {
+
+	                }
+	            };
+	            Class type = Helper.guessQueueComponents(copy);
+	            Object key = null;
+	            while(copy.size() < size){
+	                copy.add(null);
+	            }
+	            for(int i = 0; i < size; i++) {
+	                key = getObject(obj, type);
+	                copy.add(key);
+	            }
+	            field.set(obj, copy);
+	        }
+	        else if(ref.equals("java.util.Deque") || ref.equals("java.util.ArrayDeque")){
+	            Deque copy;
+	            if (c.getName().equals("java.util.ArrayDeque")) {
+	                copy = (ArrayDeque<Object>) field.get(obj);
+	            } else if (c.getName().equals("java.util.LinkedList")) {
+	                copy = (LinkedList<Object>) field.get(obj);
+	            } else {
+	                copy = (Deque) field.get(obj);
+	            }
+
+	            Class type = Helper.guessQueueComponents(copy);
+	            while(copy.size() < size){
+	                copy.add(null);
+	            }
+	            Object key = null;
+	            for(int i = 0; i < size; i++) {
+	                key = getObject(obj, type);
+	                copy.add(key);
+	            }
+	            field.set(obj, copy);
+	        }
+	        else if(ref.equals("java.util.Set") || ref.equals("java.util.HashSet") || ref.equals("java.util.TreeSet") ||
+	        ref.equals("LinkedHashSet")){
+	            Set copy;
+	            if(c.getName().equals("java.util.HashSet")){
+	                copy = (HashSet<Object>) field.get(obj);
+	            }
+	            else if(c.getName().equals("java.util.TreeSet")){
+	                copy = (TreeSet<Object>) field.get(obj);
+	            }
+	            else if(c.getName().equals("LinkedHashSet")){
+	                copy = (LinkedHashSet<Object>) field.get(obj);
+	            }
+	            else
+	                copy = (Set<Object>) field.get(obj);
+
+	            Class type = Helper.guessSetComponents(copy);
+	            while(copy.size() < size){
+	                copy.add(null);
+	            }
+	            Object key = null;
+	            for(int i = 0; i < size; i++) {
+	                key = getObject(obj, type);
+	                copy.add(key);
+	            }
+	            field.set(obj, copy);
+	        }
+
+	    }
+
+	    private static Object getObject(Object obj, Class component) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException {
+	        Object object;
+	        if (checkPrimitive(component)[0].equals(true)) {
+	            object = getPrimitive(component);
+	        } else {
+	            object = component.getConstructor(new Class[]{}).newInstance();
+	            for (Field f : object.getClass().getDeclaredFields()) {
+	                f.setAccessible(true);
+	                if (!f.getType().isPrimitive() && !f.getType().getName().equals("java.lang.String")) {
+	                    notPrimitive(f, object, 0);
+	                } else if (f.getType().isArray()) {
+	                    isAnArray(f, object);
+	                } else if (f.getType().isPrimitive() || f.getType().getName().equals("java.lang.String")) {
+	                    ObjectCreatorController.createPopUp(f, object, obj);
+	                }
+	            }
+	        }
+	        return object;
+	    }
+
+	    public static Object[] checkPrimitive(Class cls) {
+	        Object[] objArr = {null, null};
+	        if(cls.getName().equals("java.lang.Integer")) {
+	            objArr[0] = true;
+	            objArr[1] = cls.getName();
+	        }
+	        else if(cls.getName().equals("java.lang.Byte")) {
+	            objArr[0] = true;
+	            objArr[1] = cls.getName();
+	        }
+	        else if(cls.getName().equals("java.lang.Double")){
+	            objArr[0] = true;
+	            objArr[1] = cls.getName();
+	        }
+	        else if(cls.getName().equals("java.lang.Character")){
+	            objArr[0] = true;
+	            objArr[1] = cls.getName();
+	        }
+	        else if(cls.getName().equals("java.lang.Long")){
+	            objArr[0] = true;
+	            objArr[1] = cls.getName();
+	        }
+	        else if(cls.getName().equals("java.lang.Float")){
+	            objArr[0] = true;
+	            objArr[1] = cls.getName();
+	        }
+	        else if(cls.getName().equals("java.lang.Short")){
+	            objArr[0] = true;
+	            objArr[1] = cls.getName();
+	        }
+	        else if(cls.getName().equals("java.lang.Boolean")){
+	            objArr[0] = true;
+	            objArr[1] = cls.getName();
+	        }
+	        else if(cls.getName().equals("java.lang.String")){
+	            objArr[0] = true;
+	            objArr[1] = cls.getName();
+	        }
+	        else{
+	            objArr[0] = false;
+	            objArr[1] = cls.getName();
+	        }
+	        return objArr;
+	    }
+
+	    public static Object getPrimitive(Class cls){
+	        Object toReturn = null;
+	        if(cls.getName().equals("java.lang.Integer")) {
+	            int i = Integer.parseInt(ObjectCreatorController.getObjectPrimitive(cls));
+	            toReturn = i;
+	        }
+	        else if(cls.getName().equals("java.lang.Byte")) {
+	            byte b = Byte.parseByte(ObjectCreatorController.getObjectPrimitive(cls));
+	            toReturn = b;
+	        }
+	        else if(cls.getName().equals("java.lang.Double")){
+	            double d = Double.parseDouble(ObjectCreatorController.getObjectPrimitive(cls));
+	            toReturn = d;
+	        }
+	        else if(cls.getName().equals("java.lang.Character")){
+	            char c = ObjectCreatorController.getObjectPrimitive(cls).charAt(0);
+	            toReturn = c;
+	        }
+	        else if(cls.getName().equals("java.lang.Long")){
+	            long l = Long.parseLong(ObjectCreatorController.getObjectPrimitive(cls));
+	            toReturn = l;
+	        }
+	        else if(cls.getName().equals("java.lang.Float")){
+	            float f = Float.parseFloat(ObjectCreatorController.getObjectPrimitive(cls));
+	            toReturn = f;
+	        }
+	        else if(cls.getName().equals("java.lang.Short")){
+	            short s = Short.parseShort(ObjectCreatorController.getObjectPrimitive(cls));
+	            toReturn = s;
+	        }
+	        else if(cls.getName().equals("java.lang.Boolean")){
+	            String s = ObjectCreatorController.getObjectPrimitive(cls);
+	            if (s.equals("1")) {
+	                s = "true";
+	            }
+	            if (s.equals("0")) {
+	                s = "false";
+	            }
+	            boolean b = Boolean.parseBoolean(s);
+	            toReturn = b;
+	        }
+	        else if(cls.getName().equals("java.lang.String")){
+	            String s = ObjectCreatorController.getObjectPrimitive(cls);
+	            toReturn = s;
+	        }
+	        return toReturn;
+
+	    }
+	}
+</code>
+</pre>
+</div>
+<div id="javaSec11" style="display: none; overflow-y: scroll; width: 1200px">
+<pre>
+<code class="java">
+
+	import javafx.beans.value.ChangeListener;
+	import javafx.beans.value.ObservableValue;
+	import javafx.event.ActionEvent;
+	import javafx.event.EventHandler;
+	import javafx.fxml.FXML;
+	import javafx.geometry.Pos;
+	import javafx.scene.Scene;
+	import javafx.scene.control.*;
+	import javafx.scene.input.MouseEvent;
+	import javafx.scene.input.PickResult;
+	import javafx.scene.layout.BorderPane;
+	import javafx.scene.layout.Pane;
+	import javafx.scene.layout.VBox;
+	import javafx.scene.paint.Color;
+	import javafx.scene.text.Font;
+	import javafx.scene.text.Text;
+	import javafx.scene.text.TextAlignment;
+	import javafx.stage.FileChooser;
+	import javafx.stage.Popup;
+	import javafx.stage.Stage;
+
+	import java.io.File;
+	import java.io.FilenameFilter;
+	import java.io.IOException;
+	import java.lang.reflect.Array;
+	import java.lang.reflect.Field;
+	import java.lang.reflect.InvocationTargetException;
+	import java.lang.reflect.Type;
+	import java.net.UnknownHostException;
+	import java.nio.file.Files;
+	import java.nio.file.Path;
+	import java.nio.file.Paths;
+	import java.nio.file.StandardCopyOption;
+	import java.util.*;
+
+	import org.jdom2.*;
+
+	public class ObjectCreatorController {
+
+	    @FXML
+	    private ComboBox<String> classBox;
+
+	    @FXML
+	    private ComboBox<String> arrayTypeBox;
+
+	    @FXML
+	    private ComboBox<String> fieldBox;
+
+	    @FXML
+	    private TextField fieldText;
+
+	    @FXML
+	    private TextArea displayInfo;
+
+	    @FXML
+	    private TextArea objDisplay;
+
+	    @FXML
+	    private TextArea objDisplayData;
+
+	    @FXML
+	    private ProgressBar progBar;
+
+	    @FXML
+	    private TextField fieldText2;
+
+	    @FXML
+	    private Button serializeButton;
+
+	    private Class classObj;
+	    private Object obj;
+	    private ArrayList<Object> objArr = new ArrayList<Object>();
+	    private Object parentObj;
+	    private ArrayList<File> classesToLoad;
+
+	    public void prepForSerialize() throws IllegalAccessException, IOException {
+	        ArrayList<Document> docList = new ArrayList<>();
+	        for(Object o : objArr) {
+	            Serializer ser = new Serializer();
+	            Document serialized = ser.serialize(o);
+	            docList.add(serialized);
+	        }
+	            String ip = ObjectCreatorController.getIPFromUser();
+	            int port = Integer.parseInt(ObjectCreatorController.getPortFromUser());
+	            Client client = new Client(ip, port);
+	            client.connect(docList);
+	            client.stop();
+	    }
+
+	    public static String getIPFromUser() {
+	        VBox vb = new VBox();
+	        Text getInfo = new Text("\n\nPlease enter the IP you want to connect to: \n");
+	        getInfo.setFont(Font.font(24));
+	        getInfo.setFont(Font.font("Comic Sans"));
+	        getInfo.setTextAlignment(TextAlignment.CENTER);
+	        vb.getChildren().add(getInfo);
+	        TextArea textArea = new TextArea();
+	        textArea.setPromptText("Enter the IP: ");
+	        textArea.setMaxHeight(25);
+	        Button submit = new Button();
+	        submit.setText("Submit IP");
+	        vb.getChildren().add(textArea);
+	        vb.getChildren().add(submit);
+
+	        Scene scene = new Scene(vb, 600, 150);
+	        scene.setFill(Color.RED);
+	        Stage stage = new Stage();
+	        stage.setScene(scene);
+	        stage.setTitle("GETTING IP OF SERVER: ");
+	        submit.setOnAction(new EventHandler<ActionEvent>() {
+	            @Override
+	            public void handle(ActionEvent event) {
+	                if(textArea.getText().equals(""))
+	                    return;
+	                else
+	                    stage.close();
+	            }
+	        });
+	        stage.showAndWait();
+	        return textArea.getText();
+	    }
+
+	    public static String getPortFromUser(){
+	        VBox vb = new VBox();
+	        Text getInfo = new Text("\n\nPlease enter the port the server is listening on: \n");
+	        getInfo.setFont(Font.font(24));
+	        getInfo.setFont(Font.font("Comic Sans"));
+	        getInfo.setTextAlignment(TextAlignment.CENTER);
+	        vb.getChildren().add(getInfo);
+	        TextArea textArea = new TextArea();
+	        textArea.setPromptText("Enter the port: ");
+	        textArea.setMaxHeight(25);
+	        Button submit = new Button();
+	        submit.setText("Submit port");
+	        vb.getChildren().add(textArea);
+	        vb.getChildren().add(submit);
+
+	        Scene scene = new Scene(vb, 600, 150);
+	        scene.setFill(Color.RED);
+	        Stage stage = new Stage();
+	        stage.setScene(scene);
+	        stage.setTitle("GETTING PORT OF SERVER: ");
+	        submit.setOnAction(new EventHandler<ActionEvent>() {
+	            @Override
+	            public void handle(ActionEvent event) {
+	                if(textArea.getText().equals(""))
+	                    return;
+	                else
+	                    stage.close();
+	            }
+	        });
+	        stage.showAndWait();
+	        return textArea.getText();
+
+	    }
+
+	    public static Integer getTopLevelElements(int i, Field f){
+	        VBox vb = new VBox();
+	        Text getInfo = new Text("\n\nPlease enter the length of the " + Helper.ordinal(i) + " dimension of" + f.getType().getName()+ " \n");
+	        getInfo.setFont(Font.font(24));
+	        getInfo.setFont(Font.font("Comic Sans"));
+	        getInfo.setTextAlignment(TextAlignment.CENTER);
+	        vb.getChildren().add(getInfo);
+	        TextArea textArea = new TextArea();
+	        textArea.setPromptText("Enter an integer: ");
+	        textArea.setMaxHeight(25);
+	        Button submit = new Button();
+	        submit.setText("Enter Integer");
+	        vb.getChildren().add(textArea);
+	        vb.getChildren().add(submit);
+
+	        Scene scene = new Scene(vb, 600, 150);
+	        scene.setFill(Color.RED);
+	        Stage stage = new Stage();
+	        stage.setScene(scene);
+	        stage.setTitle("GETTING LENGTH OF DEPTH: " + i + " for " + f.getType().getName());
+	        submit.setOnAction(new EventHandler<ActionEvent>() {
+	            @Override
+	            public void handle(ActionEvent event) {
+	                if(textArea.getText().equals(""))
+	                    return;
+	                else
+	                    stage.close();
+	            }
+	        });
+	        stage.showAndWait();
+	        return Integer.parseInt(textArea.getText());
+	    }
+	    public static String getDimensionPopup(int i, int j, Field f) {
+	        VBox vb = new VBox();
+	        Text getInfo = new Text("\n\nPlease enter what you want index: " + i +"," + j + " of " + f.getType().getName()+ " to be\n");
+	        getInfo.setFont(Font.font(24));
+	        getInfo.setFont(Font.font("Comic Sans"));
+	        getInfo.setTextAlignment(TextAlignment.CENTER);
+	        vb.getChildren().add(getInfo);
+	        TextArea textArea = new TextArea();
+	        textArea.setPromptText("Enter field: " );
+	        textArea.setMaxHeight(25);
+	        Button submit = new Button();
+	        submit.setText("Enter Field");
+	        vb.getChildren().add(textArea);
+	        vb.getChildren().add(submit);
+
+	        Scene scene = new Scene(vb, 600, 150);
+	        scene.setFill(Color.RED);
+	        Stage stage = new Stage();
+	        stage.setScene(scene);
+	        stage.setTitle("GETTING VALUE FOR: " + f.getType().getName());
+	        submit.setOnAction(new EventHandler<ActionEvent>() {
+	            @Override
+	            public void handle(ActionEvent event) {
+	                stage.close();
+	            }
+	        });
+	        stage.showAndWait();
+	        return textArea.getText();
+	    }
+
+	    public static void throwArrayLengthError() {
+	    }
+
+	    public static void getPrimitiveValue(Field f, Object obj) {
+	        VBox vb = new VBox();
+	        Text getInfo = new Text("\n\nPlease enter a value for: " + f.getType() + " " + f.getName());
+	        getInfo.setFont(Font.font(24));
+	        getInfo.setFont(Font.font("Comic Sans"));
+	        getInfo.setTextAlignment(TextAlignment.CENTER);
+	        vb.getChildren().add(getInfo);
+	        TextArea textArea = new TextArea();
+	        textArea.setPromptText("Enter a value for: " + f.getName());
+	        textArea.setMaxHeight(25);
+	        Button submit = new Button();
+	        submit.setText("Enter Field");
+	        vb.getChildren().add(textArea);
+	        vb.getChildren().add(submit);
+
+	        Scene scene = new Scene(vb, 600, 150);
+	        scene.setFill(Color.RED);
+	        Stage stage = new Stage();
+	        stage.setScene(scene);
+	        stage.setTitle("ADDING VALUES FOR: " + obj.getClass().getName());
+
+	        submitButtonAction(f, obj, textArea, submit, stage);
+	        stage.showAndWait();
+
+
+	    }
+
+	    private static void submitButtonAction(Field f, Object obj, TextArea textArea, Button submit, Stage stage) {
+	        submit.setOnAction(new EventHandler<ActionEvent>() {
+	            @Override
+	            public void handle(ActionEvent event) {
+	                try {
+	                    if (textArea.getText().equals("")) {
+	                        return;
+	                    }
+	                    //primitiveCheck
+	                    if (f.getType().isPrimitive() || f.getType().getName().equals("java.lang.String")) {
+	                        ObjectCreatorReflective.parseFields(f, obj, textArea.getText());
+	                    }
+	                    stage.close();
+	                } catch (IllegalAccessException e) {
+	                    e.printStackTrace();
+	                }
+	            }
+	        });
+	    }
+
+	    public static int getCollectionSize(int i, Class classObj) {
+	        VBox vb = new VBox();
+	        Text getInfo = new Text("\n\nPlease enter how big you want: " + classObj.getName() + " to be\n");
+	        getInfo.setFont(Font.font(24));
+	        getInfo.setFont(Font.font("Comic Sans"));
+	        getInfo.setTextAlignment(TextAlignment.CENTER);
+	        vb.getChildren().add(getInfo);
+	        TextArea textArea = new TextArea();
+	        textArea.setPromptText("Enter field: " );
+	        textArea.setMaxHeight(25);
+	        Button submit = new Button();
+	        submit.setText("Enter Field");
+	        vb.getChildren().add(textArea);
+	        vb.getChildren().add(submit);
+
+	        Scene scene = new Scene(vb, 600, 150);
+	        scene.setFill(Color.RED);
+	        Stage stage = new Stage();
+	        stage.setScene(scene);
+	        stage.setTitle("GETTING SIZE FOR: " + classObj.getName());
+	        submit.setOnAction(new EventHandler<ActionEvent>() {
+	            @Override
+	            public void handle(ActionEvent event) {
+	                stage.close();
+	            }
+	        });
+	        stage.showAndWait();
+	        return Integer.parseInt(textArea.getText());
+
+	    }
+
+	    public static String getImplementationChoice(String name) {
+	        VBox vb = new VBox();
+	        Text getInfo = new Text("\n\nPlease select which implementation of: " + name + " you want\n");
+	        getInfo.setFont(Font.font(24));
+	        getInfo.setFont(Font.font("Comic Sans"));
+	        getInfo.setTextAlignment(TextAlignment.CENTER);
+	        vb.getChildren().add(getInfo);
+	        ComboBox comboBox = new ComboBox();
+
+	        if(name.equals("java.util.List")){
+	            comboBox.getItems().addAll("ArrayList", "LinkedList");
+	        }
+	        else if(name.equals("java.util.Set")){
+	            comboBox.getItems().addAll("HashSet", "TreeSet", "LinkedHashSet");
+	        }
+	        else if(name.equals("java.util.Queue")){
+	            comboBox.getItems().addAll("Queue");
+	        }
+	        else if(name.equals("java.util.Deque")){
+	            comboBox.getItems().addAll("ArrayDeque", "LinkedList");
+	        }
+	        else if(name.equals("java.util.Map")){
+	            comboBox.getItems().addAll("HashMap", "TreeMap", "LinkedHashMap");
+	        }
+	        Button submit = new Button();
+	        submit.setText("Submit Implementation");
+	        vb.getChildren().add(comboBox);
+	        vb.getChildren().add(submit);
+
+	        Scene scene = new Scene(vb, 600, 150);
+	        scene.setFill(Color.RED);
+	        Stage stage = new Stage();
+	        stage.setScene(scene);
+	        stage.setTitle("GETTING IMPLEMENTATION FOR: " + name);
+	        submit.setOnAction(new EventHandler<ActionEvent>() {
+	            @Override
+	            public void handle(ActionEvent event) {
+	                if(comboBox.getValue().equals(comboBox.getPromptText()))
+	                    return;
+	                else
+	                    stage.close();
+	            }
+	        });
+	        stage.showAndWait();
+	        return comboBox.getValue().toString();
+	    }
+
+	    public static String getObjectPrimitive(Class cls) {
+	        VBox vb = new VBox();
+	        Text getInfo = new Text("\n\nPlease enter the value for a: " + cls.getName() + " \n");
+	        getInfo.setFont(Font.font(24));
+	        getInfo.setFont(Font.font("Comic Sans"));
+	        getInfo.setTextAlignment(TextAlignment.CENTER);
+	        vb.getChildren().add(getInfo);
+	        TextArea textArea = new TextArea();
+	        textArea.setPromptText("Enter a value: ");
+	        textArea.setMaxHeight(25);
+	        Button submit = new Button();
+	        submit.setText("Submit Value");
+	        vb.getChildren().add(textArea);
+	        vb.getChildren().add(submit);
+
+	        Scene scene = new Scene(vb, 600, 150);
+	        scene.setFill(Color.RED);
+	        Stage stage = new Stage();
+	        stage.setScene(scene);
+	        stage.setTitle("GETTING PRIMITVE VALUE OF TYPE: " + cls.getName());
+	        submit.setOnAction(new EventHandler<ActionEvent>() {
+	            @Override
+	            public void handle(ActionEvent event) {
+	                if(textArea.getText().equals(""))
+	                    return;
+	                else
+	                    stage.close();
+	            }
+	        });
+	        stage.showAndWait();
+	        return textArea.getText();
+
+	    }
+
+	    public void initialize(){
+	        createHelpDialog();
+	        classesToLoad = Helper.getClasses();
+	        updateClassBox(classesToLoad);
+	        objDisplay.setText("Objects:");
+	        objDisplay.setEditable(false);
+	        objDisplayData.setEditable(false);
+	        //classBox.getItems().add("PrimitivesOnly");
+	        classBox.valueProperty().addListener(new ChangeListener<String>() {
+	            @Override
+	            public void changed(ObservableValue observable, String oldValue, String newValue) {
+	                if(newValue.equals(classBox.getPromptText())) { return;}
+	                progBar.setProgress(0);
+	                displayInfo.setText("Fields:\n");
+	                fieldBox.setValue(fieldBox.getPromptText());
+	                fieldBox.getItems().clear();
+	                fieldText.setText("");
+	                try {
+	                    classObj = Class.forName(classBox.getValue().toString());
+	                    obj = classObj.getConstructor(new Class[] {}).newInstance();
+	                } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+	                    System.out.println("Could not find class");
+
+	                } catch (NoSuchMethodException | InvocationTargetException e) {
+	                    e.printStackTrace();
+	                }
+	                Field[] fieldarr = classObj.getDeclaredFields();
+	                for (Field field : fieldarr) {
+	                    field.setAccessible(true);
+	                    fieldBox.getItems().add(field.getName());
+	                }
+	                updateDisplayArea(classObj, obj);
+
+	            }
+	        });
+	        fieldBox.valueProperty().addListener(new ChangeListener<String>() {
+	            @Override
+	            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+	                if(newValue.equals(fieldBox.getPromptText())){ return;}
+	                    fieldText.setText("");
+	                try {
+	                    classObj = Class.forName(classBox.getValue().toString());
+	                } catch (ClassNotFoundException e) {
+	                    System.out.println("Could not find class");
+	                }
+	                try {
+	                    recurseFields(newValue);
+	                } catch (NoSuchFieldException | IllegalAccessException |
+	                        NoSuchMethodException | InvocationTargetException |
+	                        InstantiationException | ClassNotFoundException e) {
+	                    e.printStackTrace();
+	                }
+	            }
+	        });
+
+	        serializeButton.setOnAction(new EventHandler<ActionEvent>() {
+	            @Override
+	            public void handle(ActionEvent actionEvent) {
+	                if(objArr.size() == 0){
+	                    throwEmptyObjError();
+	                }
+	                else {
+	                    try {
+	                        prepForSerialize();
+	                    } catch (IllegalAccessException | IOException e) {
+	                        e.printStackTrace();
+	                    }
+	                }
+	            }
+	        });
+
+
+
+	    }
+
+	    private void updateClassBox(ArrayList<File> classesToLoad) {
+	        classBox.getItems().clear();
+	        for(File f : classesToLoad){
+	            String s = f.getName().replaceFirst(".class", "");
+	            if(s.equals("ObjectCreator") || s.contains("Serializer") || s.contains("Visualizer") || s.contains("Deserializer") ||
+	                    s.contains("ObjectCreatorController") || s.contains("ObjectCreatorReflective")
+	                    || s.contains("Helper") || s.contains("Client") || s.contains("Server") || s.contains("Serializer")
+	            || s.contains("Deserializer")){ continue;}
+	            classBox.getItems().add(s);
+	        }
+	    }
+
+	    public void createHelpDialog() {
+	        VBox vb = new VBox();
+	        Text getInfo = new Text("\n\nWelcome To The Serializer/Deserializer Program!\n" +
+	                "I am a help dialog designed to guide you through the steps of working this program\n\n" +
+	                "Firstly, select your class from the first ComboBox. Note this program can take custom classes\n" +
+	                "\tYou can import classes by clicking File -> Import Class\n\n" +
+	                "\tIt is advised your imported classes have a toString() method!" +
+	                "You have the option of naming your object in the text area\n" +
+	                "Select the field that you want to alter/set\n" +
+	                "\tIf the field is a primitive just simply set the value in the text area below\n" +
+	                "\tIf it is not a primitive, the program will prompt you with text boxes to enter values\n\n" +
+	                "NOTE: IT IS CRUCIAL YOU CLICK SAVE FIELD IF YOU WANT CHANGES TO BE ACTIVATED\n\n" +
+	                "Once all the fields you want to set are complete, click Create Object\n" +
+	                "You have the option of inspecting already created object by double clicking on them in the top right most pane\n" +
+	                "The area directly below this will display the information you are looking for\n" +
+	                "To delete an already created object, simply double click on the object name and press the delete object button\n" +
+	                "\nOnce all of your objects have been created, please click SERIALIZE" +
+	                "\n\nYou can recreate this dialog anytime by clicking Help -> Show Help");
+	        getInfo.setFont(Font.font(24));
+	        getInfo.setFont(Font.font("Comic Sans"));
+	        getInfo.setTextAlignment(TextAlignment.CENTER);
+	        vb.getChildren().add(getInfo);
+	        Button submit = new Button();
+	        submit.setAlignment(Pos.BASELINE_CENTER);
+	        submit.setText("START");
+	        vb.getChildren().add(submit);
+
+	        Scene scene = new Scene(vb, 700, 400);
+	        Stage stage = new Stage();
+	        stage.setScene(scene);
+	        stage.setTitle("WELCOME");
+	        stage.show();
+	        stage.setAlwaysOnTop(true);
+
+	        submit.setOnAction(new EventHandler<ActionEvent>() {
+	            @Override
+	            public void handle(ActionEvent event) {
+	                    stage.close();
+	            }
+	        });
+	    }
+
+	    public void recurseFields(String newValue) throws NoSuchFieldException, IllegalAccessException, NoSuchMethodException, InstantiationException, InvocationTargetException, ClassNotFoundException {
+	        Field field = classObj.getDeclaredField(newValue);
+	        field.setAccessible(true);
+	        if(field.getType().isPrimitive()) {
+	            if (field.get(obj) == null) {
+	                fieldText.setText("null");
+	            } else
+	                fieldText.setText(field.get(obj).toString());
+	        }
+	        else if(field.getType().getName().equals("java.lang.String")){
+	            fieldText.setText(field.get(obj).toString());
+	        }
+	        else if(field.getType().isArray()){
+	            ObjectCreatorReflective.isAnArray(field, obj);
+	        }
+	        else if(!field.getType().isPrimitive()){
+	            if(Collection.class.isAssignableFrom(field.getType()))
+	                ObjectCreatorReflective.isACollection(field,obj);
+	            else if(Map.class.isAssignableFrom(field.getType()))
+	                ObjectCreatorReflective.isACollection(field,obj);
+	            else if(Iterator.class.isAssignableFrom(field.getType()))
+	                ObjectCreatorReflective.isACollection(field,obj);
+	            else if(Enumeration.class.isAssignableFrom(field.getType()))
+	                ObjectCreatorReflective.isACollection(field,obj);
+	            else
+	                ObjectCreatorReflective.notPrimitive(field, obj, 0);
+	        }
+	    }
+
+	    public static void createPopUp(Field f, Object field, Object obj){
+	        VBox vb = new VBox();
+	        Text getInfo = new Text("\n\nPlease enter a value for: " + f.getType() + " " + f.getName());
+	        getInfo.setFont(Font.font(24));
+	        getInfo.setFont(Font.font("Comic Sans"));
+	        getInfo.setTextAlignment(TextAlignment.CENTER);
+	        vb.getChildren().add(getInfo);
+	        TextArea textArea = new TextArea();
+	        textArea.setPromptText("Enter a value for: " + f.getName());
+	        textArea.setMaxHeight(25);
+	        Button submit = new Button();
+	        submit.setText("Enter Field");
+	        vb.getChildren().add(textArea);
+	        vb.getChildren().add(submit);
+
+	        Scene scene = new Scene(vb, 600, 150);
+	        Stage stage = new Stage();
+	        stage.setScene(scene);
+	        stage.setTitle("ADDING VALUES FOR: " + obj.getClass().getName() + " " + field.getClass().getName());
+
+
+	        submitButtonAction(f, field, textArea, submit, stage);
+	        stage.showAndWait();
+	    }
+
+
+	    public void updateDisplayArea(Class classObj, Object obj){
+	        displayInfo.setText("");
+	        displayInfo.setText("Fields:\n");
+	        displayInfo.setEditable(true);
+	        Field[] fieldarr = classObj.getDeclaredFields();
+	        for(int i = 0; i < fieldarr.length; i++){
+	            Field field = fieldarr[i];
+	            field.setAccessible(true);
+	            try {
+	                updateDisplayDeep(obj, field, displayInfo);
+	            } catch (IllegalAccessException e) {
+	                e.printStackTrace();
+	            }
+	        }
+	        displayInfo.setEditable(false);
+	    }
+
+	    static void updateDisplayDeep(Object obj, Field field, TextArea displayInfo) throws IllegalAccessException {
+	        if(!field.getType().isArray())
+	            displayInfo.appendText(field.getType() + " " + field.getName() + " : " + field.get(obj) + "\n");
+	        else {
+	            String name = field.getType().getName();
+	            if(name.equals("[I"))
+	                displayInfo.appendText(field.getType() + " " + field.getName() + " : " + Arrays.toString((int[])field.get(obj))+ "\n");
+	            else if(name.equals("[D"))
+	                displayInfo.appendText(field.getType() + " " + field.getName() + " : " + Arrays.toString((double[])field.get(obj))+ "\n");
+	            else if(name.equals("[S"))
+	                displayInfo.appendText(field.getType() + " " + field.getName() + " : " + Arrays.toString((short[])field.get(obj))+ "\n");
+	            else if(name.equals("[J"))
+	                displayInfo.appendText(field.getType() + " " + field.getName() + " : " + Arrays.toString((long[])field.get(obj))+ "\n");
+	            else if(name.equals("[B"))
+	                displayInfo.appendText(field.getType() + " " + field.getName() + " : " + Arrays.toString((byte[])field.get(obj))+ "\n");
+	            else if(name.equals("[C"))
+	                displayInfo.appendText(field.getType() + " " + field.getName() + " : " + Arrays.toString((char[])field.get(obj))+ "\n");
+	            else if(name.equals("[F"))
+	                displayInfo.appendText(field.getType() + " " + field.getName() + " : " + Arrays.toString((float[])field.get(obj))+ "\n");
+	            else if(name.equals("[Z"))
+	                displayInfo.appendText(field.getType() + " " + field.getName() + " : " + Arrays.toString((boolean[])field.get(obj))+ "\n");
+	            else if(name.equals("[[I"))
+	                displayInfo.appendText(field.getType() + " " + field.getName() + " : " + Arrays.deepToString((int[][])field.get(obj))+ "\n");
+	            else if(name.equals("[[D"))
+	                displayInfo.appendText(field.getType() + " " + field.getName() + " : " + Arrays.deepToString((double[][])field.get(obj))+ "\n");
+	            else if(name.equals("[[S"))
+	                displayInfo.appendText(field.getType() + " " + field.getName() + " : " + Arrays.deepToString((short[][])field.get(obj))+ "\n");
+	            else if(name.equals("[[J"))
+	                displayInfo.appendText(field.getType() + " " + field.getName() + " : " + Arrays.deepToString((long[][])field.get(obj))+ "\n");
+	            else if(name.equals("[[B"))
+	                displayInfo.appendText(field.getType() + " " + field.getName() + " : " + Arrays.deepToString((byte[][])field.get(obj))+ "\n");
+	            else if(name.equals("[[C"))
+	                displayInfo.appendText(field.getType() + " " + field.getName() + " : " + Arrays.deepToString((char[][])field.get(obj))+ "\n");
+	            else if(name.equals("[[F"))
+	                displayInfo.appendText(field.getType() + " " + field.getName() + " : " + Arrays.deepToString((float[][])field.get(obj))+ "\n");
+	            else if(name.equals("[[Z"))
+	                displayInfo.appendText(field.getType() + " " + field.getName() + " : " + Arrays.deepToString((boolean[][])field.get(obj))+ "\n");
+	            else if(name.equals("[Ljava.lang.String;"))
+	                displayInfo.appendText(field.getType() + " " + field.getName() + " : " + Arrays.toString((String[])field.get(obj))+ "\n");
+	            else if(name.equals("[[Ljava.lang.String;"))
+	                displayInfo.appendText(field.getType() + " " + field.getName() + " : " + Arrays.deepToString((String[][])field.get(obj))+ "\n");
+	            else
+	                displayInfo.appendText(field.getType() + " " + field.getName() + " : " + Arrays.deepToString((Object[])field.get(obj)) + "\n");
+
+	        }
+	    }
+
+	    public void saveField(ActionEvent actionEvent) throws NoSuchFieldException, IllegalAccessException, ClassNotFoundException {
+	        String classStr = classBox.getValue();
+	        String fieldStr = fieldBox.getValue();
+	        String newStr = fieldText.getText();
+	        Field field = obj.getClass().getDeclaredField(fieldStr);
+	        field.setAccessible(true);
+	        try {
+	            ObjectCreatorReflective.parseFields(field, obj, newStr);
+	        }
+	            catch(IllegalAccessException e){
+	                System.out.println("Could not access field");
+	            }
+	            catch (IllegalArgumentException | UnsupportedOperationException c) {
+	                throwRangeError(field);
+	                fieldText.setText(field.get(classObj).toString());
+	            }
+	        updateDisplayArea(classObj, obj);
+	    }
+
+	    public void createObj(ActionEvent actionEvent) throws InterruptedException {
+	        if(classBox.getValue().equals(classBox.getPromptText())){ return;}
+	        if(!objArr.contains(obj) || !objDisplay.getText().contains(fieldText2.getText())) {
+	            for(double i = 0; i < 1; i=i+0.1){
+	                progBar.setProgress(i);
+	            }
+	            objArr.add(obj);
+	            if(fieldText2.getText().equals(""))
+	                objDisplay.appendText("\n" + obj.getClass().getName());
+	            else
+	                objDisplay.appendText("\n" + fieldText2.getText());
+	            classBox.setValue(classBox.getPromptText());
+	            fieldBox.setValue(fieldBox.getPromptText());
+	            fieldText.setText("");
+	            displayInfo.setText("");
+	            fieldText2.setText("");
+	        }
+	        else{
+	            throwExistError();
+	        }
+
+	    }
+
+	    public void deleteObject(ActionEvent actionEvent) throws ClassNotFoundException {
+	        String[] differentName = objDisplay.getText().split("\n");
+	        int index = -1;
+	        String toRemove = objDisplay.getSelectedText();
+	        for(int i = 0; i < differentName.length; i++){
+	            if(differentName[i].contains(toRemove)) {
+	                index = i;
+	                break;
+	            }
+	        }
+	        if(toRemove.equals("Objects") || toRemove.equals("Objects:")){ return;}
+	        objDisplay.setText(objDisplay.getText().replace("\n"+toRemove, ""));
+	        objArr.remove(index - 1);
+	        objDisplayData.setText("");
+	        classBox.setValue(classBox.getPromptText());
+	    }
+
+	    public void displayObjInfo(MouseEvent mouseEvent) throws ClassNotFoundException, IllegalAccessException {
+	        if(mouseEvent.getClickCount() == 2) {
+	            double mind = mouseEvent.getY();
+	            int mindy = (int) (mind / 20);
+	            if (mindy < 1) {
+	                return;
+	            }
+	            Object ohj = null;
+	            try {
+	                objDisplayData.setText("");
+	                ohj = objArr.get(mindy - 1);
+	                objDisplayData.setText("Object properties:\n");
+	                objDisplayData.setText("Object: " + ohj.getClass().getName() + "\n");
+	                for (Field field : ohj.getClass().getDeclaredFields()) {
+	                    field.setAccessible(true);
+	                    updateDisplayDeep(ohj, field, objDisplayData);
+	                }
+	            } catch (IndexOutOfBoundsException e) {
+	                throwIndexError();
+	            }
+	        }
+	    }
+
+	    public static void throwRangeError(Field field) {
+	        BorderPane borderPane = new BorderPane();
+	        Text warning = new Text("\n\nValue out of range for type: " + field.getType());
+	        warning.setFont(Font.font(24));
+	        warning.setFont(Font.font("Comic Sans"));;
+	        warning.setTextAlignment(TextAlignment.CENTER);
+	        borderPane.getChildren().add(warning);
+	        Scene scene = new Scene(borderPane, 230, 50);
+	        scene.setFill(Color.RED);
+	        Stage stage = new Stage();
+	        stage.setScene(scene);
+	        stage.setTitle("ERROR");
+	        stage.show();
+
+	    }
+
+	    public static void throwExistError(){
+	        BorderPane borderPane = new BorderPane();
+	        Text warning = new Text("\n\nObject already exists!");
+	        warning.setFont(Font.font(24));
+	        warning.setFont(Font.font("Comic Sans"));;
+	        warning.setTextAlignment(TextAlignment.CENTER);
+	        borderPane.getChildren().add(warning);
+	        Scene scene = new Scene(borderPane, 230, 50);
+	        scene.setFill(Color.RED);
+	        Stage stage = new Stage();
+	        stage.setScene(scene);
+	        stage.setTitle("ERROR");
+	        stage.show();
+	    }
+
+	    public static void throwIndexError() {
+	        BorderPane borderPane = new BorderPane();
+	        Text warning = new Text("\n\nYou've been clicking out of bounds");
+	        warning.setFont(Font.font(24));
+	        warning.setFont(Font.font("Comic Sans"));
+	        warning.setTextAlignment(TextAlignment.CENTER);
+	        borderPane.getChildren().add(warning);
+	        Scene scene = new Scene(borderPane, 230, 50);
+	        scene.setFill(Color.RED);
+	        Stage stage = new Stage();
+	        stage.setScene(scene);
+	        stage.setTitle("ERROR");
+	        stage.show();
+	    }
+
+	    public static void throwEmptyObjError(){
+	        BorderPane borderPane = new BorderPane();
+	        Text warning = new Text("\n\nYou havent created an object yet!");
+	        warning.setFont(Font.font(24));
+	        warning.setFont(Font.font("Comic Sans"));
+	        warning.setTextAlignment(TextAlignment.CENTER);
+	        borderPane.getChildren().add(warning);
+	        Scene scene = new Scene(borderPane, 230, 50);
+	        scene.setFill(Color.RED);
+	        Stage stage = new Stage();
+	        stage.setScene(scene);
+	        stage.setTitle("ERROR");
+	        stage.show();
+	    }
+
+	    public void importClass(ActionEvent actionEvent) throws IOException {
+	        Stage stage = new Stage();
+	        FileChooser fc = new FileChooser();
+	        File file = fc.showOpenDialog(stage);
+	        Path text = null;
+
+	        if (file != null) {
+	            text = file.toPath();
+	        }
+	        if(!text.toString().contains(".class")) { importClass(actionEvent);}
+	        int index = text.toString().lastIndexOf("/");
+	        String fileName = text.toString().substring(index+1);
+	        Path temp = Files.copy(text,Paths.get(Helper.getMyDir()+fileName), StandardCopyOption.REPLACE_EXISTING);
+	        classesToLoad.add(new File(fileName));
+	        updateClassBox(classesToLoad);
+	    }
+	}
+</code>
+</pre>
+<div id="javaSec12" style="display: none; overflow-y: scroll; width: 1200px">
+<pre>
+<code class="java">
+	
+	import org.jdom2.Document;
+	import org.jdom2.input.SAXBuilder;
+	import org.jdom2.output.XMLOutputter;
+
+	import javax.print.Doc;
+	import java.io.*;
+	import java.net.ServerSocket;
+	import java.net.Socket;
+	import java.util.ArrayList;
+	import java.util.Scanner;
+
+	public class Server {
+	    private ServerSocket serverSocket;
+	    private Socket socket;
+	    private PrintWriter out;
+	    private BufferedReader in;
+	    public Server(){}
+
+	    public ArrayList<Document> start(int port) throws IOException {
+	        ArrayList<Document> docList = null;
+	        try{
+	            serverSocket = new ServerSocket(port);
+	            socket = serverSocket.accept();
+	            // Connected to client
+	            out = new PrintWriter(socket.getOutputStream(),true);
+	            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+	            ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
+	            docList = (ArrayList<Document>) objectInputStream.readObject();
+	            serverSocket.close();
+	        }
+	        catch (Exception e) {
+	            System.out.println("Error: " + e.getMessage());
+	        }
+	        return docList;
+	    }
+
+	    public void shutdown() throws IOException {
+	        in.close();
+	        out.close();
+	        socket.close();
+	    }
+	}
+</code>
+</pre>
+<script type="text/javascript">
+	function showVis(id){
+		var one = id.getAttribute('id');
+
+	    var x = document.getElementById("javaSec1");
+	    var y = document.getElementById("javaSec2");
+		var z = document.getElementById("javaSec3");
+		var a = document.getElementById("javaSec4");
+		var b = document.getElementById("javaSec5");
+		var c = document.getElementById("javaSec6");
+		var d = document.getElementById("javaSec7");
+		var e = document.getElementById("javaSec8");
+		var f = document.getElementById("javaSec9");
+		var g = document.getElementById("javaSec10");
+		var h = document.getElementById("javaSec11");
+		var i = document.getElementById("javaSec12");
+		x.style.display = "none";
+		y.style.display = "none";
+		z.style.display = "none";
+		a.style.display = "none";
+		b.style.display = "none";
+		c.style.display = "none";
+		d.style.display = "none";
+		e.style.display = "none";
+		f.style.display = "none";
+		g.style.display = "none";
+		h.style.display = "none";
+		i.style.display = "none";
+
+		switch(one){
+			case "ins":
+				x.style.display = "block";
+				break;
+			case "ri":
+				y.style.display = "block";
+				break;
+			case "it":
+				z.style.display = "block";
+				break;
+			case "vis":
+				a.style.display = "block";
+				break;
+			case "visc":
+				b.style.display = "block";
+				break;
+			case "ser":
+				c.style.display = "block";
+				break;
+			case "der":
+				d.style.display = "block";
+				break;
+			case "cli":
+				e.style.display = "block";
+				break;
+			case "obj":
+				f.style.display = "block";
+				break;
+			case "objr":
+				g.style.display = "block";
+				break;
+			case "objc":
+				h.style.display = "block";
+				break;
+			case "srv":
+				i.style.display = "block";
+				break;
+		}
+	}
+</script>
 <script>
 function openCity(evt, cityName) {
   // Declare all variables
@@ -1077,8 +4079,9 @@ function openCity2(evt, cityName) {
 		document.getElementById("defaultOpen2").click();
 	}
 </script>
+
 <div class="footer">
-  <h2>Footer</h2>
+	Josh Dow
 </div>
 </body>
 </html>

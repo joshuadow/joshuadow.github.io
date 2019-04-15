@@ -80,6 +80,7 @@ body {
   flex: 30%;
   background-color: #f1f1f1;
   padding: 20px;
+  max-height: 900px
 }
 
 /* Main column */
@@ -89,6 +90,7 @@ body {
   background-color: white;
   padding: 20px;
   overflow: scroll;
+  max-height: 900px;
 }
 
 /* Fake image, just for this example */
@@ -100,9 +102,16 @@ body {
 
 /* Footer */
 .footer {
+  position: inherit;
+  right: 0;
+  bottom: 0;
+  left: 0;
   padding: 20px;
   text-align: center;
   background: #009;
+  height: 50px;
+  font-size: small;
+  color: white;
 }
 
 #ac-wrapper {
@@ -168,6 +177,8 @@ body {
   <a href="work.html">Work</a>
   <a href="extracurs.html">Extra-curriculars</a>
   <a href="hobbies.html">Hobbies/Interests</a>
+  <a href="#">Resume</a>
+  <a href="#">Cirriculum Vitae</a>
 </div>
 <div class="row">
   <div class="side">
@@ -181,7 +192,7 @@ body {
     <div class="fakeimg" style="height:60px;">Image</div><br>
     <div class="fakeimg" style="height:60px;">Image</div>
   </div>
-  <div class="main">
+  <div class="main" style="overflow: auto;">
     <h2>TITLE HEADING</h2>
     <h5>Title description, Dec 7, 2017</h5>
     <div class="fakeimg" style="height:200px;">Image</div>
@@ -236,7 +247,7 @@ function checkRecaptcha() {
 }
 </script>
 <div class="footer">
-  <h2>Footer</h2>
+  Josh Dow
 </div>
 
 </body>

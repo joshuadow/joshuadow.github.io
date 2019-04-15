@@ -146,6 +146,14 @@ body {
   border-left: none;
   height: 300px;
 }
+.tabcontent2 {
+  float: left;
+  padding: 0px 12px;
+  border: 1px solid #ccc;
+  width: 70%;
+  border-left: none;
+  height: 300px;
+}
 
 
 /* Responsive layout - when the screen is less than 700px wide, make the two columns stack on top of each other instead of next to each other */
@@ -167,7 +175,7 @@ body {
 <body onload="selectDefault()">
 <div class="header">
   <h1>Work</h1>
-  <p>Projects & project descriptions only (For legal reasons thats a joke)</p>
+  <p>Projects</p>
 </div>
 
 <div class="navbar">
@@ -189,9 +197,9 @@ body {
 <script>hljs.initHighlightingOnLoad();</script>
 <div id="Java" class="tabcontent">
   <div class="tab">
-  	  <button class="tablinks" onclick="openCity(event, 'ObjectInspector')" id="defaultOpen2">Object Inspector</button>
+  	  <button class="tablinks2" onclick="openCity2(event, 'ObjectInspector')" id="defaultOpen2">Object Inspector</button>
   </div>
-  <div id="ObjectInspector" class="tabcontent">
+  <div id="ObjectInspector" class="tabcontent2">
   	Test thing
   </div>
 </div>
@@ -229,6 +237,28 @@ function openCity(evt, cityName) {
 
   // Get all elements with class="tablinks" and remove the class "active"
   tablinks = document.getElementsByClassName("tablinks");
+  for (i = 0; i < tablinks.length; i++) {
+    tablinks[i].className = tablinks[i].className.replace(" active", "");
+  }
+
+  // Show the current tab, and add an "active" class to the link that opened the tab
+  document.getElementById(cityName).style.display = "block";
+  evt.currentTarget.className += " active";
+} 
+</script>
+<script>
+function openCity2(evt, cityName) {
+  // Declare all variables
+  var i, tabcontent, tablinks;
+
+  // Get all elements with class="tabcontent" and hide them
+  tabcontent = document.getElementsByClassName("tabcontent2");
+  for (i = 0; i < tabcontent.length; i++) {
+    tabcontent[i].style.display = "none";
+  }
+
+  // Get all elements with class="tablinks" and remove the class "active"
+  tablinks = document.getElementsByClassName("tablinks2");
   for (i = 0; i < tablinks.length; i++) {
     tablinks[i].className = tablinks[i].className.replace(" active", "");
   }

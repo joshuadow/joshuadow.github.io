@@ -4,6 +4,8 @@
 <title>Josh Dow</title>
 <meta charset="UTF-8">
 <link rel=stylesheet href="https://s3-us-west-2.amazonaws.com/colors-css/2.2.0/colors.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 * {
@@ -20,9 +22,11 @@ body {
 .header {
   padding: 2px;
   text-align: center;
-  background: darkred;
-  color: gold;
+  background: #001f3f;
+  color: #DDDDDD;
   max-height: 125px;
+  z-index: 8;
+
 }
 
 /* Increase the font size of the heading */
@@ -33,17 +37,18 @@ body {
 /* Sticky navbar - toggles between relative and fixed, depending on the scroll position. It is positioned relative until a given offset position is met in the viewport - then it "sticks" in place (like position:fixed). The sticky value is not supported in IE or Edge 15 and earlier versions. However, for these versions the navbar will inherit default position */
 .navbar {
   overflow: hidden;
-  background-color: black;
+  background-color: #0074D9;
   position: sticky;
   position: -webkit-sticky;
   top: 0;
+  z-index: 8;
 }
 
 /* Style the navigation bar links */
 .navbar a {
   float: left;
   display: block;
-  color: gold;
+  color: white;
   text-align: center;
   padding: 14px 20px;
   text-decoration: none;
@@ -57,14 +62,14 @@ body {
 
 /* Change color on hover */
 .navbar a:hover {
-  background-color: gold;
-  color: darkred;
+  background-color: darkgray;
+  color: #DDDDDD;
 }
 
 /* Active/current link */
 .navbar a.active {
-  background-color: white;
-  color: darkred;
+  background-color: #DDDDDD;
+  color: #001f3f;
 }
 
 /* Column container */
@@ -80,9 +85,10 @@ body {
 .side {
   -ms-flex: 30%; /* IE10 */
   flex: 30%;
-  background-color: #f1f1f1;
+  background-color: #001f3f;
   padding: 20px;
-  max-height: 900px
+  color: white;
+  padding-bottom: 50px;
 }
 
 /* Main column */
@@ -92,7 +98,7 @@ body {
   background-color: white;
   padding: 20px;
   overflow: scroll;
-  max-height: 900px;
+  max-height: 1200px;
 }
 
 /* Fake image, just for this example */
@@ -104,16 +110,17 @@ body {
 
 /* Footer */
 .footer {
-  position: inherit;
+  position: all;
   right: 0;
   bottom: 0;
   left: 0;
   padding: 20px;
   text-align: center;
-  background: #009;
+  background: #001f2f;
   height: 50px;
   font-size: small;
   color: white;
+  z-index: 0;
 }
 
 #ac-wrapper {
@@ -185,34 +192,28 @@ body {
 <div class="row">
   <div class="side">
     <h2>About Me</h2>
-    <h5>Photo of me:</h5>
-    <img src="JD.jpg" height="400" width="200" class="center" padding="20">
-    <p>Some text about me in culpa qui officia deserunt mollit anim..</p>
-    <h3>More Text</h3>
-    <p>Lorem ipsum dolor sit ame.</p>
+    <img src="JD.jpg" height="400" width="200" class="center" padding="20" border="3">
+    <h3>B.Sc. Computer Science -- Information Security</h3>
+    <h3>B.Sc. Mathematics</h3>
+    <p>I hold my two B.Sc. from the University Of Calgary. During my time at the university
+    I was a member of the Dino's Mens Varsity Swim Team for all five years of my eligibility.</p>
+    <p>As captain of the Dino's Mens Swimming I had the pleasure of training/working with many great individuals</p>
+    <p>
+    Competitive swimming has been apart of my life for over a decade until I retired in 2019. Some
+	notable performances over my career: 10+ provincial records, 8 age group national gold medals, 1 senior
+	national gold medal, 1 USPORT gold medal and one USPORT record.</p>
+	<p>You can find out more about me in the <a href="hobbies.html" style="color: white">Hobbies/Interests</a> section!</p>
     <div class="fakeimg" style="height:60px;">Image</div><br>
-    <div class="fakeimg" style="height:60px;">Image</div><br>
-    <div class="fakeimg" style="height:60px;">Image</div>
+
   </div>
-  <div class="main" style="overflow: auto;">
-    <h2>TITLE HEADING</h2>
-    <h5>Title description, Dec 7, 2017</h5>
-    <div class="fakeimg" style="height:200px;">Image</div>
-    <p>Some text..</p>
-    <p>Sunt in culpa qui officia deserunt mollit anim id est laborum consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco.</p>
-    <br>
-    <h2>TITLE HEADING</h2>
-    <h5>Title description, Sep 2, 2017</h5>
-    <div class="fakeimg" style="height:200px;">Image</div>
-    <p>Some text..</p>
-    <p>Sunt in culpa qui officia deserunt mollit anim id est laborum consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco.</p>
-    <br>
-    <h2>TITLE HEADING</h2>
-    <h5>Title description, Sep 2, 2017</h5>
-    <div class="fakeimg" style="height:200px;">Image</div>
-    <p>Some text..</p>
-    <p>Sunt in culpa qui officia deserunt mollit anim id est laborum consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco.</p>
-  </div>
+<div class="main" style="overflow: auto;">
+  	<div class="container mt-2 pt-2" id="medium">
+        <div class="jumbotron text-center">
+            <h1 class="display-6 mb-6">My Post's</h1>
+        </div>
+        <div class="row" id="jsonContent" style="margin-top: 10;"></div>
+    </div>
+        <ul id="pagin" class="pagination justify-content-center"></ul>
 </div>
 <script type="text/javascript">
     function PopUp(hideOrshow) {
@@ -254,9 +255,81 @@ function checkRecaptcha() {
   }
 }
 </script>
+<br>
+<br>
 <div class="footer">
   Josh Dow
 </div>
+<script type="text/javascript">
+ $(function () {
+            var mediumPromise = new Promise(function (resolve) {
+            var $content = $('#jsonContent');
+            var data = {
+                rss: 'https://medium.com/feed/@Comparabl'
+            };
+            $.get('https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fmedium.com%2Ffeed%2F%40Comparabl&api_key=svkqpl9gta415ln5ytqqzmgbvgynlxix3pmr1duf', data, function (response) {
+                if (response.status == 'ok') {
+                    $("#logo").append(`<img src="${response.feed["image"]}" class="rounded mx-auto d-block">`)
+                    var output = '';
+                    $.each(response.items, function (k, item) {
+                        output += `<div class="card mb-3 mx-auto mr-5 " style="width: 20rem;">`;
+                        var tagIndex = item.description.indexOf('<img'); // Find where the img tag starts
+                        var srcIndex = item.description.substring(tagIndex).indexOf('src=') + tagIndex; // Find where the src attribute starts
+                        var srcStart = srcIndex + 5; // Find where the actual image URL starts; 5 for the length of 'src="'
+                        var srcEnd = item.description.substring(srcStart).indexOf('"') + srcStart; // Find where the URL ends
+                        var src = item.description.substring(srcStart, srcEnd); // Extract just the URL
+                        output += `<img src="${src}" class="card-img-top" alt="Cover image">`;
+                        output += `<div class="card-body">`;
+                        output += `<h5 class="card-title"><a href="${item.link}">${item.title}</a></h5>`;
+                        var yourString = item.description.replace(/<img[^>]*>/g,""); //replace with your string.
+                        yourString = yourString.replace('h4', 'p');
+                        yourString = yourString.replace('h3', 'p');
+                        var maxLength = 120; // maximum number of characters to extract
+                        //trim the string to the maximum length
+                        var trimmedString = yourString.substr(0, maxLength);
+                        //re-trim if we are in the middle of a word
+                        trimmedString = trimmedString.substr(0, Math.min(trimmedString.length, trimmedString.lastIndexOf(" ")))
+                        output += `<p class="card-text">${trimmedString}...</p>`;
+                        output += `<a href="${item.link}" class="btn btn-outline-success">Read More</a>`;
+                        output += '</div></div>';
+                        return k < 10;
+                    });
+                    resolve($content.html(output));
+                }
+            });
+            });
 
+mediumPromise.then(function()
+            {
+                //Pagination
+                pageSize = 3;
+
+                var pageCount = $(".card").length / pageSize;
+
+                for (var i = 0; i < pageCount; i++) {
+                    $("#pagin").append(`<li class="page-item"><a class="page-link" href="#">${(i + 1)}</a></li> `);
+                }
+                $("#pagin li:nth-child(1)").addClass("active");
+                showPage = function (page) {
+                    $(".card").hide();
+                    $(".card").each(function (n) {
+                        if (n >= pageSize * (page - 1) && n < pageSize * page)
+                            $(this).show();
+                    });
+                }
+
+                showPage(1);
+
+                $("#pagin li").click(function () {
+                    $("#pagin li").removeClass("active");
+                    $(this).addClass("active");
+                    showPage(parseInt($(this).text()))
+                });
+            });
+        });
+
+
+
+</script>
 </body>
 </html>

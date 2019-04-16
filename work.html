@@ -12,6 +12,7 @@
 body {
   font-family: Arial, Helvetica, sans-serif;
   margin: 0;
+  overflow: hidden;
 }
 
 /* Header/logo Title */
@@ -65,6 +66,45 @@ body {
   color: #001f3f;
 }
 
+.navbar2 {
+  overflow: hidden;
+  background-color: #0074D9;
+  position: sticky;
+  position: -webkit-sticky;
+  top: 0;
+  z-index: 8;
+  height: 75px;
+}
+
+/* Style the navigation bar links */
+.navbar2 a {
+  float: left;
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 28px 20px;
+  text-decoration: none;
+  height: 75px;
+}
+
+/* Right-aligned link */
+.navbar2 a.right {
+  float: right;
+}
+
+/* Change color on hover */
+.navbar2 a:hover {
+  background-color: darkgray;
+  color: #DDDDDD;
+  height: 75px;
+}
+
+/* Active/current link */
+.navbar2 a.active {
+  background-color: #DDDDDD;
+  color: #001f3f;
+  height: 75px;
+}
 /* Column container */
 .row {  
   display: -ms-flexbox; /* IE10 */
@@ -114,6 +154,21 @@ body {
   color: white;
 }
 
+.footer2 {
+  position: relative;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  text-align: center;
+  background: #001f2f;
+  min-height: 130.35px;
+  max-height: 130.35px;
+  font-size: small;
+  color: white;
+  z-index: 0;
+  width: 100%;
+  height: 100%
+}
 /* Style the tab */
 .tab {
   float: left;
@@ -164,15 +219,6 @@ body {
   border-left: none;
   height: 300px;
 }
-.navbar2 a {
-  float: left;
-  display: block;
-  color: black;
-  text-align: center;
-  padding: 14px 20px;
-  text-decoration: none;
-  font-size: 12px;
-}
 
 pre {
   overflow-y: auto;
@@ -191,22 +237,6 @@ code {
 	overflow-x: hidden; 
 }
 
-/* Right-aligned link */
-.navbar2 a.right {
-  float: right;
-}
-
-/* Change color on hover */
-.navbar2 a:hover {
-  background-color: darkred;
-  color: gold;
-}
-
-/* Active/current link */
-.navbar2 a.active {
-  background-color: black;
-  color: white;
-}
 .dropdown {
   float: left;
   overflow: hidden;
@@ -343,7 +373,7 @@ code {
 
 /* Responsive layout - when the screen is less than 400px wide, make the navigation links stack on top of each other instead of next to each other */
 @media screen and (max-width: 400px) {
-  .navbar a {
+  .navbar2 a {
     float: none;
     width: 100%;
   }
@@ -351,17 +381,14 @@ code {
 </style>
 </head>
 <body>
-<div class="header">
-  <h1>Work</h1>
-  <p>Projects</p>
-</div>
-<div class="navbar">
-  <a href="index.html">Home</a>
-  <a href="work.html" class="active">Work</a>
-  <a href="extracurs.html">Extra-curriculars</a>
-  <a href="hobbies.html">Hobbies/Interests</a>
-  <a href="#">Resume</a>
-  <a href="#">Cirriculum Vitae</a>
+	<div class="navbar2">
+	  <a href="index.html">Home</a>
+	  <a href="work.html" class="active">Work</a>
+	  <a href="extracurs.html">Extra-curriculars</a>
+	  <a href="hobbies.html">Hobbies/Interests</a>
+	  <a href="#">Resume</a>
+	  <a href="#">Cirriculum Vitae</a>
+	  <img src="imgs/LOGO.png" width="4%" style="position: relative;left: 640px; top: 5px;">
 </div>
 <link rel="stylesheet" href="highlight/styles/a11y-dark.css"/>
 <script src="highlight/highlight.pack.js"></script>
@@ -427,7 +454,7 @@ code {
     	</ul>
     </li>
 </ul>
-<div style="background-color: white; position: inherit;">
+<div style="background-color: white; position: inherit; overflow-x: none; height: 75vh;">
 	<div id="javaSec1" style="display: none; overflow-y: scroll; width: 1000px; padding-left: 50px;">
 	<pre>
 <code class="java" style="overflow-x: hidden;">
@@ -5024,8 +5051,27 @@ function openCity2(evt, cityName) {
 	}
 </script>
 
-<div class="footer">
-	Josh Dow
-</div>
+<div class="footer2" style="display: inline-block;">
+    <div style="display:inline-block; width:5%; padding-top: 20px;">
+        <p style="text-align:center;">
+		    <a href="https://github.com/joshuadow"><img src="imgs/kisspng-github-computer-icons-logo-github-5ab8a338143da0.8375508315220498480829.jpg" width="80%"></a>
+        </p>
+    </div>
+    <div style="display:inline-block; width:6%; padding-top: 0px;">
+        <p style="text-align:center">
+			<a href="https://www.instagram.com/joshdow/?hl=en"><img src="imgs/IMG_1192.JPG" width="80%"></a> 
+       </p>
+    </div>
+    <div style="display:inline-block; width:5%; padding-top: 0px;">
+        <p style="text-align:center">
+			<a href="https://www.twitch.tv/Comparabl"><img src="imgs/IMG_1193.PNG" width="80%"></a> 
+       </p>
+    </div>
+    <div style="display:inline-block; width:5%; padding-top: 0px;">
+        <p style="text-align:center">
+			<a href="mailto:josh_dow@outlook.com"><img src="imgs/IMG_1194.PNG" width="90%"></a> 
+       </p>
+    </div>
+</div> 
 </body>
 </html>

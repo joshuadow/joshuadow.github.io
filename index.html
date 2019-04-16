@@ -35,7 +35,7 @@ body {
 }
 
 /* Sticky navbar - toggles between relative and fixed, depending on the scroll position. It is positioned relative until a given offset position is met in the viewport - then it "sticks" in place (like position:fixed). The sticky value is not supported in IE or Edge 15 and earlier versions. However, for these versions the navbar will inherit default position */
-.navbar {
+.navbar2 {
   overflow: hidden;
   background-color: #0074D9;
   position: sticky;
@@ -45,7 +45,7 @@ body {
 }
 
 /* Style the navigation bar links */
-.navbar a {
+.navbar2 a {
   float: left;
   display: block;
   color: white;
@@ -56,18 +56,18 @@ body {
 
 
 /* Right-aligned link */
-.navbar a.right {
+.navbar2 a.right {
   float: right;
 }
 
 /* Change color on hover */
-.navbar a:hover {
+.navbar2 a:hover {
   background-color: darkgray;
   color: #DDDDDD;
 }
 
 /* Active/current link */
-.navbar a.active {
+.navbar2 a.active {
   background-color: #DDDDDD;
   color: #001f3f;
 }
@@ -109,8 +109,8 @@ body {
 }
 
 /* Footer */
-.footer {
-  position: all;
+.footer2 {
+  position: relative;
   right: 0;
   bottom: 0;
   left: 0;
@@ -121,6 +121,12 @@ body {
   font-size: small;
   color: white;
   z-index: 0;
+  width: 100%;
+}
+
+.profImg img {
+	display: block;
+	margin: 0 auto;
 }
 
 #ac-wrapper {
@@ -157,7 +163,7 @@ body {
 
 /* Responsive layout - when the screen is less than 400px wide, make the navigation links stack on top of each other instead of next to each other */
 @media screen and (max-width: 400px) {
-  .navbar a {
+  .navbar2 a {
     float: none;
     width: 100%;
   }
@@ -181,7 +187,7 @@ body {
   <p>A self-made website portfolio</p>
 </div>
 
-<div class="navbar">
+<div class="navbar2">
   <a href="index.html" class="active">Home</a>
   <a href="work.html">Work</a>
   <a href="extracurs.html">Extra-curriculars</a>
@@ -192,7 +198,9 @@ body {
 <div class="row">
   <div class="side">
     <h2>About Me</h2>
-    <img src="JD.jpg" height="400" width="200" class="center" padding="20" border="3">
+    <div class="profImg" style="align-self: center">
+    	<img src="JD.jpg" height="400" width="200" class="center" padding="20" border="3">
+    </div>
     <h3>B.Sc. Computer Science -- Information Security</h3>
     <h3>B.Sc. Mathematics</h3>
     <p>I hold my two B.Sc. from the University Of Calgary. During my time at the university
@@ -206,16 +214,14 @@ body {
     <div class="fakeimg" style="height:60px;">Image</div><br>
 
   </div>
-<div class="main" style="overflow: auto;">
+<div class="main">
   	<div class="container mt-2 pt-2" id="medium">
-        <div class="jumbotron text-center">
-            <h1 class="display-6 mb-6">My Post's</h1>
-        </div>
+        
         <div class="row" id="jsonContent" style="margin-top: 10;"></div>
     </div>
         <ul id="pagin" class="pagination justify-content-center"></ul>
 </div>
-<script type="text/javascript">
+<!--<script type="text/javascript">
     function PopUp(hideOrshow) {
     if (hideOrshow == 'hide') document.getElementById('ac-wrapper').style.display = "none";
     else document.getElementById('ac-wrapper').removeAttribute('style');
@@ -225,7 +231,7 @@ window.onload = function () {
         PopUp('show');
     }, 200);
 }
-</script>
+</script>-->
 <script>
 function get_action(form) 
 {
@@ -257,7 +263,7 @@ function checkRecaptcha() {
 </script>
 <br>
 <br>
-<div class="footer">
+<div class="footer2">
   Josh Dow
 </div>
 <script type="text/javascript">
@@ -272,14 +278,14 @@ function checkRecaptcha() {
                     $("#logo").append(`<img src="${response.feed["image"]}" class="rounded mx-auto d-block">`)
                     var output = '';
                     $.each(response.items, function (k, item) {
-                        output += `<div class="card mb-3 mx-auto mr-5 " style="width: 20rem;">`;
+                        output += `<div class="card mb-3 mx-auto mr-5 " style="width: 15rem;">`;
                         var tagIndex = item.description.indexOf('<img'); // Find where the img tag starts
                         var srcIndex = item.description.substring(tagIndex).indexOf('src=') + tagIndex; // Find where the src attribute starts
                         var srcStart = srcIndex + 5; // Find where the actual image URL starts; 5 for the length of 'src="'
                         var srcEnd = item.description.substring(srcStart).indexOf('"') + srcStart; // Find where the URL ends
                         var src = item.description.substring(srcStart, srcEnd); // Extract just the URL
                         output += `<img src="${src}" class="card-img-top" alt="Cover image">`;
-                        output += `<div class="card-body">`;
+                        output += `<div class="card-body" style="max-height: 20;">`;
                         output += `<h5 class="card-title"><a href="${item.link}">${item.title}</a></h5>`;
                         var yourString = item.description.replace(/<img[^>]*>/g,""); //replace with your string.
                         yourString = yourString.replace('h4', 'p');

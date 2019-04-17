@@ -486,10 +486,53 @@ code {
     				<li><a href="javascript:;" id="ai35" onclick="showVis(this);return false;">Util.java</a></li>
     			</ul>
     		</li>
+        <li>
+          <a href="#">Get Web Objects</a>
+          <ul class="third-level-menu">
+            <li><a href="javascript:;" id="nw1" onclick="showVis(this);return false;">UrlCache.java</a></li>
+            <li><a href="javascript:;" id="nw2" onclick="showVis(this);return false;">UrlCacheSocket.java</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="#">Web Server</a>
+          <ul class="third-level-menu">
+            <li><a href="javascript:;" id="nw3" onclick="showVis(this);return false;">WebServer.java</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="#">Fast FTP</a>
+          <ul class="third-level-menu">
+            <li><a href="javascript:;" id="nw4" onclick="showVis(this);return false;">Fastftp.java</a></li>
+            <li><a href="javascript:;" id="nw5" onclick="showVis(this);return false;">ReceiverThread.java</a></li>
+            <li><a href="javascript:;" id="nw6" onclick="showVis(this);return false;">UDPServer.java</a></li>
+          </ul>
+        </li>
     	</ul>
     </li>
     <li>
     	<a href="#">Python</a>
+      <ul class="second-level-menu">
+        <li>
+          <a href="#">Gomoku</a>
+          <ul class="third-level-menu">
+            <li><a href="javascript:;" id="gmc" onclick="showVis(this);return false;">gomokuControl.py</li>
+            <li><a href="javascript:;" id="gmg" onclick="showVis(this);return false;">gomokuGUI.py</li>
+            <li><a href="javascript:;" id="gml" onclick="showVis(this);return false;">gomokoLogic.py</li>
+          </ul>
+        </li>
+        <li>
+          <a href="#">Hurricane Plot</a>
+          <ul class="third-level-menu">
+            <li><a href="javascript:;" id="pyplot" onclick="showVis(this);return false;">weatherPlot.py</li>
+          </ul>
+        </li>
+        <li>
+          <a href="#">Puzzle Maker</a>
+          <ul class="third-level-menu">
+            <li><a href="javascript:;" id="pypm" onclick="showVis(this);return false;">puzzle.py</li>
+          </ul>
+        </li>
+      </ul>
     </li>
     <li>
     	<a href="#">C</a>
@@ -520,6 +563,26 @@ code {
     		</li>
     	</ul>
     </li>
+    <li>
+    <a href="#">PDFs</a>
+    <ul class="second-level-menu">
+      <li>
+        <a href="#">Cryptography</a>
+        <ul class="third-level-menu">
+          <li><a href="javascript:;" id="C1" onclick="showVis(this);return false;">Substitution Ciphers and Entropy</a></li>
+          <li><a href="javascript:;" id="C2" onclick="showVis(this);return false;">Polynomial Arithmetic and Block Cipher</a></li>
+          <li><a href="javascript:;" id="C3" onclick="showVis(this);return false;">Public Key Cryptosystems</a></li>
+        </ul>
+      </li>
+      <li>
+        <a href="#">Mathematics</a>
+        <ul class="third-level-menu">
+          <li><a href="javascript:;" id="M1" onclick="showVis(this);return false;">Basic Proofs</a></li>
+          <li><a href="javascript:;" id="M2" onclick="showVis(this);return false;">Basic Proofs 2</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
 </ul>
 <div style="background-color: white; position: inherit; overflow-x: none; align-content: center; padding-top: 50px;">
 	<div id="javaSec1" class="codeDiv">
@@ -13317,14 +13380,2448 @@ code {
 	</pre>
 	</div>
 
+  <div id="pySec1" class="codeDiv">
+    <pre>
+<code class="python" style="overflow-x: hidden;">
+  import SimpleGraphics as sg
+  import sys
+  import io
+
+  width = 1022
+  height = 620
+  startVert = 95
+  endVert = 50
+  startHor = 35
+  endHor = 10
+  gap = 5
+  def drawMap(plotList,startVert,endVert,startHor,endHor,width,height):
+      image = sg.loadImage("map.gif")
+      sg.resize(width, height)
+      sg.drawImage(image, 0, 0)
+      counterVert = (startVert - endVert) / gap
+      dividerVert = width / (counterVert)
+      counterHor = (startHor - endHor) / gap
+      dividerHor = height / (counterHor)
+      j = 0
+      sg.textWidth(20)
+      sg.setColor("White")
+      while (startVert &gt endVert):
+          sg.line(dividerVert * j, 0, dividerVert * j, height)
+          toWrite = str(startVert) + "W"
+          sg.text((dividerVert * j) + 15, 10, toWrite)
+          j = j + 1
+          startVert = startVert - 5
+      j = 0
+      while (startHor &gt endHor):
+          sg.line(0, dividerHor * j, width, dividerHor * j)
+          toWrite = str(startHor) + "N"
+          sg.text(15, (dividerHor * j) - 10, toWrite)
+          j = j + 1
+          startHor = startHor - 5
+      getInput(plotList,dividerVert,dividerHor)
+  def getInput(plotList,dividerVert,dividerHor):
+      factorHor = (dividerVert / gap)
+      factorVert = (dividerHor / gap)
+      #Every 5 pixels represents 127.75 pixels in frame so then 1 pixel in frame is 22.71 across and 24.8 down
+      print(factorHor,factorVert)
+      sg.setColor("Grey")
+      if(len(plotList) &gt 0):
+          counter = 0
+          while(counter < len(plotList)):
+              latitude = abs(plotList[counter])
+              if(latitude == 0):
+                  return
+              longitude = abs(plotList[counter+1])
+              windspeed = plotList[counter+2]
+              print(latitude,longitude)
+              longitude = (longitude / (startHor-endHor)) * factorVert
+              latitude = (latitude / (startHor-endHor)) * factorHor
+              sg.ellipse(longitude,latitude,5,5)
+              counter = counter + 3
+          return
+      else:
+          latitude = float(input("Please enter the Latitude of the hurricane you wish to plot: "))
+          if(latitude == 0):
+              return
+          longitude = abs(float(input("Please enter the Longitude of the hurricane you wish to plot: ")))
+          windspeed = input("HOW FAST IS THE WIND")
+          sg.ellipse(latitude, longitude, 5,  5)
+      getInput(plotList,dividerVert,dividerHor)
+  def main():
+      plotList = []
+      if(len(sys.argv) &gt 1):
+          file = open(sys.argv[1],"r")
+          plotList = file.readlines()
+          for i in range(len(plotList)):
+              plotList[i] = plotList[i].replace("\n","")
+              plotList[i] = float(plotList[i])
+      drawMap(plotList,startVert,endVert,startHor,endHor,width,height)
+  if __name__ == "__main__":
+      main()
+</code>
+    </pre>
+  </div>
+
+  <div id="pySec2" class="codeDiv">
+    <pre>
+<code class="python" style="overflow-x: hidden;">
+  import SimpleGraphics as sg
+  import os, time
+
+  def makeFold(dir):
+      try:
+          if not os.path.exists(dir):
+              os.makedirs(dir)
+      except OSError:
+          with open("ERROR.txt",'w') as err:
+              err.write("This path attempt at: " + str(time.time()) + " in the OS does not exist")
+
+  def flood(x, y,image,w,h,old):
+      toGo = []
+      stack = [(x, y)]
+      while len(stack) &gt 0:
+          x, y = stack.pop()
+          if sg.getPixel(image,x,y) != old and x &gt 0 and x &lt w-1 and y &gt 0 and y &lt h-1:
+              if sg.getPixel(image,x+1,y) != old:
+                  toGo.append([x+1,y,sg.getPixel(image,x+1,y)])
+              if sg.getPixel(image, x - 1, y) != old:
+                  toGo.append([x-1,y,sg.getPixel(image,x-1,y)])
+              if sg.getPixel(image, x, y+1) != old:
+                  toGo.append([x,y+1,sg.getPixel(image,x,y+1)])
+              if sg.getPixel(image, x, y-1) != old:
+                  toGo.append([x,y-1,sg.getPixel(image,x,y-1)])
+              sg.putPixel(image, x, y, old[0], old[1], old[2])
+              stack.append((x + 1, y))
+              stack.append((x - 1, y))
+              stack.append((x, y + 1))
+              stack.append((x, y - 1))
+      return toGo
+
+  def main():
+      fname = input("What is the file you wish to open? e.g. DogPuzzle.ppm\n\n")
+      image = sg.loadImage(fname)
+      w = sg.getWidth(image)
+      h = sg.getHeight(image)
+      sg.drawImage(image,0,0)
+      sg.resize(w,h)
+      fcount = 0
+      makeFold("./PuzzlePieces/")
+      input1 = input("What color is the border of the puzzle pieces? Please enter in space sperated values\n\n")
+      old = tuple(int(x) for x in input1.split())
+      totalimage = []
+      while not sg.closed():
+          me = sg.getMouseEvent()
+          if me != None:
+              (me, (x,y)) = me
+          else:
+              me = ""
+          if me == "&ltButton-1&gt":
+              if x &lt 0 or y &lt 0:
+                  print("Please try and click inside the picture")
+              elif x &gt w or y &gt h:
+                  print("I knew you were never good at coloring in the lines")
+              else:
+                  piece = flood(x,y,image,w,h,old)
+                  sg.drawImage(image,0,0)
+                  img = sg.createImage(w,h)
+                  filename = "./PuzzlePieces/Puzzle"
+                  for pixel in piece:
+                      totalimage.append(pixel)
+                  for pixel in totalimage:
+                      sg.putPixel(img,pixel[0],pixel[1],pixel[2][0],pixel[2][1],pixel[2][2])
+                  sg.saveGIF(img,filename)
+  if __name__ == "__main__":
+      main()
+</code>      
+    </pre>
+  </div>
+
+  <div id="pySec3" class="codeDiv">
+    <pre>
+<code class="python" style="overflow-x: hidden;">
+  import os
+  from gomoku_GUI import Visuals
+  from gomoku_Logic import Logic
+
+
+  #&gt Initiates game setup and enters mainloop(), which does not end until game close.
+  def main():
+      os.system('cls' if os.name == 'nt' else 'clear') #Clears the terminal window
+
+      #&gt Initializes the Visuals and Logic instances which will be used throughout.
+      graphics = Visuals()
+      game = Logic()
+
+      #&gt Places a reference to the instance of the other class in each instance.
+      game.graphics = graphics
+      graphics.game = game
+
+      graphics.setupBindings()
+
+      #&gt First game prep. Must be outside of __init__ in Visuals since it depends
+      #  on variables set during __init__ in Logic.
+      game.cellSize = graphics.BOARDSIZE / game.dimension
+      graphics.drawBoard()
+      if game.player == game.comp: #&gtIf the first player is the computer.
+              game.computerMove()  # then play that before looping.
+      graphics.toggleWelcome()
+      graphics.displayTurn()
+
+      graphics.win.mainloop() #&gt Loops indefinitely, waiting for click or key input
+  main()
+</code>      
+    </pre>
+  </div>
+
+  <div id="pySec4" class="codeDiv">
+    <pre>
+<code class="python" style="overflow-x: hidden;">
+  import turtle
+
+  class Visuals:
+      BOARDSIZE = 630 #Board size, in pixels.
+      OFFSETX = -200
+      OFFSETY = -290
+
+      #&gt Sets up the space within which the game is played and assigns key bindings.
+      #&gt Registers shapes, such as the background image and game pieces.
+      #&gt Sets up all necessary turtles.
+      def __init__(self):
+          # Initializes the window space.
+          self.win = turtle.Screen()
+          self.win.title("GOMOKU")
+          # Resizes and centers the Turtle window.
+          self.win.setup(width=910,height=710)
+
+
+          # Sets up images for use elsewhere
+          images = turtle.getscreen()
+          images.bgpic("background.gif")
+          images.register_shape("welcomeScreen.gif")
+          images.register_shape("helpScreen.gif")
+          images.register_shape("winMessage.gif")
+          images.register_shape("loseMessage.gif")
+          images.register_shape("diffSettings.gif")
+          images.register_shape("diffWarning.gif")
+          images.register_shape("noDiffDisplay.gif")
+          images.register_shape("easyDiffDisplay.gif")
+          images.register_shape("medDiffDisplay.gif")
+          images.register_shape("hardDiffDisplay.gif")
+
+          # Bugfix to hide the "anonymous" turtle generated by the registered shapes.
+          turtle.getturtle().hideturtle()
+
+          # Sets all the turtles for play
+          self.turtleBreeder()
+
+
+      #&gt Sets up all of the necessary Turtle widow bindings required to process:
+      #  click input (gameplay and buttons),
+      #  keyboard shortcuts (exit, save, load, difficulty, help, welcome)
+      def setupBindings(self):
+          self.win.onclick(self.game.sectionSelector)
+          self.win.onkey(self.game.initializeNewGame,"n")
+          self.win.onkey(exit,"e")
+          self.win.onkey(exit,"x") #&gtSince "x" is so much more "exit" than "e".
+          self.win.onkey(self.game.saveGame,"s")
+          self.win.onkey(self.game.loadGame,"l")
+          self.win.onkey(self.toggleWelcome,"w")
+          self.win.onkey(self.toggleDiffSettings,"d")
+          self.win.onkey(self.disableComp,"0")
+          self.win.onkey(self.toggleHelp,"h")
+          self.win.listen()
+
+
+      #&gt Draws the Gomoku board grid and labels each line.
+      #&gt Uses self.lineman, which must already have been initialized.
+      def drawBoard(self):
+          # Sets the animation tracing to an instantaneous mode.
+          self.win.tracer(2)
+
+          # Draws horizontal lines.
+          # Offsets the starting position to give the board "spokes".
+          gotox = -self.game.cellSize/2 + self.OFFSETX
+          gotoy = 0 + self.OFFSETY
+          self.lineman.setheading(0)
+          for row in range(1,self.game.dimension+1):
+              self.lineman.penup()
+              self.lineman.goto(gotox, gotoy)
+              self.lineman.pendown()
+              self.lineman.write(row,move=False,align="left",font=("Arial",10,"normal"))
+              self.lineman.forward(self.BOARDSIZE)
+              self.lineman.write(row,move=False,align="right",font=("Arial",10,"normal"))
+              gotoy = gotoy + self.game.cellSize #Offsets the y-coord by a grid unit.
+
+          # Constructs a list containing 'n' capital letters, where n = dimension.
+          upperCase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+          letters = []
+          for let in range(self.game.dimension):
+              letters.append(upperCase[let])
+
+          # Draws vertical lines.
+          gotox = 0 + self.OFFSETX
+          gotoy = -self.game.cellSize/2 + self.OFFSETY
+          self.lineman.setheading(90)
+          for col in letters:
+              self.lineman.penup()
+              self.lineman.goto(gotox, gotoy-25)
+              self.lineman.write(col,move=False,align="center",font=("Arial",10,"normal"))
+              self.lineman.forward(25)
+              self.lineman.pendown()
+              self.lineman.forward(self.BOARDSIZE)
+              gotox = gotox + self.game.cellSize #Offsets the x-coord by a grid unit.
+              self.lineman.write(col,move=False,align="center",font=("Arial",10,"normal"))
+
+          # Sets the animation tracing back to normal
+          self.win.tracer(1)
+
+
+      #&gt Creates instance-wide turtles to enable so that their stamps
+      #  can be cleared later, which is not possible if they are local.
+      def turtleBreeder(self):
+          # Initializes the turtle which will write the turn number.
+          self.turner = turtle.Turtle()
+          self.turner.hideturtle()
+          self.turner.color('blue')
+          self.turner.penup()
+          self.turner.speed(0)
+          self.turner.goto(-150+self.OFFSETX,340+self.OFFSETY)
+
+          # Initializes the turtle used to stamp game pieces.
+          self.stamper = turtle.Turtle()
+          self.stamper.hideturtle()
+          self.stamper.shape("circle")
+          self.stamper.speed(0)
+          self.stamper.penup()
+          self.stamper.goto(50+self.OFFSETX,50+self.OFFSETY)
+
+          # Initializes the turtle which draws the grid.
+          self.lineman = turtle.Turtle()
+          self.lineman.hideturtle()
+          self.lineman.color("white")
+          self.lineman.width(2)
+
+          # Initializes the turtle which writes messages in the game window.
+          self.messenger = turtle.Turtle()
+          self.messenger.hideturtle()
+          self.messenger.color("white")
+          self.messenger.speed(0)
+          self.messenger.penup()
+          self.messenger.goto(-245+self.OFFSETX, 185+self.OFFSETY)
+
+          # Initializes the turtle which will draw the "win line".
+          self.winMan = turtle.Turtle()
+          self.winMan.hideturtle()
+          self.winMan.color("red")
+          self.winMan.width(5)
+          self.winMan.speed(0)
+          self.winMan.penup()
+
+          # Initializes the turtle which will display the difficulty level.
+          self.diffDisplayer = turtle.Turtle()
+          self.diffDisplayer.shape("easyDiffDisplay.gif") #Default difficulty
+
+          # Initializes the turtle which will display a warning message.
+          self.diffWarner = turtle.Turtle()
+          self.diffWarner.hideturtle()
+          self.diffWarner.shape("diffWarning.gif")
+
+          # Initializes the turtle which will allow user to select difficulty.
+          self.diffSetter = turtle.Turtle()
+          self.diffSetter.hideturtle()
+          self.diffSetter.shape("diffSettings.gif")
+
+          # Sets up the turtle which displays the intro screen.
+          self.welcomeMan = turtle.Turtle()
+          self.welcomeMan.hideturtle()
+          self.welcomeMan.shape("welcomeScreen.gif")
+
+          # Sets up the turtle which displays the help screen.
+          self.helpMan = turtle.Turtle()
+          self.helpMan.hideturtle()
+          self.helpMan.shape("helpScreen.gif")
+
+          # Sets up the turtle which displays the win/lose image.
+          self.resultMan = turtle.Turtle()
+          self.resultMan.hideturtle()
+
+
+      #&gt Toggles the welcome screen image. Initial value of game.welcome is "None"
+      #  so that boolean logic can be used.
+      #&gt&gt This enables toggling using key input, which cannot pass parameters.
+      def toggleWelcome(self):
+          if self.game.welcomeVisible:
+              self.welcomeMan.clear()
+              self.game.welcomeVisible = False
+          else:
+              self.welcomeMan.stamp()
+              self.game.welcomeVisible = True
+
+
+      #&gt Toggles the help screen image. Works identically to toggleWelcome(),
+      #  except that the initial value of game.help is False, since it shouldn't
+      #  display by default.
+      def toggleHelp(self):
+          if self.game.helpVisible:
+              self.helpMan.clear()
+              self.game.helpVisible = False
+          else:
+              self.helpMan.stamp()
+              self.game.helpVisible = True
+
+
+      #&gt Writes the number of turns a player has taken to the message board.
+      def displayTurn(self):
+          self.turner.clear()
+          self.turner.write(self.game.move, move=False,\
+                            align="left", font=("Helvetica", 35, "normal"))
+
+      
+      #&gt Uses the click x value to determine whether the confirm or cancel buttons
+      #  has been clicked. If the xPos is &lt-165, then the confirm code is executed;
+      #  the new difficulty is set and a new game is begun.
+      def diffConfirmation(self, xPos):
+          self.displayMessage("clear")
+          self.diffWarner.hideturtle()
+          self.game.diffWarnVisible = False
+
+          if xPos &lt -165:
+              self.game.diff = self.game.newDiff
+              self.displayDiff()
+              self.game.initializeNewGame()
+
+
+      #&gt Stamps the image for the current difficulty level in the message box
+      def displayDiff(self):
+          if self.game.diff == 0: # No AI mode; easter egg / debugging
+              self.diffDisplayer.shape("noDiffDisplay.gif")
+          elif self.game.diff == 1:
+              self.diffDisplayer.shape("easyDiffDisplay.gif")
+          elif self.game.diff == 2:
+              self.diffDisplayer.shape("medDiffDisplay.gif")
+          elif self.game.diff == 3:
+              self.diffDisplayer.shape("hardDiffDisplay.gif")
+
+              
+      #&gt Toggles the "difficulty change warning" which tells the user that their
+      #  current game progress will be lost, and seeks confirmation.
+      #&gt The "set difficulty" prompt is always hidden when this is run.
+      #&gt If the selected difficulty is already set, an error is displayed
+      def toggleDiffWarning(self):
+          self.diffSetter.hideturtle()
+          self.game.diffSetVisible = False
+
+          if self.game.diffWarnVisible:
+              self.diffWarner.hideturtle()
+              self.game.diffWarnVisible = False
+
+          elif self.game.newDiff != self.game.diff:
+              self.displayMessage("clear")
+              self.diffWarner.showturtle()
+              self.game.diffWarnVisible = True
+
+          else:
+              self.displayMessage("That  difficulty\n  setting  was\n  already  set!")
+
+              
+      #&gt Toggles the "set difficulty" prompt, which enables the user to choose
+      #  the difficulty of the next game they play. 
+      def toggleDiffSettings(self):
+          if self.game.diffSetVisible:
+              self.diffSetter.hideturtle()
+              self.game.diffSetVisible = False
+          else:
+              self.displayMessage("clear")
+              self.diffSetter.showturtle()
+              self.game.diffSetVisible = True
+      
+     
+      #&gt This function manages the "easter egg" / debugging functionality of
+      #  disabling the AI so that the computer does not make any moves. 
+      #&gt The only way that this function is invoked is through the keyboard bindings
+      #  assigned to the "0" numerical key.
+      def disableComp(self):
+          if self.game.diff != 0:
+              self.game.diff = 0
+          else:
+              self.game.diff = 2
+          self.displayDiff()
+          
+          
+      #&gt Accepts a string and writes it to the display area left of the game board.
+      #&gt Used to display arbitrary information to the user.
+      def displayMessage(self, message):
+          # Clears anything that could be in the message box.
+          self.messenger.clear()
+          if self.game.diffSetVisible:
+              self.toggleDiffSettings()
+          elif self.game.diffWarnVisible:
+              self.toggleDiffWarning()
+          elif self.game.winState:
+              self.resultMan.clear()
+
+          if message != "clear":
+              self.messenger.write(message, move=False, \
+                                   align="left", font=("Impact", 22, "normal"))
+
+
+      #&gt Stamps the current player's game piece at the X and Y coordinates specified
+      def stampPiece(self, posX,posY):
+          if self.game.player == "B":
+              self.stamper.color("black")
+          else:
+              self.stamper.color("white")
+          self.stamper.shapesize(2*(10/self.game.dimension),2*(10/self.game.dimension))
+          self.stamper.goto(posX+self.OFFSETX,posY+self.OFFSETY)
+          self.stamper.stamp()
+
+
+      #&gt Draws a line which passes through the 5 winning pieces, and prints a message.
+      #&gt Both parameters are expected to be numerical 2-tuples of form (col, row).
+      def setWin(self, start, end):
+          self.game.winState = True
+
+          if self.game.player == self.game.human:
+              self.resultMan.shape("winMessage.gif")
+              self.resultMan.stamp()
+          else:
+              self.resultMan.shape("loseMessage.gif")
+              self.resultMan.stamp()
+
+          #&gt Finds coordinates for start and endpoint of winning play
+          # using tuples passed as parameters
+          xStart = start[0] * self.game.cellSize + self.OFFSETX
+          yStart = start[1] * self.game.cellSize + self.OFFSETY
+          xEnd = end[0] * self.game.cellSize + self.OFFSETX
+          yEnd = end[1] * self.game.cellSize + self.OFFSETY
+
+          #&gt Draws the win line
+          self.winMan.goto(xStart,yStart)
+          self.winMan.speed(1)
+          self.winMan.pendown()
+          self.winMan.goto(xEnd,yEnd)
+          self.winMan.penup()
+</code>      
+    </pre>
+  </div>
+
+  <div id="pySec5" class="codeDiv">
+    <pre>
+<code class="python" style="overflow-x: hidden;">
+  import random
+
+  #&gt This class is instantiated in gomoku_Control.py to run the critical operations
+  #  related to the progression and intialization of the game. 
+  #&gt Most game variables are stored as instance variables with this class, 
+  #  aside from those which are directly related to graphics, which 
+  #  are stored along with graphical methods in gomoku_GUI.py
+  class Logic:   
+      BLANK = "X"
+      NOPATS = []
+      EASYPATS = ["XCCCC","CXCCC","CCXCC","XPPPP","PXPPP","PPXPP","XCCCX","XPPPX","XCCC"]
+      HARDPATS = ["XCCCC","CCXCC","CXCCC","XPPPP","PXPPP","PPXPP","XPXPP","XCXCC",\
+                  "XCCCX","XPPPX","XCCC","CXCXC","XPPP","PXPXP"]
+                  
+      #&gt Initializes instance variables required for the progression of the game.
+      #&gt Randomly selects dimension, scales cellSize to match, assigns player colours.
+      #&gt Converts generalized patterns to game-specific patterns
+      def __init__(self):
+          self.dimension = random.randrange(10,20)
+          self.state = self.stateConstructor()
+          self.player = None
+          self.human = None
+          self.comp = None
+
+          self.welcomeVisible = None # Initialized to "None" for toggleWelcome() logic.
+          self.helpVisible = False
+          self.diffSetVisible = False
+          self.diffWarnVisible = False
+
+          self.diff = 1 # Default difficulty is "easy".
+          self.move = 0
+          self.winState = False
+
+          self.playerSelector() # Selects the player assignments & who plays first.
+          self.playPatterns = self.patternConverter()
+
+
+      #&gt Called at the beginning of a (new or loaded) game to prepare for play.
+      def initializeNewGame(self, load=False):
+          self.graphics.lineman.clear()
+          self.graphics.stamper.clear()
+          self.graphics.winMan.clear()
+          self.graphics.messenger.clear()
+          self.graphics.resultMan.clear()
+
+          if not load:
+              self.dimension = random.randrange(10,20)
+              self.cellSize = int(self.graphics.BOARDSIZE/self.dimension)
+              self.playerSelector()
+              self.move = 0
+              self.graphics.displayMessage(" A  new  game\n has  started!\n")
+
+          if self.welcomeVisible:
+              self.graphics.toggleWelcome()
+          if self.helpVisible:
+              self.graphics.toggleHelp()
+
+          self.winState = False
+          self.playPatterns = self.patternConverter()
+          
+          self.state = self.stateConstructor()
+          self.graphics.drawBoard()
+          self.graphics.displayTurn()
+          self.graphics.displayDiff()
+
+          #&gt If the first player is the computer, then initiate that move
+          if self.player == self.comp:
+              self.computerMove()
+
+
+      #&gt Creates a 2-D list populated with the str "X" of size dimension.
+      #&gt If the instance was initialized with a preexisting state (i.e. loaded)
+      #  this function will simply return that state.
+      def stateConstructor(self):
+          newState = [""] * self.dimension
+          for elem in range(len(newState)):
+              newState[elem] = [self.BLANK] * self.dimension
+          return newState
+
+
+      #&gt Randomly selects the number 0 or 1. If 1, then the human plays first.
+      #&gt&gt Since black always plays first, this means they are also black.
+      #&gt Sets player, human and comp globals
+      def playerSelector(self):
+          if random.randrange(2) == 1:
+              self.human = "B"
+              self.comp = "W"
+              self.player = self.human
+          else:
+              self.human = "W"
+              self.comp = "B"
+              self.player = self.comp
+          #Prints the player assignment to terminal. Primarily for debugging.
+          #print("P1:", self.human, "P2:", self.comp) 
+
+
+      #&gt Takes the generalized pattern strings and converts them to correspond to
+      #  the colour assignments for that game.
+      #  Looks up the class variable "HARDPATS", but does not alter it.
+      #&gt Will include difficulty logic for final release
+      def patternConverter(self):
+          if self.diff == 0:
+              selectedPats = self.NOPATS
+          elif self.diff &lt= 2:
+              selectedPats = self.EASYPATS
+          else:
+              selectedPats = self.HARDPATS
+
+          procPatterns = []
+          for pattern in selectedPats:
+              newPattern = ""
+              for letter in pattern:
+                  if letter == "P":
+                      newPattern = newPattern + self.human
+                  elif letter == "C":
+                      newPattern = newPattern + self.comp
+                  else:
+                      newPattern = newPattern + self.BLANK
+              procPatterns.append(newPattern)
+
+              # Checks if it is a palindrome; if it isn't, it appends the reversed.
+              revPattern = newPattern[::-1] # Clones the string, but in reverse
+              if newPattern != revPattern:
+                  procPatterns.append(revPattern)
+          #print(procPatterns) ###DEBUGGING###
+          return procPatterns
+
+
+      #&gt Checks that the given col and row are within the bounds of the 
+      #  boardsize and space they represent is empty. 
+      #&gt Returns True if so, else False
+      def isValidInput(self, col, row):
+          for inst in [col, row]:
+              if inst &lt 0 or inst &gt self.dimension-1:
+                  return False
+          if self.state[col][row] != self.BLANK: # Checks that the space is empty
+              return False
+          else:
+              return True
+
+              
+      #&gt Used by checkWin to check if there is a series of 5 pieces in a line.
+      #&gt The line is extrapolated from the col / row of the player piece,
+      #  along with the dY and dX (difCol, difRow).
+      #&gt If there is a series of 5, returns a list of form 
+      #  [True,start tuple, end tuple]; else, returns a single element list [False].
+      def checkLine(self, col, row, difCol,difRow):
+          series = 1
+          seqStart = "" # Endpoint position placeholders
+          seqEnd = ""
+          for dir in [-1, 1]: # This negation factor is used to checks both directions
+              for next in range (1,self.dimension):
+                  # Sets the col/row for the next piece to be checked
+                  nextCol = (col + dir*next*difCol)
+                  nextRow = (row + dir*next*difRow)
+
+                  # If the edge of the board is met, that direction of the series ends
+                  if nextCol &gt self.dimension-1 or nextCol &lt 0\
+                  or nextRow &gt self.dimension-1 or nextRow &lt 0:
+                      if dir == -1: # Used for consistent endpoint selection
+                          # Assigns a 2-tuple to the col and row of the endpoint
+                          seqEnd = (nextCol+difCol, nextRow+difRow)
+                      else:
+                          seqStart = (nextCol-difCol, nextRow-difRow)
+                      break
+
+                  # If the next piece doesn't match, that direction of the series ends
+                  elif self.state[nextCol][nextRow] != self.player:
+                      if dir == -1:
+                          seqEnd = (nextCol+difCol, nextRow+difRow)
+                      else:
+                          seqStart = (nextCol-difCol, nextRow-difRow)
+                      break
+
+                  # If the sequence hasn't ended from either condition, they match.
+                  else:
+                      series = series + 1
+                      
+          # If the series is exactly 5, then the game is won.
+          if series == 5:
+              return [True, seqStart, seqEnd]
+          else:
+              return [False]
+
+
+      #&gt Checks to see if the winning condition has been met by the last play by checking
+      #  if any of the adjacent 8 spots match the piece just played. If so, check
+      #  that line for a series of exactly 5. If the winning condition is met, calls 
+      #  setWin() with the coordinates of the winning sequence endpoints.
+      def checkWin(self, col, row):
+          for checkCol in range(col-1,col+2):
+              if checkCol &lt 0 or checkCol &gt self.dimension-1:
+                  continue
+                  
+              for checkRow in range(row-1,row+2):
+                  # Avoids checking out of bound indices
+                  if checkRow &lt 0 or checkRow &gt self.dimension-1:
+                      continue
+                  # Avoids checking the spot corresponding to the played piece
+                  elif checkCol == col and checkRow == row:
+                      continue
+                  # Moves on if the pieces don't match.
+                  elif self.state[checkCol][checkRow] != self.player:
+                      continue
+                      
+                  else: # If this runs, the pieces being compared match.
+                      # Col/row difference between the pieces; used to traverse the line
+                      difCol = checkCol - col
+                      difRow = checkRow - row
+                      result = self.checkLine(col, row, difCol, difRow)
+                      if result[0]:
+                          return [result[1], result[2]]
+
+
+      #&gt Runs each time the computer needs to make a move. Makes the decision,
+      #  checks if the input is valid, places the piece and updates the game state variable.
+      def computerMove(self):
+          if self.diff == 0: # If AI is off, don't play at all.
+              self.player = self.human
+              return
+
+          compEle = self.decisionMaker()
+          compCol = compEle[0]
+          compRow = compEle[1]
+          colPos = compCol * self.cellSize # Converts indices to coordinates
+          rowPos = compRow * self.cellSize
+          
+          self.graphics.stampPiece(colPos,rowPos)
+          self.state[compCol][compRow] = self.player
+          winResult = self.checkWin(compCol, compRow)
+          if winResult != None:
+              self.graphics.setWin(winResult[0], winResult[1])
+          self.player = self.human
+
+
+      #&gt Converts the x or y position of a click to the index of a col/row list.
+      #&gt Finds the "base" col / row of the click using integer division,
+      #  then checks if the click is greater than half way between nodes.
+      #&gt If so, the variable will be set to that "next" value.
+      def clickPosToIndex(self, pxVal):
+          indxVal = int(pxVal // self.cellSize)
+          if pxVal % self.cellSize &gt= self.cellSize/2:
+              indxVal += 1
+          return indxVal
+
+
+      #&gt Checks if the user's choice is valid,
+      #  updates the game state variable and initiates the computer's move.
+      def moveAlternator(self,xPos,yPos):
+          humanCol = self.clickPosToIndex(xPos)
+          humanRow = self.clickPosToIndex(yPos)
+
+          if not self.isValidInput(humanCol,humanRow):
+              self.graphics.displayMessage("   You  cannot\n    place  your\n   piece there")
+              return
+
+          humanXPos = humanCol * self.cellSize
+          humanYPos = humanRow * self.cellSize
+
+
+          self.move = self.move + 1
+          self.graphics.displayTurn() #Redraws the turn counter
+          self.graphics.stampPiece(humanXPos, humanYPos)
+          self.state[humanCol][humanRow] = self.player
+
+          winResult = self.checkWin(humanCol, humanRow)
+          if winResult != None:
+              self.graphics.setWin(winResult[0], winResult[1])
+
+          if not self.winState: # If the player just won, the computer shouldn't play
+              self.player = self.comp
+              self.computerMove()
+
+
+      #Traverses the 2D state list and returns a list containing strings which
+      #represent all horizontal lines. It also returns a list with the col/row indices
+      #of every element in each string. The indices for both lists are related.
+      #e.g. The position of ele 3 in line 1 can be obtained by: horiPosList[0][2]
+      def horiLines(self):
+          horiList = []
+          horiPosList = []
+
+          for row in range(len(self.state)):
+              horiString = ""
+              horiPosList.append([])
+              for col in range(len(self.state[0])):
+                  horiString = horiString + self.state[col][row]
+                  horiPosList[row].append([col,row])
+              horiList.append(horiString)
+
+          return horiList, horiPosList
+
+
+      #Traverses the 2D state list and returns a list containing strings which
+      #represent all vertical lines. It also returns a list with the col/row indices
+      #of every element in each string. The indices for both lists are related.
+      #e.g. The position of ele 3 in line 1 can be obtained by: vertPosList[0][2]
+      def vertLines(self):
+          vertList = []
+          vertPosList = []
+
+          for col in range(len(self.state[0])):
+              vertString = ""
+              vertPosList.append([])
+              for row in range(len(self.state)):
+                  vertString = vertString + self.state[col][row]
+                  vertPosList[col].append([col,row])
+              vertList.append(vertString)
+
+          return vertList, vertPosList
+
+
+      #This function is NOT pure. It appends to both diagList and diagPosList
+      #This is intentional since the "old" lists are never used again.
+      #It improves readability and enables easier updating of diagPosList.
+      #It also minimizes the logic required to avoid strings of len &lt 5.
+      #Returns: None
+      #Parameters:
+      # 3 ints: col & row of starting position, diag direction (-1 or 1)
+      # 2 lists: diagList: contains state strings
+      #          diagPosList: contains the positions of each element in those strings
+      def diagWalker(self, col, row, diag, diagList, diagPosList):
+          valid = True
+          diagString = ""
+          tempPosList = []
+          while valid:
+              diagString = diagString + self.state[col][row]
+              tempPosList.append([col,row])
+
+              col = col + 1
+              row = row + diag
+              if col not in range(self.dimension) or row not in range(self.dimension):
+                  valid = False
+
+          if len(diagString) &gt= 5:
+                  diagList.append(diagString)
+                  diagPosList.append(tempPosList)
+
+
+      #Traverses the 2D state list and returns a list containing strings which
+      #represent all diagonal lines longer than 4. Returns a list with the col/row indices
+      #of every element in each string. The indices for both lists are related.
+      #e.g. The position of ele 3 in line 1 can be obtained by: vertPosList[0][2]
+      def diagLines(self):
+          diagList = []
+          diagPosList = []
+          for diag in [-1,1]: # Checks both diagonals
+              # Aligns the starting point of the walker to the correct row
+              if diag == -1: # If subtracting rows, run along the top; else, bottom.
+                  baseRow = self.dimension - 1
+              else:
+                  baseRow = 0
+
+              for vert in range(self.dimension):
+                  self.diagWalker(0, vert, diag, diagList, diagPosList)
+
+              for hori in range(1,self.dimension):
+                  self.diagWalker(hori, baseRow, diag, diagList, diagPosList)
+
+          return diagList, diagPosList
+
+          
+      #&gt Checks if either of the two spots on either side of the choice
+      #  are filled.
+      #&gt If at least one is, then that is the element which will be chosen.
+      #&gt This avoids placing something at the "wrong place" in the pattern.
+      def isAdjFilled(self, eleIndx, line):
+          for adjIndx in range(eleIndx-1,eleIndx+2, 2):
+              if 0 &gt adjIndx &lt= len(line): 
+                  continue
+          
+              adjString = line[eleIndx] + line[adjIndx]
+              if adjString == self.BLANK*2:
+                  continue
+          
+              return True
+              
+              
+      #&gt This function will return the index of the playable spot in the line where
+      #  a pattern was found. If multiples are found, it selects the first one.
+      #&gt If the pattern which is passed is not found in "line", or if the pattern 
+      #  does not have an adjacent blaknk/player,a ValueError will be thrown 
+      #  by lookUpPatterns.
+      def elementChoice(self, pattern, line):
+          firstIndx = line.index(pattern) # Looks for the index of the start of the pattern
+          lastIndx = firstIndx + len(pattern) # Calculates the first index after the pattern
+          
+          initEleChoices = []
+          for eleIndx in range(firstIndx, lastIndx):
+              if line[eleIndx] == self.BLANK:
+                  if self.isAdjFilled(eleIndx, line):
+                      return eleIndx
+          
+
+      #&gt The entire board is deconstructed into strings which represent a complete
+      #  vertical, horizontal or diagonal line. These strings are iterated through,
+      #&gt looking for linear patterns on the board to find the playable moves.
+      #&gt Patterns are ranked and so a single col/row pair is returned as a list.    
+      def lookUpPatterns(self):
+          vertList, vertPosList = self.vertLines()
+          horiList, horiPosList = self.horiLines()
+          diagList, diagPosList = self.diagLines()
+
+          stringList = vertList + horiList + diagList
+          posList = vertPosList + horiPosList + diagPosList
+
+          # Looks for each pattern in each line. If found, calls elementChoice
+          # with the matched strings to find the index of a playable (blank) spot.
+          # Appends the coordinates, along with the pattern index (rank), to a list.
+          choices = []
+          for lineIndx in range(len(stringList)):
+              lineStr = stringList[lineIndx]
+              for patternIndx in range(len(self.playPatterns)):
+                  patternStr = self.playPatterns[patternIndx]
+                  if patternStr in lineStr:
+                      selIndx = self.elementChoice(patternStr, lineStr)
+                      selElem = posList[lineIndx][selIndx] # Returns col/row list.
+                      choices.append([patternIndx, selElem])
+
+          choices.sort() # Sorted so the "best" (lowest pattern index) is first.
+          # Chooses the coordinates for the first entry in choice
+          choice = []
+          if len(choices) != 0:
+              # Chooses randomly if on "easy", otherwise chooses the "best".
+              if self.diff == 1:
+                  selChoice = random.randrange(len(choices))
+              else:
+                  selChoice = 0
+              choice = choices[selChoice][1] # Sets choice to the col/row list
+          return choice # Returns the lowest (i.e. best) choice
+
+
+      #&gt Parameter; two 2D lists containing the col/row of player/computer pieces.
+      #  The selected element to play near is the first in the list,
+      #  therefore, the list compPieces should have the "best" piece first.
+      def pseudoRandomPlay(self, playerPieces, compPieces):
+          if len(compPieces) == 0:
+              if len(playerPieces) != 0:
+                  startCol = playerPieces[0][0]
+                  startRow = playerPieces[0][1]
+              else:
+                  startCol = self.dimension//2
+                  startRow = self.dimension//2
+                  return startCol, startRow
+          else:
+              startCol, startRow = self.minDistanceFromPlayer(playerPieces, compPieces)
+
+          for check in range(30): # Gets 30 attempts to find a solution, else random
+              pseudoRandRow = startRow + random.randrange(-1,2) # rand in [-1,0,1]
+              pseudoRandCol = startCol + random.randrange(-1,2,2) # rand in [-1,1]
+              if self.isValidInput(pseudoRandCol, pseudoRandRow):
+                  return [pseudoRandCol, pseudoRandRow]
+              if check &gt= 20: # If that seed isn't working, try another.
+                  startCol = compPieces[0][0]
+                  startRow = compPieces[0][1]
+
+          # This block only runs if no viable solution is found in 20 tries.
+          randCol = random.randrange(self.dimension)
+          randRow = random.randrange(self.dimension)
+          return [randCol, randRow]
+
+
+      #&gt Different function to determine the position of the computer piece
+      #  which is closest to any player piece. Does not consider relative orientation
+      #  since it just takes the sum of the col/row differences.
+      def minDistanceFromPlayer(self, playerPieces, compPieces):
+          distances = []
+          for pPiece in range(len(playerPieces)):
+              distances.append([])
+              for cPiece in range(len(compPieces)):
+                  dCol = abs(playerPieces[pPiece][0] - compPieces[cPiece][0])
+                  dRow = abs(playerPieces[pPiece][1] - compPieces[cPiece][1])
+                  dSum = dCol + dRow
+                  distances[pPiece].append(dSum)
+
+          lowVal = 100
+          lowPos = [0,0]
+          for i in range(len(playerPieces)):
+              for j in range(len(compPieces)):
+                  if distances[i][j] &lt lowVal:
+                      lowVal = distances[i][j]
+                      lowPos = compPieces[j]
+          return lowPos[0], lowPos[1]
+
+
+      #&gt Iterates through self.state to find all of the positions which hold
+      #  either a computer or human piece. It appends the coordinates into a list
+      #  for either player.
+      #&gt Returns: Two 2D lists where each top element is a list with the row/col
+      #           of either the computer or human pieces.
+      def findPieces(self):
+          humanList = []
+          compList = []
+          for col in range(self.dimension):
+              for row in range(self.dimension):
+                  if self.state[col][row] == self.human:
+                      humanList.append([col, row])
+                  elif self.state[col][row] == self.comp:
+                      compList.append([col, row])
+          return humanList, compList
+
+
+      #&gt Checks if there are any patterns to play off of; if not, uses the
+      #  pseudoRandomPlay function to find a spot to play.
+      def decisionMaker(self):
+          result = self.lookUpPatterns()
+          humanPieces, compPieces = self.findPieces()
+
+          if result == []:
+              result = self.pseudoRandomPlay(humanPieces, compPieces)
+          return result
+
+
+      #&gt Saves a file called "Gomokusave.gmk" in the working directory.
+      #&gt The first line stores config variables: winState, move, dimension and human
+      #&gt&gt Every line after that stores the elements of the 2D array "state".
+      #&gt&gt No delimiters between elements.
+      def saveGame(self):
+          if self.winState:
+              self.graphics.displayMessage("clear")
+              self.graphics.displayMessage("  You  cannot\n     save  this\n ended  game")
+              return
+              
+          saved = open("gomoku_Save.gmk","w")
+          configSave = "move,"+str(self.move)+";dimension,"+str(self.dimension)+\
+                       ";human,"+str(self.human)+";diff,"+str(self.diff)+"\n"
+          saved.write(configSave)
+
+          # Iterates through each row of the state list, accumulates the elements
+          # in each col into a string, then writes that string to the file.
+          for row in range(self.dimension):
+              printedLine = ""
+              for col in range(self.dimension):
+                  printedLine = printedLine + self.state[col][row]
+              saved.write(printedLine+"\n")
+          saved.close()
+          self.graphics.displayMessage("  Game  Saved\n")
+
+
+      #&gt Interprets the config line passed by loadGame() and clears previous game info.
+      def loadConfig(self,config):
+          if self.welcomeVisible: # First closes the welcome screen if it is open.
+              self.graphics.toggleWelcome()
+
+          config = config[:len(config)-1] # Removes the newline characters.
+          pairs = config.split(";") #&gt Puts the var/value pairs in a list.
+          for entry in range(len(pairs)):
+              # Separates the var/values and places them in a nested list
+              pairs[entry] = pairs[entry].split(",")
+              var = pairs[entry][0]
+              val = pairs[entry][1]
+
+              # Checks which var it is and executes the appropriate code.
+              if var == "dimension":
+                  self.dimension = int(val)
+                  self.cellSize = self.graphics.BOARDSIZE/self.dimension
+              elif var == "move":
+                  self.move = int(val)
+                  self.graphics.displayTurn()
+              elif var == "diff":
+                  self.diff = int(val)
+                  self.graphics.displayDiff()
+              elif var == "human":
+                  if val == "B":
+                      self.human = "B"
+                      self.comp = "W"
+                  else:
+                      self.human = "W"
+                      self.comp = "B"
+                  # Human will always have be first since the comp is "instant".
+                  self.player = self.human
+
+                  
+      #&gt Looks for the file "Gomokusave.gmk" and tries to load a previous save.
+      #&gt If the file is not found, an error message displays in the Turtle window.
+      def loadGame(self):
+          try:
+              loaded = open("gomoku_Save.gmk","r")
+
+              config = loaded.readline() # Reads the config line.
+              self.loadConfig(config) # Parses the config line and performs setup.
+              self.initializeNewGame("load")
+
+              row = 0 # Sets up an accumulator to count the row the file line represents.
+              for line in loaded:
+                  line = line[:len(line)-1] # Removes the newline characters.
+                  for col in range(len(line)):
+                      ele = line[col]
+                      # Places the value of the line entry into the state list.
+                      self.state[col][row] = ele
+                      if ele != self.BLANK: # If it is blank it must be a player's.
+                          # Sets the player var so the correct piece is stamped.
+                          self.player = ele
+                          colPos = col * self.cellSize
+                          rowPos = row * self.cellSize
+                          self.graphics.stampPiece(colPos, rowPos)
+                  row += 1
+
+              loaded.close()
+              self.player = self.human # Since the computer takes almost no time to move.
+              self.graphics.displayMessage("Game  Loaded\n")
+
+          except IOError:
+              self.graphics.displayMessage("  No  save  file\n   was  found!\n")
+
+              
+      #&gt Uses the y value of the click to determine which button is being pressed.
+      #&gt Executes the code corresponding to each button.
+      def buttonSelector(self, x, y):
+          # Absolute reference for relative bounds.
+          boxExit = [585,635]
+          boxNew = [boxExit[0]-60,boxExit[1]-60]
+          boxLoad = [boxNew[0]-60,boxNew[1]-60]
+          boxSave = [boxLoad[0]-60,boxLoad[1]-60]
+          boxEasy = [boxSave[0]-145, boxSave[1]-170]
+          boxMed = [boxEasy[0]-35, boxEasy[1]-35]
+          boxHard = [boxMed[0]-35, boxMed[1]-35]
+          boxWarn = [boxHard[0]-45,boxHard[1]-35]
+          boxDiff = [boxWarn[0]-60,boxWarn[1]-45]
+          boxHelp = [boxDiff[0]-60,boxDiff[1]-60]
+
+          # Creates a 2D list containing all the buttons' y-bounds
+          buttons = [boxExit, boxNew, boxLoad, boxSave, boxEasy, boxMed,\
+                      boxHard, boxWarn, boxDiff, boxHelp]
+
+          for box in buttons:
+              if box[0] &lt y &lt box[1]: # If the click is in the given y-bounds.
+                  if box is boxExit:
+                      exit()
+                  elif box is boxNew:
+                      self.initializeNewGame()
+                  elif box is boxLoad:
+                      self.loadGame()
+                  elif box is boxSave:
+                      self.saveGame()
+                  elif box is boxEasy and self.diffSetVisible:
+                      self.newDiff = 1
+                      self.graphics.toggleDiffWarning()
+                  elif box is boxMed and self.diffSetVisible:
+                      self.newDiff = 2
+                      self.graphics.toggleDiffWarning()
+                  elif box is boxHard and self.diffSetVisible:
+                      self.newDiff = 3
+                      self.graphics.toggleDiffWarning()
+                  elif box is boxWarn and self.diffWarnVisible:
+                      self.graphics.diffConfirmation(x)
+                  elif box is boxDiff:
+                      self.graphics.toggleDiffSettings()
+                  elif box is boxHelp:
+                      self.graphics.toggleHelp()
+
+
+      #&gt Accepts click coordinates, determines which area of the board it's in
+      #  (i.e. sidebar or gameboard) and passes the input to the correct function.
+      def sectionSelector(self, x,y):
+          x -= self.graphics.OFFSETX
+          y -= self.graphics.OFFSETY
+          
+          if x &gt -50 and not self.winState: # If the click is on the game board
+              self.graphics.displayMessage("clear") # Avoids message board mess.
+              
+              if self.welcomeVisible: # If the welcome screen is open
+                  self.graphics.toggleWelcome()
+              elif self.helpVisible: # If the help screen is open
+                  self.graphics.toggleHelp()
+              elif self.player == self.human: # Avoids playing during comp turn.
+                  self.moveAlternator(x,y)
+
+          elif x &lt= -70: # If the click is in info sidebar area
+              self.buttonSelector(x, y)
+</code>      
+    </pre>
+  </div>
+
+  <div id="javaSec51" class="codeDiv">
+    <pre>
+<code class="java" style="overflow-x: hidden;">
+  import java.io.BufferedWriter;
+  import java.io.File;
+  import java.io.FileWriter;
+  import java.io.IOException;
+  import java.io.InputStreamReader;
+  import java.io.OutputStreamWriter;
+  import java.io.PrintWriter;
+  import java.net.Socket;
+  import java.text.ParseException;
+  import java.text.SimpleDateFormat;
+  import java.util.HashMap;
+  import java.util.Iterator;
+  import java.util.Locale;
+  import java.util.Map;
+  import java.util.Map.Entry;
+  import java.util.Scanner;
+
+
+  public class UrlCache{
+    // Catalog file name
+    private static final String CATALOG_FILENAME = "catalog.txt";
+    // Hashmap to store URL and LastModifiedValue
+    private HashMap&ltString, String&gt catalog = new HashMap&ltString, String&gt();
+
+    /*
+     * Default constructor to initialize data structures used for caching/etc If
+     * the cache already exists then load it. If any errors then throw runtime
+     * exception.
+     *
+     * @throws IOException
+     * If encounters any errors/exceptions
+     */
+    public UrlCache() throws IOException{
+
+      // Read in catalog file
+      File file = new File(CATALOG_FILENAME);
+
+      // Load file i it exists
+      if (file.exists()){
+        // Load file into hash map
+        Scanner fsc = new Scanner(file);
+
+        // For each line in file
+        while (fsc.hasNextLine()){
+          // Read line from file
+          String line = fsc.nextLine();
+
+          // Split line into fields
+          int pos = line.indexOf(" ");
+
+          // If two fields
+          // | url | last modified value }
+          if (pos &gt 0){
+            String url = line.substring(0, pos);
+            String lastModifiedValue = line.substring(pos + 1);
+            catalog.put(url, lastModifiedValue);
+          }
+        }
+        fsc.close(); // close file
+      }
+    }
+
+    /*
+     * Downloads the object specified by the parameter url if the local copy is
+     * out of date.
+     *
+     * @param url
+     *            URL of the object to be downloaded. It is a fully qualified
+     *            URL.
+     * @throws IOException
+     *             if encounters any errors/exceptions
+     */
+    public void getObject(String url) throws IOException{
+      String inputLine = "";
+      int count = 0;
+      String lastModified = "";
+      String contentLength = "";
+      long length = 0;
+      String catalogLastModifiedDate = "";
+      String responseCode = "";
+
+      // Default host, path, port
+      String host = url;
+      String path = "/index.html";
+      int port = 80;
+
+      // Get host and path
+      int pos = url.indexOf("/");
+      if (pos &gt 0){
+        host = url.substring(0, pos);
+        path = url.substring(pos);
+      }
+
+      // Check for port
+      pos = host.indexOf(':');
+      if (pos &gt 0){
+        port = Integer.parseInt(host.substring(pos + 1));
+        host = host.substring(0, pos);
+      }
+
+
+          // Connect to server
+      Socket socket = new Socket(host, port);
+
+      // Write out request
+      PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())));
+      out.println("GET " + path + " HTTP/1.0");
+
+      // If url in catalog
+      if (catalog.containsKey(url)){
+
+        // Get catalog last mosified date
+        catalogLastModifiedDate = catalog.get(url);
+        out.println("If-Modified-Since: " + catalogLastModifiedDate);
+      }
+
+      out.println();
+      out.flush();
+
+      // Get response stream
+      InputStreamReader in = new InputStreamReader(socket.getInputStream());
+
+          // Read in headers
+      int ch = in.read();
+
+      while (ch != -1){
+        while (ch != '\r') {
+          inputLine += (char) ch;
+          ch = in.read();
+        }
+
+        ch = in.read();
+        ch = in.read();
+
+        // End of header ]r]n
+        if (ch == '\r'){
+          ch = in.read();
+          ch = in.read();
+          break;
+        }
+
+        // Store response code
+        if (inputLine.startsWith("HTTP"))
+          responseCode = inputLine;
+
+        // Store last modified
+        if (inputLine.startsWith("Last-Modified:"))
+          lastModified = inputLine.substring("Last-Modified:".length() + 1);
+
+        // Store content length
+        if (inputLine.startsWith("Content-Length:"))
+          contentLength = inputLine.substring("Content-Length:".length() + 1);
+        inputLine = "";
+
+      }
+
+      // 200 = Ok
+      // 304 = Not Modified
+      if (responseCode.contains("200")){
+        // Write to file
+        // Use url path as file name
+
+        // Get folder name
+        path = path.substring(1);
+        pos = path.lastIndexOf("/");
+
+        String folder = "";
+        if (pos &gt 0)
+          folder = path.substring(0, pos);
+
+        //System.out.println(folder);
+              // Make directory
+        File dir = new File(folder);
+
+        if (!dir.exists()){
+          dir.mkdirs();
+        }
+        // Make file writer
+        FileWriter fr = new FileWriter(new File(path));
+
+        // Get content length
+        length = Long.parseLong(contentLength);
+
+        // Write to file
+        for (int i = 0; i &lt length; i++){
+          ch = in.read();
+          fr.write(ch);
+        }
+
+        // Close streams and file
+        in.close();
+        out.close();
+        fr.close();
+
+        // Update catalog
+        catalog.put(url, lastModified);
+
+        // Write catalog to file
+        PrintWriter pw = new PrintWriter(CATALOG_FILENAME);
+
+        // Creates iterator to go through catalog entries
+        Iterator&ltEntry&ltString, String&gt&gt it = catalog.entrySet().iterator();
+
+        // Loop through iterator
+        while (it.hasNext()){
+          Map.Entry&ltString, String&gt pair = (Map.Entry&ltString, String&gt) it.next();
+          pw.println(pair.getKey() + " " + pair.getValue());
+        }
+        pw.close(); // close file
+      }
+    }
+
+    /**
+     * Returns the Last-Modified time associated with the object specified by
+     * the parameter url.
+     *
+     * @param url
+     *            URL of the object
+     * @return the Last-Modified time in millisecond as in Date.getTime()
+     */
+    public long getLastModified(String url) {
+      long millis = 0;
+      SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.CANADA);
+
+      if (catalog.containsKey(url)) {
+        String lastModified = catalog.get(url);
+        try {
+          millis = sdf.parse(lastModified).getTime();
+        }
+        catch (ParseException e) {
+          System.out.println("Error" + e.getMessage());
+        }
+      }
+      return millis;
+    }
+  }
+</code>
+    </pre>
+  </div>
+
+  <div id="javaSec52" class="codeDiv">
+    <pre>
+<code class="java" style="overflow-x: hidden;">
+  /**
+   * UrlCache Class
+   *
+   *
+   */
+
+  import java.io.BufferedReader;
+  import java.io.File;
+  import java.io.FileWriter;
+  import java.io.IOException;
+  import java.io.InputStreamReader;
+  import java.io.PrintWriter;
+  import java.net.HttpURLConnection;
+  import java.net.URISyntaxException;
+  import java.net.URL;
+  import java.net.URLConnection;
+  import java.util.Date;
+  import java.util.HashMap;
+  import java.util.Iterator;
+  import java.util.Map;
+  import java.util.Map.Entry;
+  import java.util.Scanner;
+
+  public class UrlCache {
+
+    // catalog file name
+    private static final String CATALOG_FILENAME = "catalog.txt";
+
+    // hashmap to store URL and LastModifiedValue
+    private HashMap&ltString, Long&gt catalog = new HashMap&ltString, Long&gt();
+
+    /**
+     * Default constructor to initialize data structures used for caching/etc If
+     * the cache already exists then load it. If any errors then throw runtime
+     * exception.
+     *
+     * @throws IOException
+     *             if encounters any errors/exceptions
+     */
+    public UrlCache() throws IOException {
+
+      // read in catalog file
+      File file = new File(CATALOG_FILENAME);
+
+      // load file i it exists
+      if (file.exists()) {
+
+        // load file into hash map
+        Scanner fsc = new Scanner(file);
+
+        // for each line in file
+        while (fsc.hasNextLine()) {
+          // read line from file
+          String line = fsc.nextLine();
+
+          // split line into fields
+          String[] fields = line.split("\\s+");
+
+          // if two fields
+          // | url | last modified value }
+          if (fields.length == 2) {
+            String url = fields[0];
+            long lastModifiedValue = Long.parseLong(fields[1]);
+            catalog.put(url, lastModifiedValue);
+          }
+
+        }
+
+        fsc.close(); // close file
+      }
+    }
+
+    /**
+     * Downloads the object specified by the parameter url if the local copy is
+     * out of date.
+     *
+     * @param url
+     *            URL of the object to be downloaded. It is a fully qualified
+     *            URL.
+     * @throws IOException
+     *             if encounters any errors/exceptions
+     */
+    public void getObject(String url) throws IOException {
+
+      // create url object
+      //String urlobj = null;
+      //if (url.startsWith("http://"))
+      //  urlobj = new URL(url);
+      //else if (url.startsWith("https://"))
+      //  urlobj = new URL(url);
+      //else
+        //urlobj = new URL("http://" + url);
+
+      // open connection
+      //URLConnection conn = (URLConnection) urlobj.openConnection();
+    try{
+      String hostname;
+      int port = 80;
+      String path;
+      if(url.contains('[' || ']')){
+        int lbrace = url.indexOf('[');
+        int rbrace = url.indexOf(']');
+        hostname = url.substring(0,lbrace);
+        port = Integer.parseInt(url.substring(lbrace+1,rbrace));
+        path = url.substring(rbrace);
+      }
+      Socket socket = new Socket(url, port);
+
+      // Create necessary streams
+      outputStream = new PrintWriter(new DataOutputStream(
+          socket.getOutputStream()));
+      inputStream = new Scanner(new InputStreamReader(
+          socket.getInputStream()));
+      long catalogLastModifiedDate = 0;
+      PrintWriter pw = new PrintWriter(socket.getOutputStream());
+      while (true) {
+        pw.print("GET / HTTP/1.1\r\n");
+        pw.print("Host: " + hostname + path + "\r\n\r\n");
+        pw.flush();
+        BufferedReader br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        String recieve;
+        while((recieve = br.readLine()) != null){
+          System.out.println(t);
+        }
+        br.close();
+      }
+      outputStream.close();
+    }
+    catch (Exception e) {
+      System.out.println("Error: " + e.getMessage());
+    }
+
+      // if url in catalog
+      boolean getFile = true;
+      Date date = null;
+      if (catalog.containsKey(url)) {
+
+        // get catalog last mosified date
+        catalogLastModifiedDate = catalog.get(url);
+
+        // set last modified date
+        //conn.setIfModifiedSince(catalogLastModifiedDate);
+        catalog.put(url, catalogLastModifiedDate);
+      }
+
+      // use GET request method
+      ((HttpURLConnection) conn).setRequestMethod("GET");
+
+      System.out.println("\nSending 'GET' request to URL : " + url);
+
+      // connect to server
+      conn.connect();
+
+      // get response code
+      int responseCode = ((HttpURLConnection) conn).getResponseCode();
+
+      // System.out.println("Response Code : " + responseCode);
+      // System.out.println(conn.getHeaderFields());
+      long lastModified = conn.getLastModified();
+      String lastModifiedString = conn.getHeaderField("Last-Modified");
+      // System.out.println(lastModified);
+
+      // 200 = ok
+      // 304 = Not Modified
+      if (responseCode == 200) {
+
+        //System.out.println("reading file from server");
+
+        InputStreamReader in = new InputStreamReader(conn.getInputStream());
+
+        // write to file
+        // use url path as file name
+        String path = urlobj.getPath();
+        // System.out.println("path"+path);
+
+        if (path.startsWith("/"))
+          path = path.substring(1);
+
+        int pos = path.lastIndexOf("/");
+
+        String folder = "";
+        if (pos &gt 0)
+          folder = path.substring(0, pos);
+
+        System.out.println(folder);
+
+        File dir = new File(folder);
+
+        if (!dir.exists())
+          dir.mkdirs();
+
+        FileWriter fr = new FileWriter(new File(path));
+
+        int ch = 0;
+        while ((ch = in.read()) != -1) {
+          fr.write(ch);
+        }
+
+        in.close();
+        fr.close();
+
+        // update catalog
+        catalog.put(url, lastModified);
+
+        // write catalog to file
+        PrintWriter pw = new PrintWriter(CATALOG_FILENAME);
+
+        // for each item
+        Iterator&ltEntry&ltString, Long&gt&gt it = catalog.entrySet().iterator();
+
+        // loop through iterator
+        while (it.hasNext()) {
+          Map.Entry&ltString, Long&gt pair = (Map.Entry&ltString, Long&gt) it.next();
+          pw.println(pair.getKey() + " " + pair.getValue());
+
+        }
+
+        pw.close(); // close file
+
+      }
+
+    }
+
+    /**
+     * Returns the Last-Modified time associated with the object specified by
+     * the parameter url.
+     *
+     * @param url
+     *            URL of the object
+     * @return the Last-Modified time in millisecond as in Date.getTime()
+     */
+    public long getLastModified(String url) {
+      long millis = 0;
+
+      if (catalog.containsKey(url)) {
+        millis = catalog.get(url);
+      }
+
+      return millis;
+    }
+
+  }
+</code>
+    </pre>
+  </div>
+
+  <div id="javaSec53" class="codeDiv">
+    <pre>
+<code class="java" style="overflow-x: hidden;">
+  /**
+   * A multi-threaded web server to serve web objects to HTTP clients over the Internet.
+   * The server should support non-persistent HTTP. This means that once an HTTP request is served, the server closes the TCP connection.
+   * To inform the client that the connection is closed, include the header line "connection:close" in the server response.
+   * Your server is only required to handle GET requests. It has to check if the requested object is available,
+   * and if so return a copy of the object
+   * to the client. Return responses with the following status codes only:
+   * 200 OK
+   * 400 Bad Request
+   * 404 Not Found
+   * Your web server should be able to handle more than one connection simultaneously. To handle multiple connections, the server has to be multi-threaded.
+   * In the main thread, the server listens on a fixed port. When it receives a TCP connection request, it sets up a TCP connection through another socket
+   * and services the request in a separate worker thread. That is, once the server accepts a connection, it will spawn a new thread to parse the incoming
+   * HTTP request, transmit the object, etc.
+   */
+
+  import java.util.*;
+  import java.io.*;
+  import java.net.InetAddress;
+  import java.net.ServerSocket;
+  import java.net.Socket;
+
+  public class WebServer extends Thread{
+    private volatile boolean shutdown = false;
+    private int port;
+
+    /**
+     * Default constructor to initialize the web server
+     *
+     * @param port
+     *            The server port at which the web server listens &gt 1024
+     *
+     */
+    public WebServer(int port){
+      this.port = port;
+    }
+
+    /**
+     * The main loop of the web server Opens a server socket at the specified
+     * server port Remains in listening mode until shutdown signal
+     *
+     */
+    public void run(){
+    while(!this.shutdown){
+      try{
+
+        ServerSocket serverSocket = new ServerSocket(this.port);
+
+
+        //Wait for clients
+        while(true){
+
+          //Client connects
+          Socket socket = serverSocket.accept();
+
+          //Get client address
+          InetAddress address = socket.getInetAddress();
+
+          //Get client host
+          String hostname = address.getHostName();
+
+          //Print out connection
+          System.out.println(hostname + " connected to server " + " at address " + address.toString() + "\n");
+
+          //Make client thread
+          try{
+            new ClientThread(socket).start();
+          }
+
+          //Client error
+          catch (IOException ex){
+            System.out.println(ex.getMessage());
+          }
+
+        }
+
+      }
+
+      //Server error
+      catch (Exception e){
+        System.out.println("Error: " + e.getMessage());
+      }
+    }
+    }
+
+    /**
+     * Signals the server to shutdown.
+     *
+     */
+    public void shutdown(){
+      this.shutdown = true;
+    }
+
+    //Client Thread
+    class ClientThread extends Thread{
+      private DataOutputStream outputStream;
+      private BufferedReader inputStream;
+
+      ClientThread(Socket socket) throws IOException{
+        //Connect to client streams
+        inputStream = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        outputStream = new DataOutputStream(socket.getOutputStream());
+      }
+
+      //Client thread runs here
+      public void run(){
+
+        try{
+          //Respond to messages from the client
+          String s = inputStream.readLine();
+          System.out.println(s);
+
+          //Get request
+          if (s.toUpperCase().startsWith("GET")){
+            // get file name
+            // GET /index.html HTTP/1.0
+            int pos = 5;
+            int pos2 = s.toUpperCase().indexOf(" HTTP");
+            String filename = s.substring(pos, pos2);
+
+            //Default file
+            if(filename.length() &lt= 0)
+              filename = "index.htm";
+
+            FileInputStream requestedfile = null;
+
+            try{
+              // try to open the file,
+              requestedfile = new FileInputStream(filename);
+            }
+
+            //File open error
+            catch (Exception e){
+              try{
+                //Cannnot open the file send a 404
+                outputStream.writeBytes(constructHeader(404, 0));
+
+                //Close the stream
+                outputStream.close();
+              }
+
+              catch (Exception e2){
+                System.out.println(e2.getMessage());
+              }
+            }
+
+            //Send file to client
+            try{
+              int file_type = 5;
+
+              if (filename.endsWith(".zip") || filename.endsWith(".exe") || filename.endsWith(".tar")) {
+                file_type = 3;
+              } else if (filename.endsWith(".jpg") || filename.endsWith(".jpeg")) {
+                file_type = 1;
+              } else if (filename.endsWith(".gif")) {
+                file_type = 2;
+              } else if (filename.endsWith(".pdf")) {
+                file_type = 4;
+              }
+
+              //Send OK and file type
+              outputStream.writeBytes(constructHeader(200, file_type));
+
+              //Send file
+              while (true){
+
+                //Read char from file
+                int ch = requestedfile.read();
+
+                if (ch == -1){
+                  break;
+                  //End of file
+                }
+
+                //Send to client
+                outputStream.write(ch);
+              }
+
+              //Clean up the files, close open handles
+              outputStream.close();
+              requestedfile.close();
+            }
+
+            catch (Exception e3){
+              System.out.println(e3.getMessage());
+            }
+          }
+
+          //Method not supported
+          else{
+            //Send method not supported header
+            try{
+              outputStream.writeBytes(constructHeader(501, 0));
+              outputStream.close();
+              return;
+            }
+
+            //Catch error
+            catch (Exception e4){
+              System.out.println(e4.getMessage());
+            }
+          }
+
+        } catch (Exception e5){
+
+          System.out.println(e5.getMessage());
+        }
+      }
+
+      //Construct client header
+      private String constructHeader(int return_code, int file_type){
+
+        String s = "HTTP/1.0 ";
+
+        switch (return_code) {
+        case 200:
+          s = s + "200 OK";
+          break;
+        case 400:
+          s = s + "400 Bad Request";
+          break;
+        case 403:
+          s = s + "403 Forbidden";
+          break;
+        case 404:
+          s = s + "404 Not Found";
+          break;
+        case 500:
+          s = s + "500 Internal Server Error";
+          break;
+        case 501:
+          s = s + "501 Not Implemented";
+          break;
+        }
+
+        s = s + "\r\n";
+        s = s + "Connection: close\r\n";
+        s = s + "Server: Threaded WebServer\r\n"; //Server name
+
+        //Send content type
+        switch (file_type){
+
+        case 0:
+          break;
+        case 1:
+          s = s + "Content-Type: image/jpeg\r\n";
+          break;
+        case 2:
+          s = s + "Content-Type: image/gif\r\n";
+        case 3:
+          s = s + "Content-Type: application/x-zip-compressed\r\n";
+        case 4:
+          s = s + "Content-Type: application/pdf\r\n";
+        default:
+          s = s + "Content-Type: text/html\r\n";
+          break;
+        }
+
+        //End of the httpheader
+        s = s + "\r\n";
+
+        return s; //Return header string
+      }
+
+    }
+
+    /**
+     * A simple driver.
+     */
+    public static void main(String[] args){
+      int serverPort = 2225;
+
+      // parse command line args
+      if (args.length == 1){
+        serverPort = Integer.parseInt(args[0]);
+      }
+
+      System.out.println("starting the server on port " + serverPort);
+
+      WebServer server = new WebServer(serverPort);
+
+      server.start();
+      System.out.println("server started. Type \"quit\" to stop");
+      System.out.println(".....................................");
+
+      Scanner keyboard = new Scanner(System.in);
+      while (!keyboard.next().equals("quit"));
+
+      System.out.println();
+      System.out.println("shutting down the server...");
+      server.shutdown();
+      System.out.println("server stopped");
+    }
+
+  }
+</code>
+    </pre>
+  </div>
+
+  <div id="javaSec54" class="codeDiv">
+    <pre>
+<code class="java" style="overflow-x: hidden;">
+  package cpsc441.a3.shared;
+
+  import java.io.DataInputStream;
+  import java.io.DataOutputStream;
+  import java.io.File;
+  import java.io.FileInputStream;
+  import java.net.DatagramPacket;
+  import java.net.DatagramSocket;
+  import java.net.InetAddress;
+  import java.net.Socket;
+  import java.util.Timer;
+
+  public class FastFtp {
+
+    private int windowSize;
+    private int rtoTimer;
+    private int serverUDP;
+    private DatagramSocket UDPsocket;
+    private InetAddress address;
+    private TxQueue q;
+    private Timer timer;
+    private ReceiverThread receiver;
+
+    /**
+     * Constructor to initialize the program
+     *
+     * @param windowSize
+     *            Size of the window for Go-Back_N in terms of segments
+     * @param rtoTimer
+     *            The time-out interval for the retransmission timer
+     */
+    public FastFtp(int windowSize, int rtoTimer) {
+      this.windowSize = windowSize;
+      this.rtoTimer = rtoTimer;
+    }
+
+    /**
+     * Sends the specified file to the specified destination host: 1. send
+     * file/connection infor over TCP 2. start receving thread to process coming
+     * ACKs 3. send file segment by segment 4. wait until transmit queue is
+     * empty, i.e., all segments are ACKed 5. clean up (cancel timer, interrupt
+     * receving thread, close sockets/files)
+     *
+     * @param serverName
+     *            Name of the remote server
+     * @param serverPort
+     *            Port number of the remote server
+     * @param fileName
+     *            Name of the file to be trasferred to the rmeote server
+     */
+    public void send(String serverName, int serverPort, String fileName) {
+      try {
+        // Send file/connection infor over TCP
+        File file = new File(fileName);
+
+        // Open TCP connection to the server
+        Socket clientSocket = new Socket(serverName, serverPort);
+
+        // Get input output streams
+        DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
+        DataInputStream inFromServer = new DataInputStream(clientSocket.getInputStream());
+
+        // Send file name, file length, and local UDP port number to the
+        // Server over TCP
+        outToServer.writeUTF(fileName);
+        outToServer.writeLong(file.length());
+        outToServer.writeInt(serverPort);
+        outToServer.flush();
+
+        // Receive server UDP port number over TCP
+        serverUDP = inFromServer.readInt();
+
+        // Make data gram socket
+        UDPsocket = new DatagramSocket();
+        address = InetAddress.getByName(serverName);
+
+        // Start receving thread to process coming ACKs
+        receiver = new ReceiverThread(UDPsocket, this);
+        receiver.start();
+
+        // Open file
+        FileInputStream fis = new FileInputStream(file);
+
+        // Send file segment by segment
+        int seqNum = 1; // segment sequence number
+
+        // A queue with capacity of 10 segments
+        q = new TxQueue(windowSize);
+
+        // Payload
+        byte[] payload = new byte[100];
+        int numBytes = 0;
+
+        // While not end of file
+        while ((numBytes = fis.read(payload)) != -1) {
+
+          // Create a segment with next sequence number
+          Segment segment = new Segment(seqNum++, payload);
+
+          // Wait while transmission queue is full (i.e., window is full)
+          while (q.isFull());
+
+          // Send the segment and do whatever is necessary for reliable
+          // Transfer
+          processSend(segment);
+
+        }
+
+        // Wait until transmit queue is empty, i.e., all segments are ACKed
+        while (!q.isEmpty())
+          ;
+
+        // Clean up (cancel timer, interrupt receving thread, close
+        // Sockets/files)
+        if (timer != null)
+          timer.cancel();
+        receiver.terminate();
+        UDPsocket.close();
+        clientSocket.close();
+        fis.close();
+      } catch (Exception ex) {
+        System.out.println(ex.getMessage());
+      }
+
+    }
+
+    public synchronized void processSend(Segment seg) {
+
+      // Send seg to the UDP socket
+      // Create a DatagramPacket that can be used to send segment
+
+      try {
+
+        byte[] data = seg.getBytes();
+        DatagramPacket pkt = new DatagramPacket(data, data.length, address, serverUDP);
+        UDPsocket.send(pkt);
+
+        System.out.println("sent packet" + seg.getSeqNum());
+
+        // Add seg to the transmission queue
+        q.add(seg);
+
+        // If this is the first segment in transmission queue, start the
+        // Timer
+        if (seg.getSeqNum() == 1) {
+          timer = new Timer(true);
+          timer.schedule(new TimeoutHandler(this), rtoTimer);
+        }
+      } catch (Exception ex) {
+        System.out.println(ex.getMessage());
+      }
+    }
+
+    public synchronized void processACK(Segment ack) {
+
+      System.out.println("process ack" + ack.getSeqNum());
+
+      if (timer != null)
+        timer.cancel();
+
+      timer = null;
+      /**
+        remove all segements that are acked by this ACK from the transmission
+        queue
+        if there are any pending segments in transmission queue, start the
+        timer
+            **/
+      int size = q.size();
+
+      for (int i = 0; i &lt size; i++) {
+
+        try {
+          Segment segment = q.element();
+          q.remove();
+
+          // ack has no payload
+          if (segment.getSeqNum() != ack.getSeqNum()) {
+
+            // add segment fo re transmit
+            q.add(segment);
+          }
+        }
+
+        catch (InterruptedException e) {
+        }
+
+      }
+
+      if (q.size() &gt 0) {
+        timer = new Timer(true);
+        timer.schedule(new TimeoutHandler(this), rtoTimer);
+      }
+      // }
+    }
+
+    public synchronized void processTimeout() {
+      /**
+        Get the list of all pending segments from the transmission queue
+        Go through the list and send all segments to the UDP socket
+        If there are any pending segments in transmission queue, start the
+        Timer
+          **/
+
+      System.out.println("time out");
+
+      try {
+
+        // Get segments
+        Segment[] segments = q.toArray();
+
+        for (int i = 0; i &lt segments.length; i++) {
+
+          // Re transmit segments
+          byte[] data = segments[i].getBytes();
+          DatagramPacket pkt = new DatagramPacket(data, data.length, address, serverUDP);
+          UDPsocket.send(pkt);
+          System.out.println("time out sent packet" + segments[i].getSeqNum());
+
+        }
+
+        // Restart timer
+        if (segments.length &gt 0)
+        {
+          timer = new Timer(true);
+          timer.schedule(new TimeoutHandler(this), rtoTimer);
+        }
+
+      } catch (Exception ex) {
+        System.out.println(ex.getMessage());
+      }
+
+    }
+
+    /**
+     * A simple test driver
+     *
+     */
+    public static void main(String[] args) {
+      // all srguments should be provided
+      // as described in the assignment description
+      if (args.length != 5) {
+        System.out.println("incorrect usage, try again.");
+        System.out.println("usage: FastFtp server port file window timeout");
+        System.exit(1);
+      }
+
+      // parse the command line arguments
+      // assume no errors
+      String serverName = args[0];
+      int serverPort = Integer.parseInt(args[1]);
+      String fileName = args[2];
+      int windowSize = Integer.parseInt(args[3]);
+      int timeout = Integer.parseInt(args[4]);
+
+      // send the file to server
+      FastFtp ftp = new FastFtp(windowSize, timeout);
+      System.out.printf("sending file \'%s\' to server...\n", fileName);
+      ftp.send(serverName, serverPort, fileName);
+      System.out.println("file transfer completed.");
+    }
+  }
+</code>
+    </pre>
+  </div>
+
+  <div id="javaSec55" class="codeDiv">
+    <pre>
+<code class="java" style="overflow-x: hidden;">
+  import java.net.DatagramPacket;
+  import java.net.DatagramSocket;
+
+  public class ReceiverThread extends Thread {
+
+    private DatagramSocket socket;
+    private FastFtp fastFtp;
+    private boolean terminated = false;
+
+    // Define constructor
+    public ReceiverThread(DatagramSocket socket, FastFtp fastFtp) {
+      this.socket = socket;
+      this.fastFtp = fastFtp;
+    }
+
+    // Terminate
+    public void terminate() {
+      terminated = true;
+    }
+
+    // The run method
+    public void run() {
+
+      // while not terminated:
+      while (!terminated) {
+        try {
+
+          // 1. receive a DatagramPacket pkt from UDP socket
+          byte[] buffer = new byte[Segment.MAX_SEGMENT_SIZE];
+          DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+          socket.receive(packet);
+
+          // 2. call processAck() in the main class to process pkt
+          byte[] bytes = packet.getData();
+          Segment segment = new Segment(bytes);
+          System.out.println("receive packet " + segment.getSeqNum());
+          fastFtp.processACK(segment);
+
+        } catch (Exception ex) {
+          System.out.println(ex.getMessage());
+        }
+
+      }
+    }
+  }
+</code>
+    </pre>
+  </div>
+
+  <div id="javaSec56" class="codeDiv">
+    <pre>
+<code class="java" style="overflow-x: hidden;">
+  import java.io.*;
+  import java.io.IOException;
+  import java.net.DatagramPacket;
+  import java.net.DatagramSocket;
+  import java.net.InetAddress;
+  import java.net.ServerSocket;
+  import java.net.Socket;
+  import java.net.SocketException;
+
+  public class UDPServer implements Runnable {
+
+    public void run() {
+
+      byte[] in;
+      byte[] out;
+      DatagramSocket datagramSocket = null;
+
+      try {
+
+        datagramSocket = new DatagramSocket(10000);
+
+        System.out.println("waiting for connections");
+
+        ServerSocket serverSocket = new ServerSocket(2225);
+
+        Socket connectionSocket = serverSocket.accept();
+        DataInputStream inFromClient = new DataInputStream(connectionSocket.getInputStream());
+        DataOutputStream outToClient = new DataOutputStream(connectionSocket.getOutputStream());
+
+
+              // Receive from client
+        String filename = inFromClient.readUTF();
+        long fileLength = inFromClient.readLong();
+        int serverPort = inFromClient.readInt();
+
+        System.out.println("Received from client: " + filename + " " + fileLength + " " + serverPort);
+
+        // Send back udp port to client
+        outToClient.writeInt(10000);
+
+      } catch (IOException ex) {
+
+        System.out.println(ex.getMessage());
+        System.exit(0);
+      }
+
+      // Receive udp mesages
+      int count = 0;
+      while (true) {
+        try {
+
+          in = new byte[1024];
+          out = new byte[1024];
+
+          // Create our inbound datagram packet
+          DatagramPacket receivedPacket = new DatagramPacket(in, in.length);
+          datagramSocket.receive(receivedPacket);
+
+          // Get data
+          String text = new String(receivedPacket.getData());
+          System.out.println("String Received: " + text);
+
+
+                  // Retrieve the IP Address and port number of the datagram
+          // Packet we've just received
+          InetAddress IPAddress = receivedPacket.getAddress();
+          int port = receivedPacket.getPort();
+
+          // Create a DatagramPacket which will return our message back to
+          // As a ACK skip some messages
+          if ((count++) % 4 != 0) {
+            DatagramPacket sendPacket = new DatagramPacket(in, in.length, IPAddress, port);
+            datagramSocket.send(sendPacket);
+          }
+
+        } catch (IOException ex) {
+          System.out.println(ex.getMessage());
+          datagramSocket.close();
+          System.exit(0);
+        }
+
+      }
+    }
+
+    // Start UDP server
+    public static void main(String[] args) throws SocketException {
+
+      new Thread(new UDPServer()).start();
+    }
+
+  }
+</code>
+    </pre>
+  </div>
+
+  <div id="pdfSec1" class="codeDiv">
+      <embed src="imgs/418Assigment1(1).pdf" width="100%" height="700px" type="application/pdf" style="display: inline-block;">
+  </div>
+
+  <div id="pdfSec2" class="codeDiv">
+      <embed src="imgs/418Assignment2(1).pdf" width="100%" height="700px" type="application/pdf" style="display: inline-block;">
+  </div>
+
+  <div id="pdfSec3" class="codeDiv">
+      <embed src="imgs/418Assignment3(1).pdf" width="100%" height="700px" type="application/pdf" style="display: inline-block;">
+  </div>
+
+  <div id="pdfSec4" class="codeDiv">
+      <embed src="imgs/PMAT_315_Assignment_1.pdf" width="100%" height="700px" type="application/pdf" style="display: inline-block;">
+  </div>
+
+  <div id="pdfSec5" class="codeDiv">
+      <embed src="imgs/PMAT_315_Assignment_2.pdf" width="100%" height="700px" type="application/pdf" style="display: inline-block;">
+  </div>
+
 </div>
 <script type="text/javascript">
 	function showVis(id){
 
 		var one = id.getAttribute('id');
 
-	    var x = document.getElementById("javaSec1");
-	    var y = document.getElementById("javaSec2");
+    var x = document.getElementById("javaSec1");
+    var y = document.getElementById("javaSec2");
 		var z = document.getElementById("javaSec3");
 		var a = document.getElementById("javaSec4");
 		var b = document.getElementById("javaSec5");
@@ -13382,6 +15879,22 @@ code {
 		var ai33 = document.getElementById("javaSec48");
 		var ai34 = document.getElementById("javaSec49");
 		var ai35 = document.getElementById("javaSec50");
+    var py1 = document.getElementById("pySec1");
+    var py2 = document.getElementById("pySec2");
+    var py3 = document.getElementById("pySec3");
+    var py4 = document.getElementById("pySec4");
+    var py5 = document.getElementById("pySec5");
+    var nw1 = document.getElementById("javaSec51");
+    var nw2 = document.getElementById("javaSec52");
+    var nw3 = document.getElementById("javaSec53");
+    var nw4 = document.getElementById("javaSec54");
+    var nw5 = document.getElementById("javaSec55");
+    var nw6 = document.getElementById("javaSec56");
+    var pdf1 = document.getElementById("pdfSec1");
+    var pdf2 = document.getElementById("pdfSec2");
+    var pdf3 = document.getElementById("pdfSec3");
+    var pdf4 = document.getElementById("pdfSec4");
+    var pdf5 = document.getElementById("pdfSec5");
 
 		x.style.display = "none";
 		y.style.display = "none";
@@ -13442,6 +15955,22 @@ code {
 		ai33.style.display = "none";
 		ai34.style.display = "none";
 		ai35.style.display = "none";
+    py1.style.display = "none";
+    py2.style.display = "none";
+    py3.style.display = "none";
+    py4.style.display = "none";
+    py5.style.display = "none";
+    nw1.style.display = "none";
+    nw2.style.display = "none";
+    nw3.style.display = "none";
+    nw4.style.display = "none";
+    nw5.style.display = "none";
+    nw6.style.display = "none";
+    pdf1.style.display = "none";
+    pdf2.style.display = "none";
+    pdf3.style.display = "none";
+    pdf4.style.display = "none";
+    pdf5.style.display = "none";
 
 		switch(one){
 			case "ins":
@@ -13621,6 +16150,54 @@ code {
 			case "ai35":
 				ai35.style.display = "block";
 				break;
+      case "pyplot":
+        py1.style.display = "block";
+        break;
+      case "pypm":
+        py2.style.display = "block";
+        break;
+      case "gmc":
+        py3.style.display = "block";
+        break;
+      case "gmg":
+        py4.style.display = "block";
+        break;
+      case "gml":
+        py5.style.display = "block";
+        break;
+      case "nw1":
+        nw1.style.display = "block";
+        break;
+      case "nw2":
+        nw2.style.display = "block";
+        break;
+      case "nw3":
+        nw3.style.display = "block";
+        break;
+      case "nw4":
+        nw4.style.display = "block";
+        break;
+      case "nw5":
+        nw5.style.display = "block";
+        break;
+      case "nw6":
+        nw6.style.display = "block";
+        break;
+      case "C1":
+        pdf1.style.display = "block";
+        break;
+      case "C2":
+        pdf2.style.display = "block";
+        break;
+      case "C3":
+        pdf3.style.display = "block";
+        break;
+      case "M1":
+        pdf4.style.display = "block";
+        break;
+      case "M2":
+        pdf5.style.display = "block";
+        break;
 			default:
 				alert("Could not get ID");
 				break;

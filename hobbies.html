@@ -4,6 +4,8 @@
 <title>Josh Dow</title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdn.rawgit.com/Fugiman/Twitch-Channel-Status/1d74252edf89110507cbf3088f9c3eaa38fac9d3/twitch-channel-status.min.js" data-online-image="imgs/twitchON.PNG" data-offline-image="imgs/twitchOFF.PNG"></script>
 <style>
 * {
   box-sizing: border-box;
@@ -30,40 +32,44 @@ body {
 }
 
 /* Sticky navbar - toggles between relative and fixed, depending on the scroll position. It is positioned relative until a given offset position is met in the viewport - then it "sticks" in place (like position:fixed). The sticky value is not supported in IE or Edge 15 and earlier versions. However, for these versions the navbar will inherit default position */
-.navbar {
+.navbar2 {
   overflow: hidden;
   background-color: #0074D9;
   position: sticky;
   position: -webkit-sticky;
   top: 0;
+  z-index: 8;
+  height: 75px;
 }
 
 /* Style the navigation bar links */
-.navbar a {
+.navbar2 a {
   float: left;
   display: block;
   color: white;
   text-align: center;
-  padding: 14px 20px;
+  padding: 28px 20px;
   text-decoration: none;
+  height: 75px;
 }
 
-
 /* Right-aligned link */
-.navbar a.right {
+.navbar2 a.right {
   float: right;
 }
 
 /* Change color on hover */
-.navbar a:hover {
+.navbar2 a:hover {
   background-color: darkgray;
   color: #DDDDDD;
+  height: 75px;
 }
 
 /* Active/current link */
-.navbar a.active {
+.navbar2 a.active {
   background-color: #DDDDDD;
   color: #001f3f;
+  height: 75px;
 }
 
 /* Column container */
@@ -80,8 +86,9 @@ body {
   -ms-flex: 30%; /* IE10 */
   flex: 30%;
   background-color: #001f3f;
-  padding: 20px;
+  padding-left: 5px;
   color: white;
+  border-right: 3px solid #0074d9;
 }
 
 /* Main column */
@@ -102,17 +109,21 @@ body {
 }
 
 /* Footer */
-.footer {
-  position: all;
+.footer2 {
+  position: relative;
   right: 0;
   bottom: 0;
   left: 0;
   padding: 20px;
   text-align: center;
   background: #001f2f;
-  height: 50px;
+  max-height: 130.35px;
+  min-height: 130.35px;
   font-size: small;
   color: white;
+  z-index: 0;
+  width: 100%;
+  height: 100%
 }
 
 #ac-wrapper {
@@ -140,6 +151,11 @@ body {
     left: 500px;
 }
 
+.profImg img {
+  display: block;
+  margin: 0 auto;
+}
+
 /* Responsive layout - when the screen is less than 700px wide, make the two columns stack on top of each other instead of next to each other */
 @media screen and (max-width: 700px) {
   .row {   
@@ -157,36 +173,101 @@ body {
 </style>
 </head>
 <body>
-<div class="header">
-  <h1>Hobbies & Interests</h1>
-  <p>Other things I like</p>
-</div>
-
-<div class="navbar">
+<div class="navbar2">
   <a href="index.html">Home</a>
   <a href="work.html">Work</a>
-  <a href="extracurs.html">Extra-curriculars</a>
-  <a href="hobbies.html" class="active">Hobbies/Interests</a>
-  <a href="#">Resume</a>
+  <a href="extracurs.html">Extracurriculars</a>
+  <a href="#" class="active">Hobbies/Interests</a>
+  <a href="resume.html">Resume</a>
   <a href="#">Cirriculum Vitae</a>
 </div>
-  <div class="main" style="overflow: auto;">
-    <h2>TITLE HEADING</h2>
-    <h5>Title description, Dec 7, 2017</h5>
-    <div class="fakeimg" style="height:200px;">Image</div>
-    <p>Some text..</p>
-    <p>Sunt in culpa qui officia deserunt mollit anim id est laborum consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco.</p>
-    <br>
-    <h2>TITLE HEADING</h2>
-    <h5>Title description, Sep 2, 2017</h5>
-    <div class="fakeimg" style="height:200px;">Image</div>
-    <p>Some text..</p>
-    <p>Sunt in culpa qui officia deserunt mollit anim id est laborum consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco.</p>
-  </div>
-</div>
-<div class="footer">
-  Josh Dow
-</div>
+  <div class="row">
+    <div class="side">
+        <div class="profImg">
+          <h2 style="text-align: center; z-index: 4"><u>Twitch</u></h2>
+          <img src="imgs/Comparabl2.png" width="50%" style="z-index: 3; margin-top: auto;">
+          <p>I started streaming about 3 years ago. Its something I love to do but often dont have the time to put significant effort into.
+          I am a Twitch affiliate which is a great stepping stone and hope to get to partner status soon.</p>
+          <p> Streaming is one of my favourite things to do as it lets me talk and share stories with people I normally would never meet. It also lets me extend my love of teaching to a broader audience.</p>
+          <p>My streams often consist of me playing my favourite video game at the time or I am working on a project/doing an educational streaming on topics that I find interesting. This allows me to teach others and share some cool facts while also reinforcing the material that I have learned.</p>
+          <p>In this column you will find my logo at the very top. Its an expression of my love for math as well as gaming, which has always been an
+          outlet for me.</p>
+          <p>Although not extremely impressive, my streams often reach an audience of 20-300(max to date) concurrent viewers. Below you will find some of
+          the intro videos I have made for my channel:</p>
+          <div style="text-align: center;">
+            <video width="90%" controls poster="imgs/Comparabl2.png">
+              <source src="imgs/style49NOTAG[14].mp4" type="video/mp4">
+            </video>
+            <br>
+            <video width="90%" controls poster="imgs/Comparabl2.png">
+              <source src="imgs/style154NOTAG[15].mp4" type="video/mp4">
+            </video>
+            <br>
+            <video width="90%" controls poster="imgs/Comparabl2.png">
+              <source src="imgs/style88NOTAG[16].mp4" type="video/mp4">
+            </video>
+            <br>
+            <video width="90%" controls poster="imgs/Comparabl2.png">
+              <source src="imgs/style182NOTAG[17].mp4" type="video/mp4">
+            </video>
+            <br>
+            <video width="90%" controls poster="imgs/Comparabl2.png">
+              <source src="imgs/style200NOTAG[18].mp4" type="video/mp4">
+            </video>
+          </div>
+        </div>
+    </div>
+    <div class="side">
+        <div class="profImg">
+          <h2 style="text-align: center;"><u>Physics/Astronomy</u></h2>
+          <p>As one of my favourite subject in high-school & university I have always found the things that are too small to see 
+          and the things that are too big to comprehend fascinating. I had the privilege of being able to watch the first successful Space-X launch
+          and landing at the John F. Kennedy Space Center on December 21st 2015. I have attached a video below:</p>
 
+          <div style="text-align: center;">
+            <video width="90%" height="400px" controls>
+              <source src="imgs/goingup.mp4">
+            </video>
+            <br>
+          </div>
+          <p> and here is a video of it returning to Earth:</p>
+          <div style="text-align: center;">
+            <video width="90%" height="400px" controls>
+              <source src="imgs/comingDown.mp4">
+            </video>
+            <br>
+          </div>
+          <p>I am fortunate to have knowledge of programming as well because its allowed me to conduct many modeled simulations to gain 
+          better undertstanding of how things work. Its one thing to have a mathematical expression to show something is true, but another
+          to see it with your own eyes.</p>
+        </div>
+    </div>
+    <div class="side" style="border-right: none;">
+      
+    </div>
+  </div>
+
+<div class="footer2" style="display: inline-block;">
+    <div style="display:inline-block; width:5%; padding-top: 20px;">
+        <p style="text-align:center;">
+        <a href="https://github.com/joshuadow"><img src="imgs/gh.jpg" width="80%"></a>
+        </p>
+    </div>
+    <div style="display:inline-block; width:6%; padding-top: 0px;">
+        <p style="text-align:center">
+      <a href="https://www.instagram.com/joshdow/?hl=en"><img src="imgs/insta.JPG" width="80%"></a> 
+       </p>
+    </div>
+    <div style="display:inline-block; width:5%; padding-top: 0px;">
+        <p style="text-align:center">
+      <a href="https://www.twitch.tv/Comparabl"><img data-twitch-channel="Comparabl" width="80%"></a> 
+       </p>
+    </div>
+    <div style="display:inline-block; width:5%; padding-top: 0px;">
+        <p style="text-align:center">
+      <a href="mailto:josh_dow@outlook.com"><img src="imgs/mail.PNG" width="90%"></a> 
+       </p>
+    </div>
+</div>
 </body>
 </html>

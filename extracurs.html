@@ -85,9 +85,10 @@ body {
 .side {
   -ms-flex: 30%; /* IE10 */
   flex: 30%;
-  background-color: darkgray;
-  padding: 0px;
-  color: #001f2f;
+  background-color: #001f3f;
+  padding-left: 5px;
+  color: white;
+  border-right: 3px solid #0074d9;
 }
 
 /* Main column */
@@ -150,7 +151,10 @@ body {
     left: 500px;
 }
 
-
+.profImg img {
+  display: block;
+  margin: 0 auto;
+}
 /* Responsive layout - when the screen is less than 700px wide, make the two columns stack on top of each other instead of next to each other */
 @media screen and (max-width: 700px) {
   .row {   
@@ -178,21 +182,73 @@ body {
 </div>
   <div class="row">
     <div class="side">
-      <div style="text-align: center; border-right: 3px solid #0074d9">
-        <h2><u>Swimming</u></h2>
-        <img src="imgs/swim.JPG" width="80%">
+        <div class="profImg">
+          <h2 style="text-align: center;"><u>Swimming</u></h2>
+          <img src="imgs/swim.JPG" width="80%">
+          <h3>Age Group Highlights</h3>
+          <ul style="list-style-type: disc; list-style-position: inside;">
+            <li>8 national gold</li>
+            <li>6 national silver</li>
+            <li>2 national bronze</li>
+            <li>20+ provincial gold</li>
+            <li>10+ provincial records</li>
+            <li>2013-2014 Swim Alberta Outlying Area Swimmer Of The Year</li>
+            <li>25 FMSC club records</li>
+          </ul>
+          <h3>Senior Highlights</h3>
+            <ul style="list-style-type: disc; list-style-position: inside;">
+              <li>1 National gold</li>
+              <li>1 National bronze</li>
+              <li>1 CIS gold</li>
+              <li>CIS national record</li>
+              <li>1 CIS silver</li>
+              <li>1 Canada-West gold</li>
+              <li>2 Canada-West silver</li>
+              <li>3 Canada-West bronze</li>
+              <li>Swimming Canada Male Backstroke Award</li>
+              <li>2 First Team All-Canadian</li>
+              <li>1 Second Team All-Canadian</li>
+          </ul>
       </div>
     </div>
     <div class="side">
-      <div style="text-align: center; border-right: 3px solid #0074d9">
-        <h2><u>Tutoring</u></h2>
-        <img src="imgs/math.png" width="80%">
-      </div>
+        <div class="profImg">
+          <h2 style="text-align: center;"><u>Tutoring</u></h2>
+          <img src="imgs/math.png" width="80%">
+          <p>I have been tutoring for over a decade. Some of the topics I have tutored in:</p>
+          <ul style="list-style-type: disc; list-style-position: inside;">
+            <li>High-School Math</li>
+            <li>High-School Physics</li>
+            <li>High-School Biology</li>
+            <li>High-School Chemistry</li>
+            <li>Calculus I,II,III,IV</li>
+            <li>Linear Algebra I,II,III,IV</li>
+            <li>Programming</li>
+            <li>Computability</li>
+            <li>Algorithms</li>
+            <li>Databases</li>
+            <li>Artificial Intelligence</li>
+            <li>Logic/Circuits</li>
+            <li>Physics</li>
+            <li>Algebra</li>
+            <li>Statistics</li>
+          </ul>
+          <p>In addition to academic tutoring, I have also taught many kids ways to improve their swimming through 
+          technique and different methods of strength training.</p>
+          <p>I was also a swim-instructor for several years where I taught
+        all ages how to "swim to survive". This involved lifesaving techniques, first aid, and CPR.</p>
+        </div>
     </div>
     <div class="side">
-      <div style="text-align: center;">
-        <h2><u>Lazarus Consulting</u></h2>
+      <div class="profImg">
+        <h2 style="text-align: center;"><u>Lazarus Consulting</u></h2>
         <img src="imgs/lazarus.JPG" width="80%">
+        <p>Although this endeavour was short lived, I still take great pride in the work I put into this project.</p>
+        <p>I started this company in 2018 and had a few clients which I did software consulting/development for. This was
+        just a side project unfortunately as I was getting swamped in school a bit and had to put this on hold. I still love
+      the idea of doing development/consulting and hopefully I get to do it again either through my own or a different company.</p>
+      <p>I had designed the logo, website, email system and many of the other aspects that went into this. It was a ton of fun and since then
+      I have moved onto different projects (like this website).</p>
       </div>
     </div>
   </div>

@@ -395,6 +395,33 @@ code {
 }
 </style>
 </head>
+<script type="text/javascript">
+  function ifIAmLive(){
+    if(document.getElementById("logo").src.match("imgs/twitchON.PNG")){
+      document.getElementById("MS").style.visibility="visible";
+    }
+  }
+</script>
+<script>
+  var r=255,g=0,b=0;
+
+setInterval(function(){
+  if(r > 0 && b == 0){
+    r--;
+    g++;
+  }
+  if(g > 0 && r == 0){
+    g--;
+    b++;
+  }
+  if(b > 0 && g == 0){
+    r++;
+    b--;
+  }
+  $("#MS").text("I'm Live!");
+  $("#MS").css("background-color","rgb("+r+","+g+","+b+")");
+  },10);
+</script>
 <body>
 	<div class="navbar2">
 	  <a href="index.html">Home</a>
@@ -403,6 +430,7 @@ code {
 	  <a href="hobbies.html">Hobbies/Interests</a>
 	  <a href="resume.html">Resume</a>
 	  <a href="#">Cirriculum Vitae</a>
+    <a href="#" id="MS" style="visibility: hidden;">I'm Live!</a>
 </div>
 <link rel="stylesheet" href="highlight/styles/a11y-dark.css"/>
 <script src="highlight/highlight.pack.js"></script>
@@ -414,9 +442,9 @@ code {
     		<li>
     			<a href="#">Reflective Object Inspector</a>
     			<ul class="third-level-menu">
-    				<li><a href="javascript:;" id="ins" onclick="showVis(this);return false;">Inspector.java</li>
-					<li><a href="javascript:;" id="ri" onclick="showVis(this);return false;">ReflectiveInspector.java</li>
-					<li><a href="javascript:;" id="it" onclick="showVis(this);return false;">InspectorTest.java</li>
+    			 <li><a href="javascript:;" id="ins" onclick="showVis(this);return false;">Inspector.java</li>
+					 <li><a href="javascript:;" id="ri" onclick="showVis(this);return false;">ReflectiveInspector.java</li>
+					 <li><a href="javascript:;" id="it" onclick="showVis(this);return false;">InspectorTest.java</li>
     			</ul>
     		</li>
     		<li>

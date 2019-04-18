@@ -171,6 +171,33 @@ body {
 }
 </style>
 </head>
+<script type="text/javascript">
+  function ifIAmLive(){
+    if(document.getElementById("logo").src.match("imgs/twitchON.PNG")){
+      document.getElementById("MS").style.visibility="visible";
+    }
+  }
+</script>
+<script>
+  var r=255,g=0,b=0;
+
+setInterval(function(){
+  if(r > 0 && b == 0){
+    r--;
+    g++;
+  }
+  if(g > 0 && r == 0){
+    g--;
+    b++;
+  }
+  if(b > 0 && g == 0){
+    r++;
+    b--;
+  }
+  $("#MS").text("I'm Live!");
+  $("#MS").css("background-color","rgb("+r+","+g+","+b+")");
+  },10);
+</script>
 <body>
 <div class="navbar2">
   <a href="index.html">Home</a>
@@ -179,6 +206,7 @@ body {
   <a href="#" class="active">Hobbies/Interests</a>
   <a href="resume.html">Resume</a>
   <a href="#">Cirriculum Vitae</a>
+  <a href="#" id="MS" style="visibility: hidden;">I'm Live!</a>
 </div>
   <div class="row">
     <div class="side">
@@ -188,29 +216,29 @@ body {
           <p>I started streaming about 3 years ago. Its something I love to do but often dont have the time to put significant effort into.
           I am a Twitch affiliate which is a great stepping stone and hope to get to partner status soon.</p>
           <p> Streaming is one of my favourite things to do as it lets me talk and share stories with people I normally would never meet. It also lets me extend my love of teaching to a broader audience.</p>
-          <p>My streams often consist of me playing my favourite video game at the time or I am working on a project/doing an educational streaming on topics that I find interesting. This allows me to teach others and share some cool facts while also reinforcing the material that I have learned.</p>
+          <p>My streams often consist of me working on a project/doing an educational stream on topics that I find interesting. This allows me to teach others and share some cool facts while also reinforcing the material that I have learned.</p>
           <p>In this column you will find my logo at the very top. Its an expression of my love for math as well as gaming, which has always been an
           outlet for me.</p>
           <p>Although not extremely impressive, my streams often reach an audience of 20-300(max to date) concurrent viewers. Below you will find some of
           the intro videos I have made for my channel:</p>
           <div style="text-align: center;">
-            <video width="90%" controls poster="imgs/Comparabl2.png">
+            <video width="90%" controls>
               <source src="imgs/style49NOTAG[14].mp4" type="video/mp4">
             </video>
             <br>
-            <video width="90%" controls poster="imgs/Comparabl2.png">
+            <video width="90%" controls>
               <source src="imgs/style154NOTAG[15].mp4" type="video/mp4">
             </video>
             <br>
-            <video width="90%" controls poster="imgs/Comparabl2.png">
+            <video width="90%" controls>
               <source src="imgs/style88NOTAG[16].mp4" type="video/mp4">
             </video>
             <br>
-            <video width="90%" controls poster="imgs/Comparabl2.png">
+            <video width="90%" controls>
               <source src="imgs/style182NOTAG[17].mp4" type="video/mp4">
             </video>
             <br>
-            <video width="90%" controls poster="imgs/Comparabl2.png">
+            <video width="90%" controls>
               <source src="imgs/style200NOTAG[18].mp4" type="video/mp4">
             </video>
           </div>
@@ -219,19 +247,19 @@ body {
     <div class="side">
         <div class="profImg">
           <h2 style="text-align: center;"><u>Physics/Astronomy</u></h2>
-          <p>As one of my favourite subject in high-school & university I have always found the things that are too small to see 
+          <p>As one of my favourite subjects in high-school & university I have always found the things that are too small to see 
           and the things that are too big to comprehend fascinating. I had the privilege of being able to watch the first successful Space-X launch
           and landing at the John F. Kennedy Space Center on December 21st 2015. I have attached a video below:</p>
 
           <div style="text-align: center;">
-            <video width="90%" height="400px" controls>
+            <video width="90%" height="300px" controls>
               <source src="imgs/goingup.mp4">
             </video>
             <br>
           </div>
           <p> and here is a video of it returning to Earth:</p>
           <div style="text-align: center;">
-            <video width="90%" height="400px" controls>
+            <video width="90%" height="300px" controls>
               <source src="imgs/comingDown.mp4">
             </video>
             <br>

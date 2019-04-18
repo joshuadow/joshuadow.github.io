@@ -170,6 +170,33 @@ body {
 }
 </style>
 </head>
+<script type="text/javascript">
+  function ifIAmLive(){
+    if(document.getElementById("logo").src.match("imgs/twitchON.PNG")){
+      document.getElementById("MS").style.visibility="visible";
+    }
+  }
+</script>
+<script>
+  var r=255,g=0,b=0;
+
+setInterval(function(){
+  if(r > 0 && b == 0){
+    r--;
+    g++;
+  }
+  if(g > 0 && r == 0){
+    g--;
+    b++;
+  }
+  if(b > 0 && g == 0){
+    r++;
+    b--;
+  }
+  $("#MS").text("I'm Live!");
+  $("#MS").css("background-color","rgb("+r+","+g+","+b+")");
+  },10);
+</script>
 <body>
 <div class="navbar2">
   <a href="index.html">Home</a>
@@ -178,6 +205,7 @@ body {
   <a href="hobbies.html">Hobbies/Interests</a>
   <a href="resume.html">Resume</a>
   <a href="#">Cirriculum Vitae</a>
+  <a href="#" id="MS" style="visibility: hidden;">I'm Live!</a>
 </div>
   <div class="row">
     <div class="side">

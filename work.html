@@ -227,9 +227,8 @@ pre {
   background-color: #2b2b2b;
   border: 0px solid white;
   align-self: center;
-  max-height: 600px;
+  max-height: inherit;
   position: relative;
-  min-height: 600px;
   padding-top: 10px;
   padding-bottom: 0px;
   width: 100%;
@@ -237,8 +236,9 @@ pre {
 }
 
 code {
-	overflow-y: hidden;
-	overflow-x: hidden; 
+	overflow-y: auto;
+	overflow-x: hidden;
+  height: 62vh;
 }
 
 .dropdown {
@@ -376,6 +376,8 @@ code {
   margin: 0 auto;
   border: thick black;
   border-style: double;
+  position: inherit;
+  height: auto;
 }
 
 
@@ -618,7 +620,7 @@ setInterval(function(){
     </ul>
   </li>
 </ul>
-<div style="background-color: white; position: inherit; overflow-x: none; align-content: center; padding-top: 50px;">
+<div style="background-color: white; position: inherit; overflow-x: none; align-content: center; padding-top: 50px; max-height: 550px;">
 	<div id="javaSec1" class="codeDiv">
 	<pre>
 <code class="java" style="overflow-x: hidden;">

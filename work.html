@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script src="codeStorage.js"></script>
 <title>Josh Dow</title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -14,7 +15,6 @@
 body {
   font-family: Arial, Helvetica, sans-serif;
   margin: 0;
-  overflow: hidden;
 }
 
 /* Header/logo Title */
@@ -162,12 +162,11 @@ body {
   left:0;
   text-align: center;
   background: #001f2f;
-  min-height: 130.35px;
-  max-height: 130.35px;
   font-size: small;
   color: white;
   z-index: 0;
   width: 100%;
+  padding: 20px;
 }
 /* Style the tab */
 .tab {
@@ -682,6 +681,13 @@ setInterval(function(){
   </li>
 </ul>
 <div style="background-color: white; position: inherit; overflow-x: none; align-content: center; padding-top: 50px; height: 80vh;">
+  <div id="totalContainer" class="codeDiv">
+    <pre>
+<code id="editor">
+  <!--do something-->
+</code>
+    </pre>
+  </div>
 	<div id="javaSec1" class="codeDiv">
 	<pre>
 <code class="java" style="overflow-x: hidden;">
@@ -15916,389 +15922,398 @@ setInterval(function(){
 	function showVis(id){
 
 		var one = id.getAttribute('id');
+    console.log(one, codeStore, document.getElementById('editor'))
+    document.getElementById('editor').className = codeStore[one].type + " hljs"
 
-    var x = document.getElementById("javaSec1");
-    var y = document.getElementById("javaSec2");
-		var z = document.getElementById("javaSec3");
-		var a = document.getElementById("javaSec4");
-		var b = document.getElementById("javaSec5");
-		var c = document.getElementById("javaSec6");
-		var d = document.getElementById("javaSec7");
-		var e = document.getElementById("javaSec8");
-		var f = document.getElementById("javaSec9");
-		var g = document.getElementById("javaSec10");
-		var h = document.getElementById("javaSec11");
-		var i = document.getElementById("javaSec12");
-		var xx = document.getElementById("cppSec1");
-		var yy = document.getElementById("cSec1");
-		var zz = document.getElementById("cSec2");
-		var aa = document.getElementById("cSec3");
-		var bb = document.getElementById("cSec4");
-		var cc = document.getElementById("cSec5");
-		var dd = document.getElementById("cSec6");
-		var ee = document.getElementById("cSec7");
-		var ff = document.getElementById("cSec8");
-		var gg = document.getElementById("javaSec13");
-		var hh = document.getElementById("javaSec14");
-		var ii = document.getElementById("javaSec15");
-		var ai1 = document.getElementById("javaSec16");
-		var ai2 = document.getElementById("javaSec17");
-		var ai3 = document.getElementById("javaSec18");
-		var ai4 = document.getElementById("javaSec19");
-		var ai5 = document.getElementById("javaSec20");
-		var ai6 = document.getElementById("javaSec21");
-		var ai7 = document.getElementById("javaSec22");
-		var ai8 = document.getElementById("javaSec23");
-		var ai9 = document.getElementById("javaSec24");
-		var ai10 = document.getElementById("javaSec25");
-		var ai11 = document.getElementById("javaSec26");
-		var ai12 = document.getElementById("javaSec27");
-		var ai13 = document.getElementById("javaSec28");
-		var ai14 = document.getElementById("javaSec29");
-		var ai15 = document.getElementById("javaSec30");
-		var ai16 = document.getElementById("javaSec31");
-		var ai17 = document.getElementById("javaSec32");
-		var ai18 = document.getElementById("javaSec33");
-		var ai19 = document.getElementById("javaSec34");
-		var ai20 = document.getElementById("javaSec35");
-		var ai21 = document.getElementById("javaSec36");
-		var ai22 = document.getElementById("javaSec37");
-		var ai23 = document.getElementById("javaSec38");
-		var ai24 = document.getElementById("javaSec39");
-		var ai25 = document.getElementById("javaSec40");
-		var ai26 = document.getElementById("javaSec41");
-		var ai27 = document.getElementById("javaSec42");
-		var ai28 = document.getElementById("javaSec43");
-		var ai29 = document.getElementById("javaSec44");
-		var ai30 = document.getElementById("javaSec45");
-		var ai31 = document.getElementById("javaSec46");
-		var ai32 = document.getElementById("javaSec47");
-		var ai33 = document.getElementById("javaSec48");
-		var ai34 = document.getElementById("javaSec49");
-		var ai35 = document.getElementById("javaSec50");
-    var py1 = document.getElementById("pySec1");
-    var py2 = document.getElementById("pySec2");
-    var py3 = document.getElementById("pySec3");
-    var py4 = document.getElementById("pySec4");
-    var py5 = document.getElementById("pySec5");
-    var nw1 = document.getElementById("javaSec51");
-    var nw2 = document.getElementById("javaSec52");
-    var nw3 = document.getElementById("javaSec53");
-    var nw4 = document.getElementById("javaSec54");
-    var nw5 = document.getElementById("javaSec55");
-    var nw6 = document.getElementById("javaSec56");
-    var pdf1 = document.getElementById("pdfSec1");
-    var pdf2 = document.getElementById("pdfSec2");
-    var pdf3 = document.getElementById("pdfSec3");
-    var pdf4 = document.getElementById("pdfSec4");
-    var pdf5 = document.getElementById("pdfSec5");
+    document.getElementById('editor').innerHTML = codeStore[one] && codeStore[one].code ? codeStore[one].code : 'This section is Empty! '
+    document.getElementById('totalContainer').style.display = "block";
+    document.querySelectorAll('pre code').forEach((block) => {
+      hljs.highlightBlock(block);
+    });
 
-		x.style.display = "none";
-		y.style.display = "none";
-		z.style.display = "none";
-		a.style.display = "none";
-		b.style.display = "none";
-		c.style.display = "none";
-		d.style.display = "none";
-		e.style.display = "none";
-		f.style.display = "none";
-		g.style.display = "none";
-		h.style.display = "none";
-		i.style.display = "none";
-		xx.style.display = "none";
-		yy.style.display = "none";
-		zz.style.display = "none";
-		aa.style.display = "none";
-		bb.style.display = "none";
-		cc.style.display = "none";
-		dd.style.display = "none";
-		ee.style.display = "none";
-		ff.style.display = "none";
-		gg.style.display = "none";
-		hh.style.display = "none";
-		ii.style.display = "none";
-		ai1.style.display = "none";
-		ai2.style.display = "none";
-		ai3.style.display = "none";
-		ai4.style.display = "none";
-		ai5.style.display = "none";
-		ai6.style.display = "none";
-		ai7.style.display = "none";
-		ai8.style.display = "none";
-		ai9.style.display = "none";
-		ai10.style.display = "none";
-		ai11.style.display = "none";
-		ai12.style.display = "none";
-		ai13.style.display = "none";
-		ai14.style.display = "none";
-		ai15.style.display = "none";
-		ai16.style.display = "none";
-		ai17.style.display = "none";
-		ai18.style.display = "none";
-		ai19.style.display = "none";
-		ai20.style.display = "none";
-		ai21.style.display = "none";
-		ai22.style.display = "none";
-		ai23.style.display = "none";
-		ai24.style.display = "none";
-		ai25.style.display = "none";
-		ai26.style.display = "none";
-		ai27.style.display = "none";
-		ai28.style.display = "none";
-		ai29.style.display = "none";
-		ai30.style.display = "none";
-		ai31.style.display = "none";
-		ai32.style.display = "none";
-		ai33.style.display = "none";
-		ai34.style.display = "none";
-		ai35.style.display = "none";
-    py1.style.display = "none";
-    py2.style.display = "none";
-    py3.style.display = "none";
-    py4.style.display = "none";
-    py5.style.display = "none";
-    nw1.style.display = "none";
-    nw2.style.display = "none";
-    nw3.style.display = "none";
-    nw4.style.display = "none";
-    nw5.style.display = "none";
-    nw6.style.display = "none";
-    pdf1.style.display = "none";
-    pdf2.style.display = "none";
-    pdf3.style.display = "none";
-    pdf4.style.display = "none";
-    pdf5.style.display = "none";
 
-		switch(one){
-			case "ins":
-				x.style.display = "block";
-				break;
-			case "ri":
-				y.style.display = "block";
-				break;
-			case "it":
-				z.style.display = "block";
-				break;
-			case "vis":
-				a.style.display = "block";
-				break;
-			case "visc":
-				b.style.display = "block";
-				break;
-			case "ser":
-				c.style.display = "block";
-				break;
-			case "der":
-				d.style.display = "block";
-				break;
-			case "cli":
-				e.style.display = "block";
-				break;
-			case "obj":
-				f.style.display = "block";
-				break;
-			case "objr":
-				g.style.display = "block";
-				break;
-			case "objc":
-				h.style.display = "block";
-				break;
-			case "srv":
-				i.style.display = "block";
-				break;
-			case "AC":
-				xx.style.display = "block";
-				break;
-			case "bof":
-				yy.style.display = "block";
-				break;
-			case "sbof":
-				zz.style.display = "block";
-				break;
-			case "env":
-				aa.style.display = "block";
-				break;
-			case "senv":
-				bb.style.display = "block";
-				break;
-			case "toc":
-				cc.style.display = "block";
-				break;
-			case "stoc":
-				dd.style.display = "block";
-				break;
-			case "fmt":
-				ee.style.display = "block";
-				break;
-			case "sfmt":
-				ff.style.display = "block";
-				break;
-			case "sf":
-				gg.style.display = "block";
-				break;
-			case "df":
-				hh.style.display = "block";
-				break;
-			case "mvs":
-				ii.style.display = "block";
-				break;
-			case "ai1":
-				ai1.style.display = "block";
-				break;
-			case "ai2":
-				ai2.style.display = "block";
-				break;
-			case "ai3":
-				ai3.style.display = "block";
-				break;
-			case "ai4":
-				ai4.style.display = "block";
-				break;
-			case "ai5":
-				ai5.style.display = "block";
-				break;
-			case "ai6":
-				ai6.style.display = "block";
-				break;
-			case "ai7":
-				ai7.style.display = "block";
-				break;
-			case "ai8":
-				ai8.style.display = "block";
-				break;
-			case "ai9":
-				ai9.style.display = "block";
-				break;
-			case "ai10":
-				ai10.style.display = "block";
-				break;
-			case "ai11":
-				ai11.style.display = "block";
-				break;
-			case "ai12":
-				ai12.style.display = "block";
-				break;
-			case "ai13":
-				ai13.style.display = "block";
-				break;
-			case "ai14":
-				ai14.style.display = "block";
-				break;
-			case "ai15":
-				ai15.style.display = "block";
-				break;
-			case "ai16":
-				ai16.style.display = "block";
-				break;
-			case "ai17":
-				ai17.style.display = "block";
-				break;
-			case "ai18":
-				ai18.style.display = "block";
-				break;
-			case "ai19":
-				ai19.style.display = "block";
-				break;
-			case "ai20":
-				ai20.style.display = "block";
-				break;
-			case "ai21":
-				ai21.style.display = "block";
-				break;
-			case "ai22":
-				ai22.style.display = "block";
-				break;
-			case "ai23":
-				ai23.style.display = "block";
-				break;
-			case "ai24":
-				ai24.style.display = "block";
-				break;
-			case "ai25":
-				ai25.style.display = "block";
-				break;
-			case "ai26":
-				ai26.style.display = "block";
-				break;
-			case "ai27":
-				ai27.style.display = "block";
-				break;
-			case "ai28":
-				ai28.style.display = "block";
-				break;
-			case "ai29":
-				ai29.style.display = "block";
-				break;
-			case "ai30":
-				ai30.style.display = "block";
-				break;
-			case "ai31":
-				ai31.style.display = "block";
-				break;
-			case "ai32":
-				ai32.style.display = "block";
-				break;
-			case "ai33":
-				ai33.style.display = "block";
-				break;
-			case "ai34":
-				ai34.style.display = "block";
-				break;
-			case "ai35":
-				ai35.style.display = "block";
-				break;
-      case "pyplot":
-        py1.style.display = "block";
-        break;
-      case "pypm":
-        py2.style.display = "block";
-        break;
-      case "gmc":
-        py3.style.display = "block";
-        break;
-      case "gmg":
-        py4.style.display = "block";
-        break;
-      case "gml":
-        py5.style.display = "block";
-        break;
-      case "nw1":
-        nw1.style.display = "block";
-        break;
-      case "nw2":
-        nw2.style.display = "block";
-        break;
-      case "nw3":
-        nw3.style.display = "block";
-        break;
-      case "nw4":
-        nw4.style.display = "block";
-        break;
-      case "nw5":
-        nw5.style.display = "block";
-        break;
-      case "nw6":
-        nw6.style.display = "block";
-        break;
-      case "C1":
-        pdf1.style.display = "block";
-        break;
-      case "C2":
-        pdf2.style.display = "block";
-        break;
-      case "C3":
-        pdf3.style.display = "block";
-        break;
-      case "M1":
-        pdf4.style.display = "block";
-        break;
-      case "M2":
-        pdf5.style.display = "block";
-        break;
-			default:
-				alert("Could not get ID");
-				break;
-		}
+  //   var x = document.getElementById("javaSec1");
+  //   var y = document.getElementById("javaSec2");
+		// var z = document.getElementById("javaSec3");
+		// var a = document.getElementById("javaSec4");
+		// var b = document.getElementById("javaSec5");
+		// var c = document.getElementById("javaSec6");
+		// var d = document.getElementById("javaSec7");
+		// var e = document.getElementById("javaSec8");
+		// var f = document.getElementById("javaSec9");
+		// var g = document.getElementById("javaSec10");
+		// var h = document.getElementById("javaSec11");
+		// var i = document.getElementById("javaSec12");
+		// var xx = document.getElementById("cppSec1");
+		// var yy = document.getElementById("cSec1");
+		// var zz = document.getElementById("cSec2");
+		// var aa = document.getElementById("cSec3");
+		// var bb = document.getElementById("cSec4");
+		// var cc = document.getElementById("cSec5");
+		// var dd = document.getElementById("cSec6");
+		// var ee = document.getElementById("cSec7");
+		// var ff = document.getElementById("cSec8");
+		// var gg = document.getElementById("javaSec13");
+		// var hh = document.getElementById("javaSec14");
+		// var ii = document.getElementById("javaSec15");
+		// var ai1 = document.getElementById("javaSec16");
+		// var ai2 = document.getElementById("javaSec17");
+		// var ai3 = document.getElementById("javaSec18");
+		// var ai4 = document.getElementById("javaSec19");
+		// var ai5 = document.getElementById("javaSec20");
+		// var ai6 = document.getElementById("javaSec21");
+		// var ai7 = document.getElementById("javaSec22");
+		// var ai8 = document.getElementById("javaSec23");
+		// var ai9 = document.getElementById("javaSec24");
+		// var ai10 = document.getElementById("javaSec25");
+		// var ai11 = document.getElementById("javaSec26");
+		// var ai12 = document.getElementById("javaSec27");
+		// var ai13 = document.getElementById("javaSec28");
+		// var ai14 = document.getElementById("javaSec29");
+		// var ai15 = document.getElementById("javaSec30");
+		// var ai16 = document.getElementById("javaSec31");
+		// var ai17 = document.getElementById("javaSec32");
+		// var ai18 = document.getElementById("javaSec33");
+		// var ai19 = document.getElementById("javaSec34");
+		// var ai20 = document.getElementById("javaSec35");
+		// var ai21 = document.getElementById("javaSec36");
+		// var ai22 = document.getElementById("javaSec37");
+		// var ai23 = document.getElementById("javaSec38");
+		// var ai24 = document.getElementById("javaSec39");
+		// var ai25 = document.getElementById("javaSec40");
+		// var ai26 = document.getElementById("javaSec41");
+		// var ai27 = document.getElementById("javaSec42");
+		// var ai28 = document.getElementById("javaSec43");
+		// var ai29 = document.getElementById("javaSec44");
+		// var ai30 = document.getElementById("javaSec45");
+		// var ai31 = document.getElementById("javaSec46");
+		// var ai32 = document.getElementById("javaSec47");
+		// var ai33 = document.getElementById("javaSec48");
+		// var ai34 = document.getElementById("javaSec49");
+		// var ai35 = document.getElementById("javaSec50");
+  //   var py1 = document.getElementById("pySec1");
+  //   var py2 = document.getElementById("pySec2");
+  //   var py3 = document.getElementById("pySec3");
+  //   var py4 = document.getElementById("pySec4");
+  //   var py5 = document.getElementById("pySec5");
+  //   var nw1 = document.getElementById("javaSec51");
+  //   var nw2 = document.getElementById("javaSec52");
+  //   var nw3 = document.getElementById("javaSec53");
+  //   var nw4 = document.getElementById("javaSec54");
+  //   var nw5 = document.getElementById("javaSec55");
+  //   var nw6 = document.getElementById("javaSec56");
+  //   var pdf1 = document.getElementById("pdfSec1");
+  //   var pdf2 = document.getElementById("pdfSec2");
+  //   var pdf3 = document.getElementById("pdfSec3");
+  //   var pdf4 = document.getElementById("pdfSec4");
+  //   var pdf5 = document.getElementById("pdfSec5");
+
+		// x.style.display = "none";
+		// y.style.display = "none";
+		// z.style.display = "none";
+		// a.style.display = "none";
+		// b.style.display = "none";
+		// c.style.display = "none";
+		// d.style.display = "none";
+		// e.style.display = "none";
+		// f.style.display = "none";
+		// g.style.display = "none";
+		// h.style.display = "none";
+		// i.style.display = "none";
+		// xx.style.display = "none";
+		// yy.style.display = "none";
+		// zz.style.display = "none";
+		// aa.style.display = "none";
+		// bb.style.display = "none";
+		// cc.style.display = "none";
+		// dd.style.display = "none";
+		// ee.style.display = "none";
+		// ff.style.display = "none";
+		// gg.style.display = "none";
+		// hh.style.display = "none";
+		// ii.style.display = "none";
+		// ai1.style.display = "none";
+		// ai2.style.display = "none";
+		// ai3.style.display = "none";
+		// ai4.style.display = "none";
+		// ai5.style.display = "none";
+		// ai6.style.display = "none";
+		// ai7.style.display = "none";
+		// ai8.style.display = "none";
+		// ai9.style.display = "none";
+		// ai10.style.display = "none";
+		// ai11.style.display = "none";
+		// ai12.style.display = "none";
+		// ai13.style.display = "none";
+		// ai14.style.display = "none";
+		// ai15.style.display = "none";
+		// ai16.style.display = "none";
+		// ai17.style.display = "none";
+		// ai18.style.display = "none";
+		// ai19.style.display = "none";
+		// ai20.style.display = "none";
+		// ai21.style.display = "none";
+		// ai22.style.display = "none";
+		// ai23.style.display = "none";
+		// ai24.style.display = "none";
+		// ai25.style.display = "none";
+		// ai26.style.display = "none";
+		// ai27.style.display = "none";
+		// ai28.style.display = "none";
+		// ai29.style.display = "none";
+		// ai30.style.display = "none";
+		// ai31.style.display = "none";
+		// ai32.style.display = "none";
+		// ai33.style.display = "none";
+		// ai34.style.display = "none";
+		// ai35.style.display = "none";
+  //   py1.style.display = "none";
+  //   py2.style.display = "none";
+  //   py3.style.display = "none";
+  //   py4.style.display = "none";
+  //   py5.style.display = "none";
+  //   nw1.style.display = "none";
+  //   nw2.style.display = "none";
+  //   nw3.style.display = "none";
+  //   nw4.style.display = "none";
+  //   nw5.style.display = "none";
+  //   nw6.style.display = "none";
+  //   pdf1.style.display = "none";
+  //   pdf2.style.display = "none";
+  //   pdf3.style.display = "none";
+  //   pdf4.style.display = "none";
+  //   pdf5.style.display = "none";
+
+		// switch(one){
+		// 	case "ins":
+		// 		x.style.display = "block";
+		// 		break;
+		// 	case "ri":
+		// 		y.style.display = "block";
+		// 		break;
+		// 	case "it":
+		// 		z.style.display = "block";
+		// 		break;
+		// 	case "vis":
+		// 		a.style.display = "block";
+		// 		break;
+		// 	case "visc":
+		// 		b.style.display = "block";
+		// 		break;
+		// 	case "ser":
+		// 		c.style.display = "block";
+		// 		break;
+		// 	case "der":
+		// 		d.style.display = "block";
+		// 		break;
+		// 	case "cli":
+		// 		e.style.display = "block";
+		// 		break;
+		// 	case "obj":
+		// 		f.style.display = "block";
+		// 		break;
+		// 	case "objr":
+		// 		g.style.display = "block";
+		// 		break;
+		// 	case "objc":
+		// 		h.style.display = "block";
+		// 		break;
+		// 	case "srv":
+		// 		i.style.display = "block";
+		// 		break;
+		// 	case "AC":
+		// 		xx.style.display = "block";
+		// 		break;
+		// 	case "bof":
+		// 		yy.style.display = "block";
+		// 		break;
+		// 	case "sbof":
+		// 		zz.style.display = "block";
+		// 		break;
+		// 	case "env":
+		// 		aa.style.display = "block";
+		// 		break;
+		// 	case "senv":
+		// 		bb.style.display = "block";
+		// 		break;
+		// 	case "toc":
+		// 		cc.style.display = "block";
+		// 		break;
+		// 	case "stoc":
+		// 		dd.style.display = "block";
+		// 		break;
+		// 	case "fmt":
+		// 		ee.style.display = "block";
+		// 		break;
+		// 	case "sfmt":
+		// 		ff.style.display = "block";
+		// 		break;
+		// 	case "sf":
+		// 		gg.style.display = "block";
+		// 		break;
+		// 	case "df":
+		// 		hh.style.display = "block";
+		// 		break;
+		// 	case "mvs":
+		// 		ii.style.display = "block";
+		// 		break;
+		// 	case "ai1":
+		// 		ai1.style.display = "block";
+		// 		break;
+		// 	case "ai2":
+		// 		ai2.style.display = "block";
+		// 		break;
+		// 	case "ai3":
+		// 		ai3.style.display = "block";
+		// 		break;
+		// 	case "ai4":
+		// 		ai4.style.display = "block";
+		// 		break;
+		// 	case "ai5":
+		// 		ai5.style.display = "block";
+		// 		break;
+		// 	case "ai6":
+		// 		ai6.style.display = "block";
+		// 		break;
+		// 	case "ai7":
+		// 		ai7.style.display = "block";
+		// 		break;
+		// 	case "ai8":
+		// 		ai8.style.display = "block";
+		// 		break;
+		// 	case "ai9":
+		// 		ai9.style.display = "block";
+		// 		break;
+		// 	case "ai10":
+		// 		ai10.style.display = "block";
+		// 		break;
+		// 	case "ai11":
+		// 		ai11.style.display = "block";
+		// 		break;
+		// 	case "ai12":
+		// 		ai12.style.display = "block";
+		// 		break;
+		// 	case "ai13":
+		// 		ai13.style.display = "block";
+		// 		break;
+		// 	case "ai14":
+		// 		ai14.style.display = "block";
+		// 		break;
+		// 	case "ai15":
+		// 		ai15.style.display = "block";
+		// 		break;
+		// 	case "ai16":
+		// 		ai16.style.display = "block";
+		// 		break;
+		// 	case "ai17":
+		// 		ai17.style.display = "block";
+		// 		break;
+		// 	case "ai18":
+		// 		ai18.style.display = "block";
+		// 		break;
+		// 	case "ai19":
+		// 		ai19.style.display = "block";
+		// 		break;
+		// 	case "ai20":
+		// 		ai20.style.display = "block";
+		// 		break;
+		// 	case "ai21":
+		// 		ai21.style.display = "block";
+		// 		break;
+		// 	case "ai22":
+		// 		ai22.style.display = "block";
+		// 		break;
+		// 	case "ai23":
+		// 		ai23.style.display = "block";
+		// 		break;
+		// 	case "ai24":
+		// 		ai24.style.display = "block";
+		// 		break;
+		// 	case "ai25":
+		// 		ai25.style.display = "block";
+		// 		break;
+		// 	case "ai26":
+		// 		ai26.style.display = "block";
+		// 		break;
+		// 	case "ai27":
+		// 		ai27.style.display = "block";
+		// 		break;
+		// 	case "ai28":
+		// 		ai28.style.display = "block";
+		// 		break;
+		// 	case "ai29":
+		// 		ai29.style.display = "block";
+		// 		break;
+		// 	case "ai30":
+		// 		ai30.style.display = "block";
+		// 		break;
+		// 	case "ai31":
+		// 		ai31.style.display = "block";
+		// 		break;
+		// 	case "ai32":
+		// 		ai32.style.display = "block";
+		// 		break;
+		// 	case "ai33":
+		// 		ai33.style.display = "block";
+		// 		break;
+		// 	case "ai34":
+		// 		ai34.style.display = "block";
+		// 		break;
+		// 	case "ai35":
+		// 		ai35.style.display = "block";
+		// 		break;
+  //     case "pyplot":
+  //       py1.style.display = "block";
+  //       break;
+  //     case "pypm":
+  //       py2.style.display = "block";
+  //       break;
+  //     case "gmc":
+  //       py3.style.display = "block";
+  //       break;
+  //     case "gmg":
+  //       py4.style.display = "block";
+  //       break;
+  //     case "gml":
+  //       py5.style.display = "block";
+  //       break;
+  //     case "nw1":
+  //       nw1.style.display = "block";
+  //       break;
+  //     case "nw2":
+  //       nw2.style.display = "block";
+  //       break;
+  //     case "nw3":
+  //       nw3.style.display = "block";
+  //       break;
+  //     case "nw4":
+  //       nw4.style.display = "block";
+  //       break;
+  //     case "nw5":
+  //       nw5.style.display = "block";
+  //       break;
+  //     case "nw6":
+  //       nw6.style.display = "block";
+  //       break;
+  //     case "C1":
+  //       pdf1.style.display = "block";
+  //       break;
+  //     case "C2":
+  //       pdf2.style.display = "block";
+  //       break;
+  //     case "C3":
+  //       pdf3.style.display = "block";
+  //       break;
+  //     case "M1":
+  //       pdf4.style.display = "block";
+  //       break;
+  //     case "M2":
+  //       pdf5.style.display = "block";
+  //       break;
+		// 	default:
+		// 		alert("Could not get ID");
+		// 		break;
+		// }
 	}
 </script>
 <script>

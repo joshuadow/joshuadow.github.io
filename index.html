@@ -7,184 +7,8 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="https://cdn.rawgit.com/Fugiman/Twitch-Channel-Status/1d74252edf89110507cbf3088f9c3eaa38fac9d3/twitch-channel-status.min.js" data-online-image="imgs/twitchON.PNG" data-offline-image="imgs/twitchOFF.PNG"></script>
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+<link rel="stylesheet" href="myStyle.css">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
-* {
-  box-sizing: border-box;
-}
-
-/* Style the body */
-body {
-  font-family: Arial, Helvetica, sans-serif;
-  margin: 0;
-  overflow-x: hidden;
-}
-
-/* Header/logo Title */
-.header {
-  padding: 2px;
-  text-align: center;
-  background: white;
-  color: #DDDDDD;
-  max-height: 100px;
-  z-index: 8;
-}
-
-/* Increase the font size of the heading */
-.header h1 {
-  font-size: 40px;
-}
-
-/* Sticky navbar - toggles between relative and fixed, depending on the scroll position. It is positioned relative until a given offset position is met in the viewport - then it "sticks" in place (like position:fixed). The sticky value is not supported in IE or Edge 15 and earlier versions. However, for these versions the navbar will inherit default position */
-.navbar2 {
-  overflow: hidden;
-  background-color: #0074D9;
-  position: relative;
-  position: -webkit-relative;
-  top: 0;
-  z-index: 8;
-  height: 75px;
-  width: 100%;
-}
-
-/* Style the navigation bar links */
-.navbar2 a {
-  float: left;
-  display: block;
-  color: white;
-  text-align: center;
-  padding: 25px 20px;
-  text-decoration: none;
-  height: 75px;
-}
-
-
-/* Right-aligned link */
-.navbar2 a.right {
-  float: right;
-}
-
-/* Change color on hover */
-.navbar2 a:hover {
-  background-color: darkgray;
-  color: #DDDDDD;
-  height: 75px;
-}
-
-/* Active/current link */
-.navbar2 a.active {
-  background-color: #DDDDDD;
-  color: #001f3f;
-  height: 75px;
-}
-
-/* Column container */
-.row {  
-  display: -ms-flexbox; /* IE10 */
-  display: flex;
-  -ms-flex-wrap: wrap; /* IE10 */
-  flex-wrap: wrap;
-  overflow-x: hidden;
-}
-
-/* Create two unequal columns that sits next to each other */
-/* Sidebar/left column */
-.side {
-  -ms-flex: 30%; /* IE10 */
-  flex: 30%;
-  background-color: #001f3f;
-  padding: 20px;
-  color: white;
-  padding-bottom: 50px;
-}
-
-/* Main column */
-.main {   
-  -ms-flex: 70%; /* IE10 */
-  flex: 70%;
-  background-color: white;
-  padding: 20px;
-    background-image: linear-gradient(to bottom, #0074d9, #3683da, #5492da, #6fa1d9, #89afd8, #86a6ca, #829ebc, #7f95ae, #5f7591, #405775, #223a59, #001f3f);
-  max-height: 1200px;
-}
-
-/* Fake image, just for this example */
-.fakeimg {
-  background-color: #aaa;
-  width: 100%;
-  padding: 20px;
-}
-
-/* Footer */
-.footer2 {
-  position: relative;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  padding: 20px;
-  text-align: center;
-  background: #001f2f;
-  max-height: 130.35px;
-  min-height: 130.35px;
-  font-size: small;
-  color: white;
-  z-index: 0;
-  width: 100%;
-  height: 100%
-}
-
-.profImg img {
-	display: block;
-	margin: 0 auto;
-}
-
-#ac-wrapper {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(255, 255, 255, .6);
-    z-index: 1001;
-}
-#popup {
-    width: 555px;
-    height: 375px;
-    background: #FFFFFF;
-    border: 5px solid #000;
-    border-radius: 25px;
-    -moz-border-radius: 25px;
-    -webkit-border-radius: 25px;
-    box-shadow: #64686e 0px 0px 3px 3px;
-    -moz-box-shadow: #64686e 0px 0px 3px 3px;
-    -webkit-box-shadow: #64686e 0px 0px 3px 3px;
-    position: relative;
-    top: 150px;
-    left: 500px;
-}
-
-
-
-/* Responsive layout - when the screen is less than 700px wide, make the two columns stack on top of each other instead of next to each other */
-@media screen and (max-width: 700px) {
-  .row {   
-    flex-direction: column;
-  }
-
-  .footer2{
-    float: none;
-  }
-}
-
-/* Responsive layout - when the screen is less than 400px wide, make the navigation links stack on top of each other instead of next to each other */
-@media screen and (max-width: 400px) {
-  .navbar2 a {
-    float: none;
-    width: 100%;
-  }
-}
-
-</style>
 </head>
 <script type="text/javascript">
   function ifIAmLive(){
@@ -286,25 +110,25 @@ function checkRecaptcha() {
 }
 </script>
 <br>
-<div class="footer2" style="display: inline-block;">
-    <div style="display:inline-block; width:5%; padding-top: 10px;">
+<div class="footer2" style="display: flex; flex-direction: row; justify-content: center; align-items: center;">
+    <div style="width:5%;">
         <p style="text-align:center;">
-		    <a href="https://github.com/joshuadow"><img src="imgs/gh.jpg" width="80%"></a>
+        <a href="https://github.com/joshuadow"><img src="imgs/gh.jpg" width="80%"></a>
         </p>
     </div>
-    <div style="display:inline-block; width:6%; padding-top: 10px;">
+    <div style="width:6%;">
         <p style="text-align:center">
-			<a href="https://www.instagram.com/joshdow/?hl=en"><img src="imgs/insta.JPG" width="80%"></a> 
+      <a href="https://www.instagram.com/joshdow/?hl=en"><img src="imgs/insta.JPG" width="80%"></a> 
        </p>
     </div>
-    <div style="display:inline-block; width:5%; padding-top: 10px;">
+    <div style="width:5%;">
         <p style="text-align:center">
-			<a href="https://www.twitch.tv/Comparabl"><img data-twitch-channel="Comparabl" width="80%" id="logo" onload="ifIAmLive()"></a> 
+      <a href="https://www.twitch.tv/Comparabl"><img data-twitch-channel="Comparabl" width="80%"></a> 
        </p>
     </div>
-    <div style="display:inline-block; width:5%; padding-top: 10px;">
+    <div style="width:5%;">
         <p style="text-align:center">
-			<a href="mailto:josh_dow@outlook.com"><img src="imgs/mail.PNG" width="90%"></a> 
+      <a href="mailto:josh_dow@outlook.com"><img src="imgs/mail.PNG" width="90%"></a> 
        </p>
     </div>
 </div> 

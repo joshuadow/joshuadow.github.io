@@ -10,13 +10,7 @@
 <link rel="stylesheet" href="myStyle.css">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
-<script type="text/javascript">
-  function ifIAmLive(){
-    if(document.getElementById("logo").src.match("imgs/twitchON.PNG")){
-      document.getElementById("MS").style.visibility="visible";
-    }
-  }
-</script>
+
 <body>
 <!---<div id="ac-wrapper" style='display:none'>
     	<div id="popup">
@@ -29,9 +23,6 @@
         	</center>
     	</div>
 	</div> -->
-<!--<div class="header">
-</div>-->
-
 <div class="navbar2">
   <a href="#" class="active">Home</a>
   <a href="work.html">Work</a>
@@ -46,69 +37,32 @@
     <h2 align="center">About Me</h2>
     <div class="profImg" style="align-self: center">
     	<img src="imgs/JD.jpg" height="400" width="200" class="center" padding="20" border="3">
-
-    <br>
-    <h3>B.Sc. Computer Science Information Security</h3>
-    <h3>B.Sc. Mathematics</h3>
-    <p>I hold my two B.Sc. from the University Of Calgary. During my time at the university
-    I was a member of the Dino's Mens Varsity Swim Team for all five years of my eligibility. Included in this time I served the role as captain for two years</p>
-    <p>
-    Competitive swimming has been apart of my life for over a decade until I retired in 2019. Some
-	notable performances over my career: 10+ provincial records, 8 age group national gold medals, 1 senior
-	national gold medal, 1 USPORT gold medal and one USPORT record.</p>
-	<p>You can find out more about me in the <a href="hobbies.html" style="color: aqua">Hobbies/Interests</a> section!</p>
+      <br>
+      <h3>B.Sc. Computer Science Information Security</h3>
+      <h3>B.Sc. Mathematics</h3>
+      <p>I hold my two B.Sc. from the University Of Calgary. During my time at the university
+        I was a member of the Dino's Mens Varsity Swim Team for all five years of my eligibility. Included in this time I served the role as captain for two years</p>
+      <p>
+        Competitive swimming has been apart of my life for over a decade until I retired in 2019. Some
+      	notable performances over my career: 10+ provincial records, 8 age group national gold medals, 1 senior
+      	national gold medal, 1 USPORT gold medal and one USPORT record.</p>
+    	<p>
+        You can find out more about me in the <a href="hobbies.html" style="color: aqua">Hobbies/Interests</a> section!</p>
 	<br>
     </div>
   </div>
 <div class="main">
   	<div class="container mt-0 pt-0" id="medium">
   		<div class="profImg">
-	        <img src="imgs/LOGO.png" width="20%" style="padding-bottom: 30px;">
+        <img src="imgs/LOGO.png" width="20%" style="padding-bottom: 30px;">
   		</div>
         <div class="row" id="jsonContent" style="margin-top: 10;"></div>
     </div>
-        <ul id="pagin" class="pagination justify-content-center"></ul>
+    <ul id="pagin" class="pagination justify-content-center"></ul>
 </div>
-<!--<script type="text/javascript">
-    function PopUp(hideOrshow) {
-    if (hideOrshow == 'hide') document.getElementById('ac-wrapper').style.display = "none";
-    else document.getElementById('ac-wrapper').removeAttribute('style');
-}
-window.onload = function () {
-    setTimeout(function () {
-        PopUp('show');
-    }, 200);
-}
-</script>-->
-<script>
-function get_action(form) 
-{
-    var v = grecaptcha.getResponse();
-    if(v.length == 0)
-    {
-        document.getElementById('captcha').innerHTML="You can't leave Captcha Code empty";
-        return false;
-    }
-    else
-    {
-         document.getElementById('captcha').innerHTML="Captcha completed";
-        return true; 
-    }
-}
-</script>
-<script> 
-function checkRecaptcha() {
-  var response = grecaptcha.getResponse();
-  if(response.length == 0) { 
-    //reCaptcha not verified
-    alert("Not correct"); 
-  }
-  else { 
-    //reCaptch verified
-    document.getElementById("ac-wrapper").style.display = "none";
-  }
-}
-</script>
+<!--<script src="popUp.js"></script>-->
+<script src="getAction.js"></script>
+<script src="checkRC.js"></script>
 <br>
 <div class="footer2" style="display: flex; flex-direction: row; justify-content: center; align-items: center;">
     <div style="width:5%;">
@@ -123,7 +77,7 @@ function checkRecaptcha() {
     </div>
     <div style="width:5%;">
         <p style="text-align:center">
-      <a href="https://www.twitch.tv/Comparabl"><img data-twitch-channel="Comparabl" width="80%"></a> 
+      <a href="https://www.twitch.tv/Comparabl"><img id="logo" data-twitch-channel="Comparabl" width="80%" onload="ifIAmLive()"></a> 
        </p>
     </div>
     <div style="width:5%;">
@@ -132,94 +86,8 @@ function checkRecaptcha() {
        </p>
     </div>
 </div> 
-<script type="text/javascript">
- $(function () {
-            var mediumPromise = new Promise(function (resolve) {
-            var $content = $('#jsonContent');
-            var data = {
-                rss: 'https://medium.com/feed/@Comparabl'
-            };
-            $.get('https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fmedium.com%2Ffeed%2F%40Comparabl&api_key=svkqpl9gta415ln5ytqqzmgbvgynlxix3pmr1duf', data, function (response) {
-                if (response.status == 'ok') {
-                    $("#logo").append(`<img src="${response.feed["image"]}" class="rounded mx-auto d-block">`)
-                    var output = '';
-                    $.each(response.items, function (k, item) {
-                        output += `<div class="card mb-3 mx-auto mr-5 " style="width: 15rem;">`;
-                        var tagIndex = item.description.indexOf('<img'); // Find where the img tag starts
-                        var srcIndex = item.description.substring(tagIndex).indexOf('src=') + tagIndex; // Find where the src attribute starts
-                        var srcStart = srcIndex + 5; // Find where the actual image URL starts; 5 for the length of 'src="'
-                        var srcEnd = item.description.substring(srcStart).indexOf('"') + srcStart; // Find where the URL ends
-                        var src = item.description.substring(srcStart, srcEnd); // Extract just the URL
-                        output += `<img src="${src}" class="card-img-top" alt="Cover image">`;
-                        output += `<div class="card-body" style="max-height: 20;">`;
-                        output += `<h5 class="card-title"><a href="${item.link}">${item.title}</a></h5>`;
-                        var yourString = item.description.replace(/<img[^>]*>/g,""); //replace with your string.
-                        yourString = yourString.replace('h4', 'p');
-                        yourString = yourString.replace('h3', 'p');
-                        var maxLength = 120; // maximum number of characters to extract
-                        //trim the string to the maximum length
-                        var trimmedString = yourString.substr(0, maxLength);
-                        //re-trim if we are in the middle of a word
-                        trimmedString = trimmedString.substr(0, Math.min(trimmedString.length, trimmedString.lastIndexOf(" ")))
-                        output += `<p class="card-text">${trimmedString}...</p>`;
-                        output += `<a href="${item.link}" class="btn btn-outline-success">Read More</a>`;
-                        output += '</div></div>';
-                        return k < 10;
-                    });
-                    resolve($content.html(output));
-                }
-            });
-            });
-
-mediumPromise.then(function()
-            {
-                //Pagination
-                pageSize = 3;
-
-                var pageCount = $(".card").length / pageSize;
-
-                for (var i = 0; i < pageCount; i++) {
-                    $("#pagin").append(`<li class="page-item"><a class="page-link" href="#">${(i + 1)}</a></li> `);
-                }
-                $("#pagin li:nth-child(1)").addClass("active");
-                showPage = function (page) {
-                    $(".card").hide();
-                    $(".card").each(function (n) {
-                        if (n >= pageSize * (page - 1) && n < pageSize * page)
-                            $(this).show();
-                    });
-                }
-
-                showPage(1);
-
-                $("#pagin li").click(function () {
-                    $("#pagin li").removeClass("active");
-                    $(this).addClass("active");
-                    showPage(parseInt($(this).text()))
-                });
-            });
-        });
-
-</script>
-<script>
-  var r=255,g=0,b=0;
-
-setInterval(function(){
-  if(r > 0 && b == 0){
-    r--;
-    g++;
-  }
-  if(g > 0 && r == 0){
-    g--;
-    b++;
-  }
-  if(b > 0 && g == 0){
-    r++;
-    b--;
-  }
-  $("#MS").text("I'm Live!");
-  $("#MS").css("background-color","rgb("+r+","+g+","+b+")");
-  },10);
-</script>
+<script src="amLive.js"></script>
+<script src="mediumLoad.js"></script>
+<script src="rgb.js"></script>
 </body>
 </html>

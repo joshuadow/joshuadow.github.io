@@ -218,8 +218,6 @@ pre {
   align-self: center;
   max-height: inherit;
   position: relative;
-  padding-top: 10px;
-  padding-bottom: 0px;
   width: 100%;
   margin: 0 auto;
 }
@@ -227,7 +225,9 @@ pre {
 code {
 	overflow-y: auto;
 	overflow-x: hidden;
-  height: 62vh;
+  height: 65vh;
+  margin-left: -100px;
+  width: 109.5%;
 }
 
 .dropdown {
@@ -433,6 +433,15 @@ code {
 
 .additionalMenu a {
   width: 100%;
+}
+
+.wrapMenu {
+    width: 100%;
+    display: block;
+    background-color: #001f3f;
+    padding-bottom: 0px;
+    height: 30px;
+    position: inherit;
 }
 
 /* Responsive layout - when the screen is less than 700px wide, make the two columns stack on top of each other instead of next to each other */

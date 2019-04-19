@@ -15,4 +15,5 @@ setInterval(function(){
   }
   $("#MS").text("I'm Live!");
   $("#MS").css("background-color","rgb("+r+","+g+","+b+")");
+  $('#MS2').css("background-color","rgb("+r+","+g+","+b+")");
   },10);

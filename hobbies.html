@@ -78,6 +78,7 @@ body {
   display: flex;
   -ms-flex-wrap: wrap; /* IE10 */
   flex-wrap: wrap;
+  background-image: linear-gradient(to bottom, #001f3f, #1c3a5a, #375876, #527793, #7097b0, #7097ae, #7197ac, #7297aa, #547689, #385769, #1c3a4b, #001f2f);
 }
 
 /* Create two unequal columns that sits next to each other */
@@ -85,10 +86,11 @@ body {
 .side {
   -ms-flex: 30%; /* IE10 */
   flex: 30%;
-  background-color: #001f3f;
+  
   padding-left: 5px;
   color: white;
-  border-right: 3px solid #0074d9;
+  border-right: 5px solid white;
+  border-top: 5px solid white;
 }
 
 /* Main column */
@@ -212,14 +214,12 @@ setInterval(function(){
     <div class="side">
         <div class="profImg">
           <h2 style="text-align: center; z-index: 4"><u>Twitch</u></h2>
-          <img src="imgs/Comparabl2.png" width="50%" style="z-index: 3; margin-top: auto;">
+          <img src="imgs/Comparabl2.png" width="30%" style="z-index: 3; margin-top: auto;">
           <p>I started streaming about 3 years ago. Its something I love to do but often dont have the time to put significant effort into.
           I am a Twitch affiliate which is a great stepping stone and hope to get to partner status soon.</p>
           <p> Streaming is one of my favourite things to do as it lets me talk and share stories with people I normally would never meet. It also lets me extend my love of teaching to a broader audience.</p>
           <p>My streams often consist of me working on a project/doing an educational stream on topics that I find interesting. This allows me to teach others and share some cool facts while also reinforcing the material that I have learned.</p>
-          <p>In this column you will find my logo at the very top. Its an expression of my love for math as well as gaming, which has always been an
-          outlet for me.</p>
-          <p>Although not extremely impressive, my streams often reach an audience of 20-300(max to date) concurrent viewers. Below you will find some of
+          <p>My streams often reach an audience of 20-300(max to date) concurrent viewers. Below you will find some of
           the intro videos I have made for my channel:</p>
           <div style="text-align: center;">
             <video width="90%" controls>
@@ -246,27 +246,8 @@ setInterval(function(){
     </div>
     <div class="side">
         <div class="profImg">
-          <h2 style="text-align: center;"><u>Physics/Astronomy</u></h2>
-          <p>As one of my favourite subjects in high-school & university I have always found the things that are too small to see 
-          and the things that are too big to comprehend fascinating. I had the privilege of being able to watch the first successful Space-X launch
-          and landing at the John F. Kennedy Space Center on December 21st 2015. I have attached a video below:</p>
-
-          <div style="text-align: center;">
-            <video width="90%" height="300px" controls>
-              <source src="imgs/goingup.mp4">
-            </video>
-            <br>
-          </div>
-          <p> and here is a video of it returning to Earth:</p>
-          <div style="text-align: center;">
-            <video width="90%" height="300px" controls>
-              <source src="imgs/comingDown.mp4">
-            </video>
-            <br>
-          </div>
-          <p>I am fortunate to have knowledge of programming as well because its allowed me to conduct many modeled simulations to gain 
-          better undertstanding of how things work. Its one thing to have a mathematical expression to show something is true, but another
-          to see it with your own eyes.</p>
+          <h2 style="text-align: center;"><u>Programming</u></h2>
+          
         </div>
     </div>
     <div class="side" style="border-right: none;">

@@ -9,7 +9,8 @@
 <script src="https://cdn.rawgit.com/Fugiman/Twitch-Channel-Status/1d74252edf89110507cbf3088f9c3eaa38fac9d3/twitch-channel-status.min.js" data-online-image="imgs/twitchON.PNG" data-offline-image="imgs/twitchOFF.PNG"></script>
 <link rel="stylesheet" href="myStyle.css">
 </head>
-<body>
+<body style="background-image: linear-gradient(to bottom, #0074d9, #3683da, #5492da, #6fa1d9, #89afd8, #86a6ca, #829ebc, #7f95ae, #5f7591, #405775, #223a59, #001f3f);
+ ">
 	<div class="navbar2">
 	  <a href="index.html">Home</a>
 	  <a href="#" class="active">Work</a>
@@ -35,7 +36,124 @@
 <script src="highlight/highlight.pack.js"></script>
 <script>hljs.initHighlightingOnLoad();</script>
 <script src="showVis.js"></script>
-<div class="wrapMenu">
+<link rel="stylesheet" type="text/css" href="ResponsiveMultiLevelMenu/css/default.css" />
+<link rel="stylesheet" type="text/css" href="ResponsiveMultiLevelMenu/css/component.css" />
+<script src="ResponsiveMultiLevelMenu/js/modernizr.custom.js"></script>
+  <div class="column" style="width: 12%">
+    <div id="dl-menu" class="dl-menuwrapper" style="width: 75%;">
+      <button class="dl-trigger">Open Menu</button>
+      <ul class="dl-menu">
+        <li>
+          <a href="#">Java</a>
+          <ul class="dl-submenu">
+            <li>
+              <a href="#">Reflective Object Inspector</a>
+              <ul class="dl-submenu">
+                <li><a id="ins" onclick="showVis(this);return false;">Inspector.java</a></li>
+                <li><a href="#">Jackets</a></li>
+                <li><a href="#">Chinos &amp; Trousers</a></li>
+                <li><a href="#">Jeans</a></li>
+                <li><a href="#">T-Shirts</a></li>
+                <li><a href="#">Underwear</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#">Women</a>
+              <ul class="dl-submenu">
+                <li><a href="#">Jackets</a></li>
+                <li><a href="#">Knits</a></li>
+                <li><a href="#">Jeans</a></li>
+                <li><a href="#">Dresses</a></li>
+                <li><a href="#">Blouses</a></li>
+                <li><a href="#">T-Shirts</a></li>
+                <li><a href="#">Underwear</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#">Children</a>
+              <ul class="dl-submenu">
+                <li><a href="#">Boys</a></li>
+                <li><a href="#">Girls</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>
+          <a href="#">Electronics</a>
+          <ul class="dl-submenu">
+            <li><a href="#">Camera &amp; Photo</a></li>
+            <li><a href="#">TV &amp; Home Cinema</a></li>
+            <li><a href="#">Phones</a></li>
+            <li><a href="#">PC &amp; Video Games</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="#">Furniture</a>
+          <ul class="dl-submenu">
+            <li>
+              <a href="#">Living Room</a>
+              <ul class="dl-submenu">
+                <li><a href="#">Sofas &amp; Loveseats</a></li>
+                <li><a href="#">Coffee &amp; Accent Tables</a></li>
+                <li><a href="#">Chairs &amp; Recliners</a></li>
+                <li><a href="#">Bookshelves</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#">Bedroom</a>
+              <ul class="dl-submenu">
+                <li>
+                  <a href="#">Beds</a>
+                  <ul class="dl-submenu">
+                    <li><a href="#">Upholstered Beds</a></li>
+                    <li><a href="#">Divans</a></li>
+                    <li><a href="#">Metal Beds</a></li>
+                    <li><a href="#">Storage Beds</a></li>
+                    <li><a href="#">Wooden Beds</a></li>
+                    <li><a href="#">Children's Beds</a></li>
+                  </ul>
+                </li>
+                <li><a href="#">Bedroom Sets</a></li>
+                <li><a href="#">Chests &amp; Dressers</a></li>
+              </ul>
+            </li>
+            <li><a href="#">Home Office</a></li>
+            <li><a href="#">Dining &amp; Bar</a></li>
+            <li><a href="#">Patio</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="#">Jewelry &amp; Watches</a>
+          <ul class="dl-submenu">
+            <li><a href="#">Fine Jewelry</a></li>
+            <li><a href="#">Fashion Jewelry</a></li>
+            <li><a href="#">Watches</a></li>
+            <li>
+              <a href="#">Wedding Jewelry</a>
+              <ul class="dl-submenu">
+                <li><a href="#">Engagement Rings</a></li>
+                <li><a href="#">Bridal Sets</a></li>
+                <li><a href="#">Women's Wedding Bands</a></li>
+                <li><a href="#">Men's Wedding Bands</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div><!-- /dl-menuwrapper -->
+  </div>
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="ResponsiveMultiLevelMenu/js/jquery.dlmenu.js"></script>
+<script>
+$(function() {
+  $( '#dl-menu' ).dlmenu({
+    animationClasses : { classin : 'dl-animate-in-5', classout : 'dl-animate-out-5' }
+  });
+});
+</script>
+
+<!--<div class="wrapMenu">
   <ul class="top-level-menu">
       <li>
       	<a href="#">Java</a>
@@ -219,9 +337,8 @@
       </ul>
     </li>
   </ul>
-</div>
-<div style="background-image: linear-gradient(to bottom, #0074d9, #3683da, #5492da, #6fa1d9, #89afd8, #86a6ca, #829ebc, #7f95ae, #5f7591, #405775, #223a59, #001f3f);
- position: inherit; overflow-x: none; align-content: center; padding-top: 50px; height: 80vh;">
+</div>-->
+<div style="position: inherit; overflow-x: none; align-content: center; padding-top: 50px; height: 80vh;">
   <div id="totalContainer" class="codeDiv">
     <pre>
 <code id="editor">

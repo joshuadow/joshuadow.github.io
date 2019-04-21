@@ -14,43 +14,15 @@
 .side {
   -ms-flex: 30%; /* IE10 */
   flex: 30%;
-  background-color: #001f3f;
   padding-left: 5px;
   color: white;
   border-right: 5px solid white;
   border-top: 5px solid white;
-  background-image: linear-gradient(to bottom, #001f3f, #1c3a5a, #375876, #527793, #7097b0, #7097ae, #7197ac, #7297aa, #547689, #385769, #1c3a4b, #001f2f);
+  background-color: transparent;
 }
 </style>
 </head>
-<script type="text/javascript">
-  function ifIAmLive(){
-    if(document.getElementById("logo").src.match("imgs/twitchON.PNG")){
-      document.getElementById("MS").style.visibility="visible";
-    }
-  }
-</script>
-<script>
-  var r=255,g=0,b=0;
-
-setInterval(function(){
-  if(r > 0 && b == 0){
-    r--;
-    g++;
-  }
-  if(g > 0 && r == 0){
-    g--;
-    b++;
-  }
-  if(b > 0 && g == 0){
-    r++;
-    b--;
-  }
-  $("#MS").text("I'm Live!");
-  $("#MS").css("background-color","rgb("+r+","+g+","+b+")");
-  },10);
-</script>
-<body>
+<body style="overflow-x: hidden;">
 <div class="navbar2">
   <a href="index.html">Home</a>
   <a href="work.html">Work</a>
@@ -60,7 +32,19 @@ setInterval(function(){
   <a href="#">Cirriculum Vitae</a>
   <a href="#" id="MS" style="visibility: hidden;">I'm Live!</a>
 </div>
-  <div class="row">
+<div class="mobile-nav">
+   <a href="extracurs.html" class="active">Extracurriculars</a>
+   <div class="navbreadCrum"></div>
+   <div class="addtionalMenu">
+    <a href="index.html">Home</a>
+    <a href="work.html">Work</a>
+    <a href="hobbies.html">Hobbies/Interests</a>
+    <a href="resume.html">Resume</a>
+    <a href="#">Cirriculum Vitae</a>
+    <a href="#" id="MS2" style="visibility: hidden; display: none;">I'm Live!</a>
+   </div>
+</div>
+  <div class="row" style="background-image: linear-gradient(to bottom, #001f3f, #1c3a5a, #375876, #527793, #7097b0, #7097ae, #7197ac, #7297aa, #547689, #385769, #1c3a4b, #001f2f);">
     <div class="side">
         <div class="profImg">
           <h2 style="text-align: center;"><u>Swimming</u></h2>
@@ -156,6 +140,11 @@ setInterval(function(){
        </p>
     </div>
 </div>
-
+<script src="amLive.js"></script>
+<script src="mediumLoad.js"></script>
+<script src="rgb.js"></script>
+<script src="getAction.js"></script>
+<script src="checkRC.js"></script>
+<script src="bcrumb.js"></script>
 </body>
 </html>

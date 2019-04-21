@@ -32,6 +32,21 @@ function showPDF(id){
 		case "pdf5":
 			document.getElementById('pdfEmbed').src = "imgs/PMAT_315_Assignment_2.pdf";
 			break;
+		case "pdf6":
+			document.getElementById('pdfEmbed').src = "imgs/CPSC_413_Assignment_3.pdf";
+			break;
+		case "pdf7":
+			document.getElementById('pdfEmbed').src = "imgs/CPSC_413_Assignment_4__Copy_.pdf";
+			break;
+		case "pdf8":
+			document.getElementById('pdfEmbed').src = "imgs/CPSC_530_Project_Proposal__Copy.pdf";
+			break;
+		case "pdf9":
+			document.getElementById('pdfEmbed').src = "imgs/CPSC 313 Fall 2016 Final Cheat Sheet.pdf";
+			break;
+		case "pdf10":
+			document.getElementById('pdfEmbed').src = "imgs/CPSC_530_Final_Paper.pdf";
+			break;
 	}
 	document.getElementById('pdfContainer').style.display = "block";
 };

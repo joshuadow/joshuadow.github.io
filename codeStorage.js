@@ -12835,12 +12835,13 @@ var codeStore = {
 		    forbidden[3] = '|';
 		    forbidden[4] = '>';
 		    forbidden[5] = '<';
-		    forbidden[6] = '\\';
-		    forbidden[8] = '#';
+		    forbidden[6] = "";
+		    forbidden[7] = '$';
+		    forbidden[8] = '\#';
 
-		    printf("Checking \"");
+		    printf("Checking ");
 		    printf(message);
-		    printf("\" for forbidden chars...");
+		    printf(" for forbidden chars...");
 
 		    for (int i = 0; i < 7; ++i)
 		    {
@@ -17650,7 +17651,7 @@ var codeStore = {
 		type: 'arm',
 		code: `
 		//Created by Joshua Dow, 10150588
-		
+
 		define(fd_r, w19)
 		define(nread_r, x20)
 		define(buf_base_r, x21)

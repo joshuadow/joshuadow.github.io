@@ -27,7 +27,7 @@
 }
 
 .dl-menuwrapper button {
-	background: #ccc;
+	background: #001f3f;
 	border: none;
 	width: 48px;
 	height: 45px;
@@ -41,7 +41,7 @@
 .dl-menuwrapper button:hover,
 .dl-menuwrapper button.dl-active,
 .dl-menuwrapper ul {
-	background: #aaa;
+	background: #001f3f;
 }
 
 .dl-menuwrapper button:after {
@@ -79,6 +79,7 @@
 	outline: none;
 	overflow-x: hidden;
 	word-wrap: break-word;
+	border-top: 1px solid white;
 }
 
 .no-touch .dl-menuwrapper li a:hover {
@@ -99,6 +100,7 @@
 	speak: none;
 	-webkit-font-smoothing: antialiased;
 	content: "\e000";
+	color: #0074d9;
 }
 
 .dl-menuwrapper li.dl-back:after {

@@ -26,8 +26,8 @@
   <a href="extracurs.html">Extracurriculars</a>
   <a href="#" class="active">Hobbies/Interests</a>
   <a href="resume.html">Resume</a>
-  <a href="#">Cirriculum Vitae</a>
-  <a href="#" id="MS" style="visibility: hidden;">I'm Live!</a>
+  <!--<a href="#">Cirriculum Vitae</a>-->
+  <a href="mytwitch.html" id="MS" style="visibility: hidden;">I'm Live!</a>
 </div>
 <div class="mobile-nav">
    <a href="hobbies.html" class="active">Hobbies/Interests</a>
@@ -37,8 +37,8 @@
     <a href="work.html">Work</a>
     <a href="extracurs.html">Extracurriculars</a>
     <a href="resume.html">Resume</a>
-    <a href="#">Cirriculum Vitae</a>
-    <a href="#" id="MS2" style="visibility: hidden; display: none;">I'm Live!</a>
+    <!--<a href="#">Cirriculum Vitae</a>-->
+    <a href="mytwitch.html" id="MS2" style="visibility: hidden; display: none;">I'm Live!</a>
    </div>
 </div>
   <div class="row" style="background-image: linear-gradient(to bottom, #0074d9, #3683da, #5492da, #6fa1d9, #89afd8, #86a6ca, #829ebc, #7f95ae, #5f7591, #405775, #223a59, #001f3f);
@@ -89,7 +89,9 @@
         </div>
     </div>
   </div>
-
+<script src="getAction.js"></script>
+<script src="checkRC.js"></script>
+<script src="bcrumb.js"></script>
 <div class="footer2" style="display: flex; flex-direction: row; justify-content: center; align-items: center;">
     <div style="width:5%;">
         <p style="text-align:center;">
@@ -103,7 +105,7 @@
     </div>
     <div style="width:5%;">
         <p style="text-align:center">
-      <a href="https://www.twitch.tv/Comparabl"><img data-twitch-channel="Comparabl" width="80%"></a> 
+      <a href="https://www.twitch.tv/Comparabl"><img data-twitch-channel="Comparabl" width="80%" id="logo" onload="ifIAmLive()"></a> 
        </p>
     </div>
     <div style="width:5%;">
@@ -115,8 +117,6 @@
 <script src="amLive.js"></script>
 <script src="mediumLoad.js"></script>
 <script src="rgb.js"></script>
-<script src="getAction.js"></script>
-<script src="checkRC.js"></script>
-<script src="bcrumb.js"></script>
+
 </body>
 </html>

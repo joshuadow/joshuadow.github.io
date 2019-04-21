@@ -10,8 +10,17 @@
 <link rel="stylesheet" href="myStyle.css">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
-
-<body>
+<style type="text/css">
+  .main {   
+  -ms-flex: 33%; /* IE10 */
+  flex: 33%;
+  background-color: transparent;
+  padding: 20px;
+  background-image: none;
+  color: white;
+}
+</style>
+<body style="background-image: linear-gradient(to bottom, #0074d9, #3683da, #5492da, #6fa1d9, #89afd8, #86a6ca, #829ebc, #7f95ae, #5f7591, #405775, #223a59, #001f3f);">
 <!---<div id="ac-wrapper" style='display:none'>
     	<div id="popup">
         	<center>
@@ -24,10 +33,10 @@
     	</div>
 	</div> -->
 <div class="navbar2">
-  <a href="#" class="active">Home</a>
+  <a href="index.html">Home</a>
   <a href="work.html">Work</a>
   <a href="experience.html">Experience</a>
-  <a href="skills.html">Skills</a>
+  <a href="#" class="active">Skills</a>
   <a href="extracurs.html">Extracurriculars</a>
   <a href="hobbies.html">Hobbies/Interests</a>
   <a href="resume.html">Resume</a>
@@ -35,11 +44,11 @@
   <a href="mytwitch.html" id="MS" style="visibility: hidden;">I'm Live!</a>
 </div>
 <div class="mobile-nav">
-   <a href="index.html" class="active">Home</a>
+   <a href="#" class="active">Skills</a>
    <div class="navbreadCrum"></div>
    <div class="addtionalMenu">
+    <a href="index.html">Home</a>
     <a href="work.html">Work</a>
-    <a href="skills.html">Skills</a>
     <a href="experience.html">Experience</a>
     <a href="extracurs.html">Extracurriculars</a>
     <a href="hobbies.html">Hobbies/Interests</a>
@@ -48,35 +57,64 @@
     <a href="mytwitch.html" id="MS2" style="visibility: hidden; display: none;">I'm Live!</a>
    </div>
 </div>
-<div class="row">
-  <div class="side" style="padding: 20px;">
-    <h2 align="center">About Me</h2>
-    <div class="profImg" style="align-self: center">
-    	<img src="imgs/JD.jpg" height="400" width="200" class="center" padding="20" border="3">
-      <br>
-      <h3>B.Sc. Computer Science Information Security</h3>
-      <h3>B.Sc. Mathematics</h3>
-      <p>I hold my two B.Sc. from the University Of Calgary. During my time at the university
-        I was a member of the Dino's Mens Varsity Swim Team for all five years of my eligibility. Included in this time I served the role as captain for two years.</p>
-      <p>
-        Competitive swimming has been apart of my life for over a decade until I retired in 2019. Some
-      	notable performances over my career: 10+ provincial records, 8 age group national gold medals, 1 senior
-      	national gold medal, 1 USPORT gold medal and one USPORT record.</p>
-    	<p>
-        You can find out more about me in the <a href="hobbies.html" style="color: aqua">Hobbies/Interests</a> and <a href="extracurs.html" style="color: aqua"> Extracurriculars</a> sections!</p>
-	<br>
-    </div>
+<div class="row" style="justify-content: center;">
+  <div class="main">
+      <h1 align="center"><u>Computer Science</u></h1>
+      <ul style="list-style: inside;">
+        <li>Object-Oriented Programming</li>
+        <li>Technology Ethics</li>
+        <li>Information Security & Privacy</li>
+        <li>Computability</li>
+        <li>Data Structures</li>
+        <li>Algorithms</li>
+        <li>Analysis</li>
+        <li>Computing Machinery I & II</li>
+        <li>Design & Analysis of Algorithms</li>
+        <li>Programming Paradigms</li>
+        <li>Large-scale Software Analysis & Design</li>
+        <li>Logic</li>
+        <li>Operating Systems</li>
+        <li>Networks</li>
+        <li>Databases</li>
+        <li>Cryptography</li>
+        <li>Artificial Intelligence</li>
+        <li>Information Theory & Security</li>
+        <li>Advanced Programming Techniques</li>
+        <li>Principles of System Security</li>
+        <li>Principles of Network Security</li>
+        <li>Software Performance Evaluation</li>
+      </ul>
   </div>
-<div class="main">
-  	<div class="container mt-0 pt-0" id="medium">
-  		<div class="profImg">
-        <img src="imgs/LOGO.png" width="20%" style="padding-bottom: 30px;">
-  		</div>
-        <div class="row" id="jsonContent" style="margin-top: 10;"></div>
-    </div>
-    <ul id="pagin" class="pagination justify-content-center"></ul>
+  <div class="main">
+    <h1 align="center"><u>Mathematics</u></h1>
+    <ul style="list-style: inside;">
+      <li>Statistics</li>
+      <li>Theoretical Statistics</li>
+      <li>Calculus I-IV</li>
+      <li>Linear Algebra I-IV</li>
+      <li>Discrete Mathematics</li>
+      <li>Algebra I & II</li>
+      <li>Optimization</li>
+      <li>Number Theory</li>
+      <li>Transformation Geometry</li>
+      <li>Combinatorics & Graph Theory</li>
+      <li>Capstone Project</li>
+    </ul>
+  </div>
+  <div class="main">
+    <h1 align="center"><u>Others</u></h1>
+    <ul style="list-style: inside;">
+      <li>Electromagnetic Theory</li>
+      <li>Mechanics</li>
+      <li>Foundational Chemistry</li>
+      <li>Latin Medical Terms</li>
+      <li>Quantum Paradoxes</li>
+      <li>Astronomy</li>
+      <li>Archaeology</li>
+      <li>Religion</li>
+      <li>Psychology</li>
+    </ul>
 </div>
-<!--<script src="popUp.js"></script>-->
 <script src="getAction.js"></script>
 <script src="checkRC.js"></script>
 <script src="bcrumb.js"></script>

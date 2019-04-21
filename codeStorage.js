@@ -15284,5 +15284,1426 @@ var codeStore = {
 
 		}`
 	},
+	m1: {
+		type: 'arm',
+		code: `
+		.section    .init
+		.globl     _ButtonFunctions
 
+		_ButtonFunctions:
+		    b ButtonFunctions
+
+		.section .text
+
+		ButtonFunctions:
+		.globl BPress
+		BPress:
+		    ldr r0, =mario
+		    ldr r4, [r0]
+		    ldr r5, [r0,#4]
+		    //Could do a power-pack ability here
+		.globl YPress
+		YPress:
+		    //NOthing yet
+		.globl SelPress
+		SelPress:
+		.globl STPress
+		STPress:
+		    push {r4-r10,lr}
+		    mov r8, #0
+		    mov r7, #0
+		    //bl _gameMenu
+		stread:
+		    bl _ReadSNES
+		stloop:
+		    cmp r5, #15
+		    bgt stread
+		    ldr r5, =buttons            //load the address of the buffer into r5
+		    ldrb r4, [r5, #4]           //load a byte from the buffer
+		    cmp r4, #0
+		    beq stdone
+		    ldrb r4, [r5, #5]           //load a byte from the buffer
+		    cmp r4, #0
+		    beq upOpt
+		    ldrb r4, [r5, #6]           //load a byte from the buffer
+		    cmp r4, #0
+		    beq downOpt
+		    ldrb r4, [r5, #9]
+		    cmp r4, #0
+		    //beq restart
+		    b stread
+
+		stdone:
+		    //bl clearmenu
+		    pop {r4-r10,lr}
+		    bx lr
+		upOpt:
+		    //bl pausemenu1
+		upR:
+		    bl _ReadSNES
+		    ldr r5, =buttons
+		    ldrb r4, [r5, #9]
+		    cmp r4, #0
+		    //beq clearmenu
+		    //beq restart
+		    ldrb r4, [r5, #6]
+		    cmp r4, #0
+		    beq downOpt
+		    b upR
+
+		downOpt:
+		    //bl pausemenu2
+		dR:
+		    bl _ReadSNES
+		    ldr r5, =buttons
+		    ldrb r4, [r5, #9]
+		    cmp r4, #0
+		    //beq clearmenu
+		    //beq Quit
+		    ldrb r4, [r5, #5]
+		    cmp r4, #0
+		    beq upOpt
+		    b dR
+
+		.globl JPUPress
+		JPUPress:
+		    push {r4-r10,lr}
+		    ldr r5, =mario
+		    ldr r4, [r5]
+		    ldr r7, [r5,#4]
+		    mov r6, r7
+		    sub r8, r7, #80 //max jump height
+		jumpup:
+		    sub r6, r6, #10  //jump height per frame
+		    bl clearMario
+		    str r6, [r5,#4]
+		    bl drawMario
+		    cmp r6, r8
+		    bge jumpup
+		    //bl _DetectCollisions
+		    bl _ReadSNES
+		    mov r0, #1000
+		    bl WaitLong
+		    ldr r9, =buttons
+		    ldrb r10, [r9, #7]
+		    cmp r10, #0
+		    bleq UpRightPress
+		    ldrb r10, [r9, #8]
+		    cmp r10, #0
+		    bleq UpLeftPress
+		jumpdown:
+		    add r6, r6, #10
+		    bl clearMario
+		    str r6, [r5,#4]
+		    bl drawMario
+		    cmp r6, r7
+		    blt jumpdown
+		    b downex
+		    //bl _DetectCollisions
+		    //cmp r0, #1
+		    //beq downex
+		    //cmp r0, #2
+		    //beq enemykilled
+		 downex:
+		    pop {r4-r10,lr}
+		    bx lr
+
+		UpRightPress:
+		    push {r4-r10, lr}
+		    ldr r5, =mario
+		    ldr r4, [r5]
+		    
+		    ldr r7, =0x40b
+		    add r6, r4, #80
+		    cmp r6, r7
+		    blt UdrawR
+		    beq UscreenR
+
+		    ldr r7, =0x807
+		    cmp r6, r7
+		    blt UdrawR
+		    beq UscreenR
+		    //add screen 3 check
+		UdrawR:
+		    bl clearMario
+		    str r6, [r5]
+		    //bl _DetectCollisions
+		    //cmp r0, #1
+		    //beq doneR
+		    //cmp r0, #2
+		    //beq lifelost
+		    bl drawMario
+		    b UdoneR
+		UscreenR:
+		    bl updateScreen
+		    bl clearMario
+		    str r6, [r5]
+
+		    //bl updateScreen
+		    bl drawMario
+		UdoneR:
+		    pop {r4-r10,lr}
+		    bx lr
+
+		UpLeftPress:
+		    push {r4-r10,lr}
+		    ldr r5, =mario
+		    ldr r4, [r5]
+		    sub r6, r4, #80
+		    cmp r6, #0
+		    bgt UdrawL
+		    b Udonel
+		UdrawL:
+		    bl clearMario
+		    str r6, [r5]
+		    //bl _DetectCollisions
+		    //cmp r0, #1
+		    //beq Udonel
+		    //cmp r0, #2
+		    //beq lifelost
+		    bl drawMario
+		Udonel:
+		    pop {r4-r10, lr}
+		    bx lr
+		.globl JPLPress
+		JPLPress:
+		    push {r4-r10,lr}
+		    ldr r5, =mario
+		    ldr r4, [r5]
+		    sub r6, r4, #15
+		    cmp r6, #0
+		    bgt drawL
+		    b donel
+		drawL:
+		    bl clearMario
+		    str r6, [r5]
+		    //bl _DetectCollisions
+		    //cmp r0, #1
+		    //beq donel
+		    //cmp r0, #2
+		    //beq lifelost
+
+		    bl drawMario
+		donel:
+		    pop {r4-r10, lr}
+		    bx lr
+		.globl JPRPress
+		JPRPress:
+		    push {r4-r10, lr}
+		    ldr r5, =mario
+		    ldr r4, [r5]
+		    
+		    ldr r7, =0x40b
+		    add r6, r4, #15
+		    cmp r6, r7
+		    blt drawR
+		    beq screenR
+
+		    ldr r7, =0x807
+		    cmp r6, r7
+		    blt drawR
+		    beq screenR
+		    //add screen 3 check
+		drawR:
+		    bl clearMario
+		    str r6, [r5]
+		    //bl _DetectCollisions
+		    //cmp r0, #1
+		    //beq doneR
+		    //cmp r0, #2
+		    //beq lifelost
+		    bl drawMario
+		    b doneR
+		screenR:
+		    bl updateScreen
+		    bl clearMario
+		    str r6, [r5]
+
+		    //bl updateScreen
+		    bl drawMario
+		doneR:
+		    pop {r4-r10,lr}
+		    bx lr
+		.globl APress
+		APress:
+		.globl XPress
+		XPress:
+		.globl LBPress
+		LBPress:
+		.globl RBPress
+		RBPress:`
+	},
+	m2: {
+		type: 'arm',
+		code: `
+		@.section    .init
+		@.globl     _DetectCollisions
+		@
+		@_DetectCollisions:
+		@    b DetetectCollision
+		@
+		@
+		@DetetectCollision:
+		@	push	{r4-r10,lr}
+		@	ldr r0, =mario
+		@	ldr r4, [r0]
+		@	ldr r5, [r0 + 4]
+		@	ldr r9, =mariowidth
+		@	ldr r9, [r9]
+		@	ldr r10, =marioheight
+		@	ldr r10, [r10]
+		@	mov r9, #4
+		@	mov r7, #0
+		@	bl checkUp
+		@	bl checkDown
+		@	bl checkLeft
+		@	bl checkRight
+		@	pop		{r4-r10,lr}
+		@	bx lr
+		@
+		@
+		@checkUp:
+		@	ldr r0, =block
+		@	ldr r1, [r0, lsl r7]
+		@	ldr r2, [r0 , r9, lsl r7]
+		@	add r9, r5, r9
+		@	add r7, r4, r10
+		@	cmp r4, r1
+		@	blt up1
+		@	add r8, r1, blockWidth
+		@ck:
+		@	cmp r9, r2
+		@	blt checkDown
+		@ck1:
+		@	cmp r5, r1
+		@	blge _DestoryBlock
+		@	movge r0, #1
+		@ck2:
+		@	cmp r5, r8
+		@	blle _DestoryBlock
+		@ck3:
+		@	cmp r7, r1
+		@	blge _DestoryBlock
+		@ck4:
+		@	cmp r7, r8
+		@	blle _DestoryBlock
+		@	add r7, r7, #3
+		@	cmp r7, #number of blocks
+		@	blt checkUp
+		@	mov r9, #0
+		@	mov r7, #0
+		@checkDown:
+		@	ldr r0, =enemy
+		@	ldr r1, [r0, lsl r7]
+		@	ldr r2, [r0, r9, lsl r7]
+		@
+		@checkLeft:
+		@
+		@
+		@checkRight:`
+	},
+	m3: {
+		type: 'arm',
+		code: `
+		.section .text
+		.globl initialscreen
+		initialscreen:
+		  push {lr}
+		    bl	InitFrameBuffer
+		  bl initializeBackground
+		  //get controller input
+
+		  bl drawMario //inside here we will determine if mario current x is enought that we wont need to redraw, and only need to move all other elements
+
+		  mov r0, #100
+		  ldr r1, =0x64 //100
+		  bl drawCloud
+		  mov r0, #420
+		  ldr r1, =0x14 //20
+		  bl drawCloud
+		  ldr r0, =0x2EE //1000
+		  ldr r1, =0x1E //10
+		  bl drawCloud
+
+		  ldr r0, =block1      //make this the value to start printing mario  //this will be the address value to mario's x
+		  ldr r0, [r0]
+		  ldr r1, =block1 //starting y  //this will be the address value to mario's y
+		  ldr r1, [r1, #4]
+		  bl drawBlock
+
+		  ldr r0, =cblock
+		  ldr r0, [r0]
+		  ldr r1, =cblock
+		  ldr r1, [r1, #4]
+		  bl drawCoinBlock
+
+		  ldr r0, =block2      //make this the value to start printing mario  //this will be the address value to mario's x
+		  ldr r0, [r0]
+		  ldr r1, =block2 //starting y  //this will be the address value to mario's y
+		  ldr r1, [r1, #4]
+		  bl drawBlock
+
+		  ldr r0, =shellEnemy
+		  ldr r0, [r0]
+		  ldr r1, =shellEnemy
+		  ldr r1, [r1, #4]
+		  bl drawShell
+
+		  pop {lr}
+		  mov pc, lr
+
+		.globl initializeBackground
+		initializeBackground:
+		  //draw background
+		  push {r7, r8, lr}
+		  mov r0, #0    //pass in starting x
+		  mov r1, #0    //pass in starting y
+		  ldr r2, =background //address of picture
+		  mov r7, #1024
+		  mov r8, #768
+		  bl  drawPicture
+
+		  //draw floor
+		  mov r0, #0 //starting x value
+		  ldr r1, =0x22D//pass in starting y (557)
+		  ldr r2, =floor //address of the floor
+		  mov r7, #1024 //picture width
+		  mov r8, #768 //picture height (218 + 550)
+		  bl drawPicture
+		  pop {r7, r8, lr}
+		  mov pc, lr
+
+		.globl drawMario
+		drawMario:
+		  push {r7, r8, r9, r10, lr}
+		  ldr r0, =mario      //make this the value to start printing mario  //this will be the address value to mario's x
+		  ldr r0, [r0]
+		  ldr r1, =mario //starting y  //this will be the address value to mario's y
+		  ldr r1, [r1, #4]
+		  ldr r9, =mario
+		  ldr r9, [r9, #8]
+		  cmp r9, #1
+		  beq running2
+		  ldr r2, =runningmario1
+		  mov r10, #1
+		  b SkipOtherMario
+		running2: ldr r2, =runningmario2
+		      mov r10, #0
+		SkipOtherMario:
+		    ldr r9, =mario
+		    str r10, [r9, #8]
+		    ldr r7, =0x29      //width of image (41)
+		    add r7, r7, r0
+		    ldr r8, =0x46    //height of image (70)
+		    add r8, r8, r1
+		    bl drawPicture
+		    pop {r7, r8, r9, r10, lr}
+		    mov pc, lr
+
+		.globl clearMario
+		clearMario:
+			push {r7, r8, lr}
+			ldr r0, =mario
+			ldr r0, [r0]
+			ldr r1, =mario
+			ldr r1, [r1, #4]
+			ldr r2, =clear
+			ldr r7, =0x29     //width of image (41)
+			add r7, r7, r0
+			ldr r8, =0x46    //height of image (70)
+			add r8, r8, r1
+			bl drawPicture
+			pop {r7, r8, lr}
+			mov pc, lr
+
+		.globl drawCloud
+		drawCloud:
+		  push {r7, r8, lr}
+		  ldr r2, =cloud
+		  mov r7, #134      //width of image (61)
+		  add r7, r7, r0
+		  ldr r8, =0x64    //height of image (117)
+		  add r8, r8, r1
+		  bl drawPicture
+		  pop {r7, r8, lr}
+		  mov pc, lr
+
+		.globl drawBlock
+		drawBlock:
+		  push {r7, r8, lr}
+		  ldr r2, =normalBlock
+		  mov r7, #45      //width of image (30)
+		  add r7, r7, r0
+		  mov r8, #45
+		  add r8, r8, r1
+		  bl drawPicture
+		  pop {r7, r8, lr}
+		  mov pc, lr
+
+		.globl drawCoinBlock
+		drawCoinBlock:
+		  push {r7, r8, lr}
+		  ldr r2, =coinBlock
+		  mov r7, #45      //width of image (30)
+		  add r7, r7, r0
+		  mov r8, #45
+		  add r8, r8, r1
+		  bl drawPicture
+		  pop {r7, r8, lr}
+		  mov pc, lr
+
+		.globl drawPipe
+		drawPipe:
+		  push {r7, r8, lr}
+		  ldr r2, =pipeImage
+		  mov r7, #83
+		  add r7, r7, r0
+		  mov r8, #85
+		  add r8, r8, r1
+		  bl drawPicture
+		  pop {r7, r8, lr}
+		  mov pc, lr
+
+		.globl drawDragon
+		drawDragon:
+		  push {r7, r8, lr}
+		  ldr r2, =dragonImage
+		  mov r7, #39
+		  add r7, r7, r0
+		  mov r8, #60
+		  add r8, r8, r1
+		  bl drawPicture
+		  pop {r7, r8, lr}
+		  mov pc, lr
+
+		.globl drawShell
+		drawShell:
+		  push {r7, r8, lr}
+		  ldr r2, =shellImage
+		  mov r7, #31
+		  add r7, r7, r0
+		  mov r8, #50
+		  add r8, r8, r1
+		  bl drawPicture
+		  pop {r7, r8, lr}
+		  mov pc, lr
+
+		.globl drawCastle
+		drawCastle:
+		  push {r7, r8, lr}
+		  ldr r2, =castleImage
+		  ldr r7, =0x166
+		  add r7, r7, r0
+		  ldr r8, =0x166
+		  add r8, r8, r1
+		  bl drawPicture
+		  pop {r7, r8, lr}
+		  mov pc, lr
+
+		.globl drawPit
+		drawPit:
+		  push {r7, r8, lr}
+		  ldr r2, =pitImage
+		  mov r7, #126
+		  add r7, r7, r0
+		  mov r8, #211
+		  add r8, r8, r1
+		  bl drawPicture
+		  pop {r7, r8, lr}
+		  mov pc, lr
+
+		.globl drawBowser
+		drawBowser:
+		  push {r7, r8, lr}
+		  ldr r2, =bowserImage
+		  mov r7, #69
+		  add r7, r7, r0
+		  mov r8, #104
+		  add r8, r8, r1
+		  bl drawPicture
+		  pop {r7, r8, lr}
+		  mov pc, lr
+
+
+		.globl clearBox
+		clearBox:
+		  push {r7, r8, lr}
+		  ldr r2, =clearBoxImage
+		  mov r7, #45   //width of image (45)
+		  add r7, r7, r0
+		  mov r8, #45   //height of image (45)
+		  add r8, r8, r1
+		  bl drawPicture
+		  pop {r7, r8, lr}
+		  mov pc, lr
+
+		.globl clearDragon
+		clearDragon:
+		    push {r7, r8, lr}
+		    ldr r2, =clearDragonImage
+		    mov r7, #39   //width of image
+		    add r7, r7, r0
+		    mov r8, #60   //height of image
+		    add r8, r8, r1
+		    bl drawPicture
+		    pop {r7, r8, lr}
+		    mov pc, lr
+
+		.globl clearPipe
+		clearPipe:
+		  push {r7, r8, lr}
+		  ldr r2, =clearPipeImage
+		  mov r7, #83   //width of image
+		  add r7, r7, r0
+		  mov r8, #85   //height of image
+		  add r8, r8, r1
+		  bl drawPicture
+		  pop {r7, r8, lr}
+		  mov pc, lr
+
+
+
+		.globl drawPicture
+		drawPicture:
+			push {r4, r5, r6, r7, r8,r9,r10, lr}
+			mov	r4,	r0			  //Start X position of your picture
+			mov r10, r4       //make a copy
+			mov	r5,	r1        //starting y value
+			mov	r6,	r2			  //Address of the picture
+			mov	r7,	r7			//Width of your picture
+			mov	r8,	r8			//Height of your picture
+		drawPictureLoop:
+		  	mov	r0,	r4			//passing x for ro which is used by the Draw pixel function
+		  	mov	r1,	r5			//passing y for r1 which is used by the Draw pixel formula
+		  	ldrh	r2,	[r6],#2			//setting pixel color by loading it from the data section. We load half word
+		    ldr r9, =0x643f
+		    cmp r2, r9
+		    beq skip
+		  	bl	DrawPixel
+		skip:
+		  	add	r4,	#1			//increment x position
+		  	cmp	r4,	r7			//compare with image width
+		  	blt	drawPictureLoop
+		  	mov	r4,	r10			//reset x
+		  	add	r5,	#1			//increment Y
+		  	cmp	r5,	r8			//compare y with image height
+		  	blt	drawPictureLoop
+		  	pop {r4, r5, r6, r7, r8,r9,r10, lr}
+		  	mov	pc,	lr			//return
+
+		  /* Draw Pixel
+		   *  r0 - x
+		   *  r1 - y
+		   *  r2 - color
+		   */
+		  DrawPixel:
+		  	push	{r4}
+		  	offset	.req	r4
+		    // offset = (y * 1024) + x = x + (y << 10)
+		  	add		offset,	r0, r1, lsl #10
+		  	// offset *= 2 (for 16 bits per pixel = 2 bytes per pixel)
+		  	lsl		offset, #1
+		  	// store the colour (half word) at framebuffer pointer + offset
+		  	ldr	r0, =FrameBufferPointer
+		  	ldr	r0, [r0]
+		  	strh	r2, [r0, offset]
+		  	pop		{r4}
+		  	bx		lr
+
+		.globl updateScreen
+		updateScreen:
+		  push {r4, r5, r6, lr}
+
+		  //if screen number is one switch to 2, if it is two, switch to three
+		  ldr r4, =screenNumber
+		  ldr r4, [r4]
+		  cmp r4, #1
+		  bleq clearScreenOne
+
+		  cmp r4, #2
+		  bleq clearScreenTwo
+
+		  cmp r4, #3
+		  //bleq clearScreenThree
+
+
+
+		  pop {r4, r5, r6, lr}
+		  mov pc, lr
+
+		clearScreenOne:
+		    push {lr}
+		    ldr r0, =block1      //make this the value to start printing mario  //this will be the address value to mario's x
+		    ldr r0, [r0]
+		    ldr r1, =block1
+		    ldr r1, [r1, #4]
+		    bl clearBox
+
+		    ldr r0, =cblock
+		    ldr r0, [r0]
+		    ldr r1, =cblock
+		    ldr r1, [r1, #4]
+		    bl clearBox
+
+		    ldr r0, =block2
+		    ldr r0, [r0]
+		    ldr r1, =block2
+		    ldr r1, [r1, #4]
+		    bl clearBox
+
+		    //add a clear shell enem function
+
+		    //clear all the other things in screen if we add them
+		    mov r2, #2
+		    ldr r3, =screenNumber
+		    str r2, [r3]
+
+		    bl initializeScreenTwo
+		    pop {lr}
+		    mov pc, lr
+
+		clearScreenTwo:
+		    push {lr}
+
+		    ldr r0, =pipe1
+		    ldr r0, [r0]
+		    ldr r1, =pipe1
+		    ldr r1, [r1, #4]
+		    bl clearPipe
+
+		    ldr r0, =pipe2
+		    ldr r0, [r0]
+		    ldr r1, =pipe2
+		    ldr r1, [r1, #4]
+		    bl clearPipe
+
+		    ldr r0, =dragonEnemy
+		    ldr r0, [r0]
+		    ldr r1, =dragonEnemy
+		    ldr r1, [r1, #4]
+		    bl clearDragon
+
+		    ldr r0, =cblock2
+		    ldr r0, [r0]
+		    ldr r1, =cblock2
+		    ldr r1, [r1, #4]
+		    bl clearBox
+
+		    ldr r0, =cblock3
+		    ldr r0, [r0]
+		    ldr r1, =cblock3
+		    ldr r1, [r1, #4]
+		    bl clearBox
+
+		    bl initializeScreenThree
+		    pop {lr}
+		    mov pc, lr
+
+		.globl initializeScreenTwo
+		initializeScreenTwo:
+		    push {lr}
+
+		    ldr r0, =pipe1
+		    ldr r0, [r0]
+		    ldr r1, =pipe1
+		    ldr r1, [r1, #4]
+		    bl drawPipe
+
+		    ldr r0, =pipe2
+		    ldr r0, [r0]
+		    ldr r1, =pipe2
+		    ldr r1, [r1, #4]
+		    bl drawPipe
+
+		    ldr r0, =dragonEnemy
+		    ldr r0, [r0]
+		    ldr r1, =dragonEnemy
+		    ldr r1, [r1, #4]
+		    bl drawDragon
+
+		    ldr r0, =cblock2
+		    ldr r0, [r0]
+		    ldr r1, =cblock2
+		    ldr r1, [r1, #4]
+		    bl drawCoinBlock
+
+		    ldr r0, =cblock3
+		    ldr r0, [r0]
+		    ldr r1, =cblock3
+		    ldr r1, [r1, #4]
+		    bl drawCoinBlock
+
+		    pop {lr}
+		    mov pc, lr
+
+		.globl initializeScreenThree
+		initializeScreenThree:
+		  push {lr}
+
+		  ldr r0, =castle
+		  ldr r0, [r0]
+		  ldr r1, =castle
+		  ldr r1, [r1, #4]
+		  bl drawCastle
+
+		  ldr r0, =bowser
+		  ldr r0, [r0]
+		  ldr r1, =bowser
+		  ldr r1, [r1, #4]
+		  bl drawBowser
+
+		  ldr r0, =pit
+		  ldr r0, [r0]
+		  ldr r1, =pit
+		  ldr r1, [r1, #4]
+		  bl drawPit
+
+		  ldr r0, =block3
+		  ldr r0, [r0]
+		  ldr r1, =block3
+		  ldr r1, [r1, #4]
+		  bl drawBlock
+
+		  ldr r0, =block4
+		  ldr r0, [r0]
+		  ldr r1, =block4
+		  ldr r1, [r1, #4]
+		  bl drawBlock
+
+		  pop {lr}
+		  mov pc, lr`
+	},
+	m4: {
+		type: 'arm',
+		code: `
+		.section .text
+		.globl InitFrameBuffer
+		/* Initialize the FrameBuffer using the FrameBufferInit structure
+		 * Returns:
+		 *	r0 - 0 on failure, framebuffer pointer on success
+		 */
+		InitFrameBuffer:
+			// load the address of the mailbox interface
+			mbox	.req	r2
+			ldr		mbox,	=0x3F00B880
+
+			// load the address of the framebuffer init structure
+			fbinit	.req	r3
+			ldr		fbinit,	=FrameBufferInit
+
+		mBoxFullLoop$:
+			// load the value of the mailbox status register
+			ldr		r0,		[mbox, #0x18]
+
+			// loop while bit 31 (Full) is set
+			tst		r0,		#0x80000000
+			bne		mBoxFullLoop$
+
+			// add 0x40000000 to address of framebuffer init struct, store in r0
+			add		r0, 	fbinit,	#0x40000000
+
+			// or with the framebuffer channel (1)
+			orr		r0, 	#0b1000
+
+			// write this value to the mailbox write register
+			str		r0,		[mbox, #0x20]
+
+		mBoxEmptyLoop$:
+			// load the value of the mailbox status register
+			ldr		r0,		[mbox, #0x18]
+
+			// loop while bit 30 (Empty) is set
+			tst		r0,		#0x40000000
+			bne		mBoxEmptyLoop$
+
+			// read the response from the mailbox read register
+			ldr		r0,		[mbox, #0x00]
+
+			// and-mask out the channel information (lowest 4 bits)
+			and		r1,		r0, #0xF
+
+			// test if this message is for the framebuffer channel (1)
+			teq		r1,		#0b1000
+
+			// if not, we need to read another message from the mailbox
+			bne		mBoxEmptyLoop$
+			
+			ldr		r0,	=FrameBufferInit
+			ldr		r1,	[r0, #0x04]	//load the request/response word from buffer
+			teq		r1,	#0x80000000	//test is the request was successful
+			beq		pointerWaitLoop$	
+			movne		r0, 	#0		//return 0 if the request failed
+			bxne		lr	
+
+		pointerWaitLoop$:
+			ldr	r0, 	=FrameBuffer 
+			ldr	r0, 	[r0]
+			teq	r0,	#0	//test if framebuffer pointer has been set
+			
+			beq	pointerWaitLoop$
+			
+			ldr 	r3, =FrameBufferPointer
+			str	r0, [r3]
+
+			.unreq	mbox
+			.unreq	fbinit
+
+			bx	lr
+
+		.section .data
+
+		.align 4
+		FrameBufferInit:
+
+			.int 	22 * 4			//Buffer size in bytes
+			.int	0			//Indicates a request to GPU
+			.int	0x00048003		//Set Physical Display width and height
+			.int	8			//size of buffer
+			.int	8			//length of value
+			.int	1024			//horizontal resolution
+			.int	768			//vertical resolution
+
+			.int	0x00048004		//Set Virtual Display width and height
+			.int	8			//size of buffer
+			.int	8			//length of value
+			.int 	1024			//same as physical display width and height
+			.int 	768
+
+			.int	0x00048005		//Set bits per pixel
+			.int 	4			//size of value buffer
+			.int	4			//length of value
+			.int	16			//bits per pixel value
+
+			.int	0x00040001		//Allocate framebuffer
+			.int	8			//size of value buffer
+			.int	8			//length of value
+		FrameBuffer:
+			.int	0			//value will be set to framebuffer pointer
+			.int	0			//value will be set to framebuffer size			
+
+			.int	0			//end tag, indicates the end of the buffer
+
+		.align 4
+		.globl FrameBufferPointer
+		FrameBufferPointer:
+			.int	0`
+	},
+	m5: {
+		type: 'arm',
+		code: `
+		.section    .init
+		.globl     _GameLoop
+
+		_GameLoop:
+		    b GameLoop
+
+		.section .text
+
+		GameLoop:
+			push {r4-r10,lr}
+		restart:
+			//reste all game object values to what they were initially, then call the initialize function in drawing functions
+		.globl GL
+		GL:	mov r7, #0                  //move 0 into register r7
+		    bl _ReadSNES                //call to subroutine which reads info from controller
+		loop:
+		    cmp r7, #15                 //check to see if we have read all the bits in the buffer
+		    bge GL                      //if true then reset and look for more info from the controller
+		    ldr r5, =buttons            //load the address of the buffer into r5
+		    ldrb r4, [r5, r7]           //load a byte from the buffer
+		    add r7, r7, #1              //increment the offset
+		    cmp r4, #1                  //if a 1 is ever read (button not pressed) skip over it
+		    beq loop                    //if true branch to loop
+		    bl _UpdateSprites
+		    //bl _updateScore
+		    //ldr r5, =score
+		    //ldrb r4, [r5]
+		    //cmp r4, #0
+		    //beq loseScreen
+		    //cmp r4, #7
+		    //beq winscreen
+		    //cmp r4, #0
+		    //bgt GL
+		    pop {r4-r10,lr}
+		    bx lr`
+	},
+	m6: {
+		type: 'arm',
+		code: `
+		.section    .init
+		.globl _InitAll
+
+		.section	.text
+		_InitAll:
+		    b InitClock
+
+		InitClock:
+		    ldr r0, =0x3F200004         //address for GPFSEL1
+		    ldr r1, [r0]                //loads the contents of address into r1
+		    mov r2, #7                  //creates bitmask
+		    lsl r2, #3                  //align for 1st index of pin 11
+		    bic r1, r2                  //clear bit at pin 11
+		    mov r3, #1                  //output function code
+		    lsl r3, #3                  //r3 = 0 001 000
+		    orr r1, r3                  //sets the pin 11 function in r1
+		    str r1, [r0]                //stores it back into GPFSEL1
+
+		InitLatch:
+		    ldr r0, =0x3F200000         //address for GPFSEL0
+		    ldr r1, [r0]                //loads the contents of address into r1
+		    mov r2, #7                  //creates bitmask
+		    lsl r2, #27                 //align for 1st index of pin 9
+		    bic r1, r2                  //clear bit at pin 9
+		    mov r3, #1                  //output function code
+		    lsl r3, #27                 //r3 = 001 000 000 000 000 000 000 000 000
+		    orr r1, r3                  //sets the pin 9 function in r1
+		    str r1, [r0]                //stores it back into GPFSEL0
+
+		InitData:
+		    ldr r0, =0x3F200004         //address for GPFSEL1
+		    ldr r1, [r0]                //loads the contents of address into r1
+		    mov r2, #7                  //creates a bitmask
+		    bic r1, r2                  //clears bit at pin 10
+		    mov r3, #1                  //r3 = 0 001
+		    add r3, r1                  //sets the pin 10 function into GPFSEL1
+		    str r1, [r0]                //stores it back into GPFSEL0
+
+
+		    bx lr`
+	},
+	m7: {
+		type: 'arm',
+		code: `//	define	some	hardware	registers	necessary
+		.equ	GPFSEL0,	0x3F200000	//	GPIO	Function	Select	0
+		.equ	GPFSEL2,	0x3F200008	//	GPIO	Function	Select	2
+
+		.equ	GPPUD,		0x3F200094	//	GPIO	Pull-up/down	Register
+		.equ	GPPUDCLK0,	0x3F200098	//	GPIO	Pull-up/down	Clock
+
+		.section	.text
+
+		.globl EnableJTAG
+		EnableJTAG:
+			push	{lr}
+			//	disable	all	pull	ups/downs
+			ldr		r0,	=GPPUD
+			eor		r1,	r1
+			str		r1,[r0]
+			bl		dowait		//	wait	150	cycles	as	per	datasheet
+			ldr		r0,	=GPPUDCLK0
+			ldr		r1,	=0x0BC00010
+			str		r1,[r0]
+			bl		dowait		//	wait	150	cycles	again
+			eor		r1,r1
+			str		r1,[r0]
+			
+			//	define	ALT5	function	for	GPIO4	(JTAG	TDI	line)
+			ldr		r0,	=GPFSEL0
+			ldr		r1,[r0]
+			bic		r1,	r1,	#0x7000
+			orr		r1,	r1,	#0x2000
+			str		r1,[r0]
+
+			//	define	ALT4	functions	for	GPIOs	22,24,25,27
+			ldr		r0,	=GPFSEL2
+			ldr		r1,[r0]
+			ldr		r2,	=0x00E3FFC0
+			bic		r1,	r1,	r2
+			ldr		r2,	=0x0061B6C0
+			orr		r1,	r1,	r2
+			str		r1,[r0]
+
+			pop		{pc}
+
+		dowait:
+			mov	r2,	#300
+		dowaitloop:
+			subs	r2,	#1
+			bne	dowaitloop
+			bx	lr`
+	},
+	m8: {
+		type: 'arm',
+		code: `
+		.section    .init
+		.globl     _start
+
+		_start:
+		    b main
+
+		.section .text
+		main:
+		    mov	sp, #0x8000         // Initializing the stack pointer
+		    bl	EnableJTAG          // Enable JTAG
+		    //bl	InstallIntTable
+			ldr	r0, =0x2000B218
+			ldr	r1, [r0]
+			orr	r1, #1
+			str	r1, [r0]
+			ldr		r0, =0x20003000	// clear bit in the event detect register
+			mov		r1, #0x002
+			str		r1, [r0]
+			ldr	r0, =0x2000B210		//Enable clock IRQ interupts
+			ldr	r1, [r0]			//The contents into r1
+			orr	r1, #2				//Enable bit 1 for c1 interupts
+			str	r1, [r0]			//And store it back
+			mrs	r0, cpsr 			//Enable IRQ interupts
+			bic	r0, #0x80
+			msr	cpsr_c, r0
+		    bl 	_InitAll
+		    //bl 	_StartScreen
+		nG: bl 	initialscreen
+
+		cycle:
+		    bl 	_GameLoop
+		    b cycle
+
+
+		Quit:
+
+
+
+		//InstallIntTable:
+		//	ldr		r0, =IntTable
+		//	mov		r1, #0x00000000
+		//	ldmia	r0!, {r2-r9}	// load the first 8 words and store at the 0 address
+		//	stmia	r1!, {r2-r9}
+		//	ldmia	r0!, {r2-r9}	// load the second 8 words and store at the next address
+		//	stmia	r1!, {r2-r9}
+		//	mov		r0, #0xD2		// switch to IRQ mode and set stack pointer
+		//	msr		cpsr_c, r0
+		//	mov		sp, #0x8000
+		//	mov		r0, #0xD3		// switch back to Supervisor mode, set the stack pointer
+		//	msr		cpsr_c, r0
+		//	mov		sp, #0x8000000
+		//	bx		lr
+
+
+		hang:
+			b hang
+
+
+
+		.section	.data
+
+		.globl buttons
+		buttons:
+			.byte 16
+			.rept 1
+			.endr
+
+
+
+
+
+		.globl mariowidth
+		mariowidth:
+				.int 67
+		.global marioheight
+		marioheight:
+				.int 117
+		//IntTable:
+		//	ldr		pc, reset_handler
+		//	ldr		pc, undefined_handler
+		//	ldr		pc, swi_handler
+		//	ldr		pc, prefetch_handler
+		//	ldr		pc, data_handler
+		//	ldr		pc, unused_handler
+		//	ldr		pc, irq_handler
+		//	ldr		pc, fiq_handler
+
+		//reset_handler:		.word InstallIntTable
+		//undefined_handler:	.word hang
+		//swi_handler:		.word hang
+		//prefetch_handler:	.word hang
+		//data_handler:		.word hang
+		//unused_handler:		.word hang
+		//irq_handler:		.word irq
+		//fiq_handler:		.word hang`
+	},
+	m9: {
+		type: 'arm',
+		code: `
+		.section	.init
+		.globl	_ReadData
+
+		.section	.text
+		_ReadData:
+			push {r4-r10, lr}
+			b ReadData
+
+		ReadData:
+		    mov r0, #10                 //we are dealing with pin 10
+		    ldr r2, =0x3F200000         //move the base GPIO address into r2
+		    ldr r1, [r2, #52]           //load GPLEV0 into r1
+		    mov r3, #1                  //move 1 into r3
+		    lsl r3, r0                  //allight value to the position of bit 10
+		    and r1, r3                  //apply bitmask to others bits
+		    teq r1, #0                  //test if the value of pin 10 is 0
+		    moveq r0, #0                //return that value read was 0
+		    movne r0, #1                //return that value read was 1
+		    pop {r4-r10, lr}
+		    bx lr`
+	},
+	m10: {
+		type: 'arm',
+		code: `
+		.section    .init
+		.globl	_ReadSNES
+
+		.section    .text
+		_ReadSNES:
+		    b ReadSNES
+
+		ReadSNES:
+			push {r4-r10,lr}            //stores contents of registers
+		    mov r1, #1                  //load bit to write to clock
+		    bl _WriteClock              
+		    mov r1, #1                  //load bit to write to latch
+		    bl _WriteLatch
+		    mov r0, #12
+		    bl _Wait                    //wait 12 microseconds
+		    mov r1, #0                  //load bit to write to latch
+		    bl _WriteLatch
+		    mov r7, #0                  //set offset to 0
+		    mov r0, #2000
+		    bl WaitLong
+		pulseLoop:
+		    mov r0, #6
+		    bl _Wait                    //wait 6 microseconds
+		    mov r1, #0                  //load bit to write to clock
+		    bl _WriteClock
+		    mov r0, #6              
+		    bl _Wait                     //wait 6 microseconds
+		    bl _ReadData                //read a bit from the data pin
+		    ldr r5, =buttons            //loads address of buffer into r5
+		    strb r0, [r5, r7]           //stores the bit returned from Read_Data into buffer with offset
+		    add r7, r7, #1              //increment offset
+		    mov r1, #1                  //load bit to write to clock
+		    bl _WriteClock
+		    cmp r7, #16                 //checks if offset is 16
+		    blt pulseLoop               //if it is less, then branch back to read another bit
+		    pop {r4-r10, lr}            //restores registers
+		    bx lr                       //return to calling code`
+	},
+	m11: {
+		type: 'arm',
+		code: `
+		.section    .init
+		.globl     _UpdateSprites
+
+		_UpdateSprites:
+		    b UpdateSprites
+
+		.section .text
+
+		UpdateSprites:
+			push {r4-r10, lr}
+			cmp r7, #1                  //checks clock cycle #
+		    beq B
+		    cmp r7, #2                  //checks clock cycle #
+		    beq Y
+		    cmp r7, #3                  //checks clock cycle #
+		    beq Sel
+		    cmp r7, #4                  //checks clock cycle #
+		    beq St
+		    cmp r7, #5                  //checks clock cycle #
+		    beq JPU
+		    cmp r7, #7                  //checks clock cycle #
+		    beq JPL
+		    cmp r7, #8                  //checks clock cycle #
+		    beq JPR
+		    cmp r7, #9                  //checks clock cycle #
+		    beq A
+		    cmp r7, #10                 //checks clock cycle #
+		    beq X
+		    cmp r7, #11                 //checks clock cycle #
+		    beq LB
+		    cmp r7, #12                 //checks clock cycle #
+		    beq RB
+		    cmp r7, #13                 //checks clock cycle #
+		    bge GL                      //if we read offset to be an unused button branch back to read again from controller
+
+
+		B:
+			cmp r4, #0
+			beq BPress
+		Y:
+			cmp r4, #0
+			bleq YPress
+		Sel:
+			cmp r4, #0
+			beq SelPress
+		St:
+			cmp r4, #0
+			bleq STPress
+			b GL
+		JPU:
+			cmp r4, #0
+			bleq JPUPress
+			b GL
+		JPL:
+			cmp r4, #0
+			beq JPLPress
+		JPR:
+			cmp r4, #0
+			beq JPRPress
+		A:
+			cmp r4, #0
+			beq APress
+		X:
+			cmp r4, #0
+			beq XPress
+		LB:
+			cmp r4, #0
+			beq LBPress
+		RB:
+			cmp r4, #0
+			beq RBPress
+
+
+		EnemyUpdate:
+
+		  @ldr r5, =screenNumber
+		  @ldr r5, [r5]
+		  @
+		  @mov r6, #1
+		  @cmp r5, r6
+		  @bleq updateShell
+		  @
+		  @mov r6, #2
+		  @cmp r5, r6
+		  @bleq updateDragon
+		  @
+		  @mov r6, #3
+		  @cmp r5, r6
+		  @bleq updateBowser
+
+			beq blockUpdate
+
+		@updateShell:
+		@    push {r4-r10,lr}
+		@    ldr r8, =shellEnemy
+		@    ldr r4, [r5]
+		@    sub r6, r4, #5
+		@    cmp r6, #0
+		@    bgt drawL
+		@    b donel
+		@drawL:
+		@    bl clearShell
+		@    str r6, [r5]
+		@    bl drawShell
+		@donel:
+		@    pop {r4-r10, lr}
+		@    bx lr
+		@
+		@updateDragon:
+		@    push {r4-r10,lr}
+		@    ldr r8, =dragonEnemy
+		@    ldr r4, [r5]
+		@    sub r6, r4, #5
+		@    cmp r6, #0
+		@    bgt drawL
+		@    b donel
+		@drawL:
+		@    bl clearDragon
+		@    str r6, [r5]
+		@    bl drawDragon
+		@donel:
+		@    pop {r4-r10, lr}
+		@    bx lr
+
+
+		blockUpdate:
+			pop {r4-r10, lr}
+			bx lr`
+	},
+	m12: {
+		type: 'arm',
+		code: `
+		.section    .init
+		.globl  _Wait
+
+		.section    .text
+		_Wait:
+		    push {r4-r10,lr}
+		    mov r4, r0
+		    b Wait
+
+		Wait:
+		    ldr r0, =0x3F003004         //CLO
+		    ldr r1, [r0]                //get value of CLO in r1
+		    add r1, r4                  //add a certain time in microseconds (passed as param)
+		LoopInWait:
+		    ldr r0, =0x3F003004         //CLO
+		    ldr r2, [r0]                //get value of CLO in r1
+		    cmp r2, r1                  //when CLO is equal to r1 we break
+		    blt LoopInWait
+		    pop {r4-r10,lr}
+		    bx lr                       //if equal then return to calling code
+
+		.globl WaitLong
+		WaitLong:
+		    push {r4-r10,lr}
+		    mov r4, r0
+		    mov r5, #60
+		    mul r4, r4, r5
+		    ldr r0, =0x3F003004
+		    ldr r1, [r0]
+		    add r1, r4
+		LoopInWaitL:
+		    ldr r0, =0x3F003004         //CLO
+		    ldr r2, [r0]                //get value of CLO in r1
+		    cmp r2, r1                  //when CLO is equal to r1 we break
+		    blt LoopInWaitL
+		    pop {r4-r10,lr}
+		    bx lr                       //if equal then return to calling code`
+	},
+	m13: {
+		type: 'arm',
+		code: `
+		.section	.init
+		.globl	_WriteClock
+
+		.section	.text
+		_WriteClock:
+			push {r4-r10, lr}
+			mov r4, r1
+			b WriteClock
+
+
+		WriteClock:
+			mov r0, #11                 //we are dealing with pin 11
+		    ldr r2, =0x3F200000         //the base GPIO address to use
+		    mov r3, #1                  //write a bit
+		    lsl r3, r0                  //align bit to pin #11
+		    teq r4, #0                  //test what bit we want to write
+		    streq r3, [r2, #40]         //write 1 to GPCLR0
+		    strne r3, [r2, #28]         //write 1 to GPSET0
+		    pop {r4-r10, lr}
+		    bx lr`
+	},
+	m14: {
+		type: 'arm',
+		code: `
+		.section	.init
+		.globl	_WriteLatch
+
+		.section	.text
+		_WriteLatch:
+			push {r4-r10, lr}
+			mov r4, r1
+			b WriteLatch
+
+		WriteLatch:
+		    mov r0, #9                  //we are dealing with pin 9
+		    ldr r2, =0x3F200000         //the base GPIO address to use
+		    mov r3, #1                  //write a bit
+		    lsl r3, r0                  //align bit to pin #9
+		    teq r4, #0                  //test what bit we want to write
+		    streq r3, [r2, #40]         //write 1 to GPCLR0
+		    strne r3, [r2, #28]         //write 1 to GPSET0
+		    pop {r4-r10, lr}
+		    bx lr                       //branch back to calling code`
+	}
 }

@@ -7,6 +7,9 @@ body {
   margin: 0;
 }
 
+html {
+  overflow-x: hidden;
+}
 
 /* Header/logo Title */
 .header {
@@ -474,10 +477,19 @@ code {
 
   .mobile-nav {
     display: flex;
+    width: 103%;
   }
 
   code {
     width: 138%;
+  }
+
+  html {
+    overflow-x: hidden;
+  }
+
+  .footer2 {
+    width: 103%;
   }
 }
 

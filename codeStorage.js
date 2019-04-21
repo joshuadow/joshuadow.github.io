@@ -16705,5 +16705,1090 @@ var codeStore = {
 		    strne r3, [r2, #28]         //write 1 to GPSET0
 		    pop {r4-r10, lr}
 		    bx lr                       //branch back to calling code`
+	},
+	m15: {
+		type: 'arm',
+		code: `
+		.section    .init
+		.globl     _start
+
+		_start:
+		    b       main
+		.section .text
+
+		main:
+		    	mov     	sp, #0x8000                                                             	// Initializing the stack pointer
+			bl		EnableJTAG                                                              	// Enable JTAG
+			bl		InitUART
+			mov r8, #0 //Square
+			mov r2, #0 //Rectangle
+			mov r3, #0 //Triangle
+		        ldr r0, =string0
+		        mov r1, #40
+		        bl WriteStringUART
+		Userask:
+		        ldr r0, =strAsk
+		        mov r1, #96
+			bl WriteStringUART
+			ldr r0, =strCh
+			mov r1, #38
+			bl WriteStringUART                                                              		 //This is important to be  able to use UART
+		getInp:
+			ldr r0, =Buffer
+			mov r1, #256
+			bl ReadLineUART
+			ldr r5, [r0, 1]
+			ldr r6, [r0]
+			cmp r5, #45
+			beq c1
+			cmp r5, #0
+			bne inperr
+		c1:
+			cmp r6, #49
+			beq summary
+		c2:
+			cmp r6, #113
+			beq exit
+			cmp r6, #49
+			blt berror
+			cmp r6, #49
+			beq square
+			cmp r6, #50
+			beq rectan
+			cmp r6, #51
+			beq tria
+			cmp r6, #51
+			bgt berror
+
+		getwid:
+			ldr r0, =shpAsk
+			mov r1, #58
+			bl WriteStringUART
+
+			ldr r0, =Buffer
+			mov r1, #256
+			bl ReadLineUART
+			ldr r4,[r0, 1]
+			cmp r4, #0
+			bne berror
+			ldr r4, [r0]
+			cmp r4, #3
+			blt berror
+			cmp r4, #9
+			bgt berror
+			mov r9, r4
+			
+
+		square:
+			str r12, [sj] //ASK TA ON WEDNESDAY
+		sj:	mov r10, #0
+		break:	add r10, r10, #1
+			cmp r10, r9
+			bgt done
+			ldr r0, =newLine
+			ldr r1, 1
+			bl WriteStringUART
+			mov r11, #1
+		break2:	cmp r11, r9
+			beq break
+			ldr r0, =drawShp
+			mov r1, #1
+			bl WriteStringUART
+			add r8, r8, #1
+			add r11, r11, #1
+			b break2
+
+		rectan:
+			bl getwid
+			mov r10, #0
+			sub r7, r9, #2
+		break3:	add r10, r10, 1
+			cmp r10, r7
+			bgt done
+			ldr r0, =newLine
+			ldr r1, 1
+			bl WriteStringUART
+			mov r11, #1
+		break4:	cmp r11, r9
+			beq break3
+			ldr r0, =drawShp
+			mov r1, #1
+			bl WriteStringUART
+			add r2, r2, #1
+			add r11, r11, #1
+			b break4
+
+		triang:
+			bl getwid
+			mov r10, #0
+			mov r7, r9
+		break5:
+			mov r11, #0
+		break6:
+			ldr r0, =newSpc
+			ldr r1, #1
+			bl WriteStringUART
+			add, r11, r11, #1
+			cmp r11, r7
+			ble break7
+		break7:
+			mov r11, #0
+		breakk7:
+			add r11, r11, #1
+			ldr r0, =drawShp
+			ldr r1, #1
+			bl WriteStringUART
+			ldr r0, =newSpc
+			ldr r1, #1
+			bl WriteStringUART
+			cmp r11, r10
+			ble breakk7
+		1up:
+			ldr r0, =newLine
+			ldr r1, #1
+			bl WriteStringUART
+			sub r7, r7, #1
+			add r10, r10, #1
+			cmp r10, r9
+			ble break5
+			b Userask
+
+		summary:
+
+
+
+
+
+
+			ldr r0, =string0 	                                                                        //Address of the label in data section containing the data you want to print	
+			mov r1, #7		                                                                        //Number of characters to print
+			bl WriteStringUART
+
+			ldr r0, =string0 	                                                                        //Address of the label in data section containing the data you want to print
+			add r0,#7			                                                                //Here I am moving the address to another ascii in this table. Keep in mind each character needs one byte.
+			mov r1, #6	                                                                                //Number of characters needed to be print
+			bl WriteStringUART
+
+			ldr r0,=Buffer											//The buffer which will store user input. user input will be stored interns of bytes using ascii
+			mov r1, #256											// Number of bytes allocated for user input in the memory
+			bl ReadLineUART											// it will return in r0 number of characters user entered
+
+
+
+		.section .data  
+		string0:
+			.ascii "Created By: Josh Dow\r\n"
+			.align
+
+		strAsk:
+		        .ascii "Please enter the number of the object you wish to draw. Press -1 for summary. Press q to exit\n"
+			.align
+		strCh:
+		        .ascii "1- Square; 2- Rectangle; 3- Triangle\n"
+		        .align
+
+		inErr:
+		        .ascii "Wrong number format! q is the only allowed character\n"
+		        .align
+		bndErr:
+		        .ascii "Invalid number! The number should be between 1 and 3 or -1 for summary\n"
+		        .align
+
+		shpAsk:
+		        .ascii "Please enter the width of object. Must be between 3 and 9\n"
+		        .align
+
+		drawShp:
+		        .ascii "*"
+
+		newLine:
+			.ascii "\n"
+			.align
+		newSpc:
+			.ascii " "
+			.align
+		dspSum:
+		        .ascii "Total Number of stars is: %d\n"
+		        .ascii "Mean of Stars used to draw Square(s): %d\n"
+		        .ascii "Mean of Stars used to draw Rectangle(s): %d\n"
+		        .ascii "Mean of Stars used to draw Traingle(s): %d\n"
+		        .align
+		trmprg:
+		        .ascii "Terminating Program\n"
+		        .align
+
+
+		Buffer:
+			.rept 256
+			.byte 0
+			.endr`
+	},
+	m16: {
+		type: 'arm',
+		code: `
+										//Created by: Joshua Dow, 10150588.
+		define(i_r, x19)
+		define(c_r, x20)
+		define(x12_r, x25)
+		define(x3_r, x26)
+
+
+
+		fmt:    	.string "The values of x,y are: %d,%d and the current minimum is: %d\n"				//Declares the value of the string
+				.balign 4											//Puts string in multiples of 4-bytes
+				.global main											//Makes string globally available
+
+
+		fmt_r:		.string "The final minimum was: %d. The program is now over\n"					//Delcares the value of the string
+				.balign 4 											//Puts string in multiples of 4-bytes
+				.global main 											//Makes string globally available
+
+
+		main:		stp x29, x30, [sp, -16]! 									//Shifts the stack by -16 bytes
+				mov x29, sp 											//Initializing stack space
+				mov i_r, -6 											//Setting default value for loop
+				mov x24, 0x2710 										//Setting high minimum value
+
+		Top_Of_Loop:	mov c_r, -0x2B 											//Sets x20 to -43
+				mov x12_r, 0x1B 											//Sets x25 to 27
+				mov x3_r, 0x5 											//Sets x26 to 5
+				mneg x21, i_r, x12_r 										//Storing the product of i_r and -27
+				add c_r, c_r, x21 										//Storing the sum of x20 and x21
+				mul x21, i_r, i_r 										//Storing the product of i_r^2
+				madd c_r, x21, x12_r, c_r
+				mul x21, i_r, x21
+				madd c_r, x21, x3_r, c_r 										//Storing the sum of x23 and x20
+				cmp c_r, x24 											//Compares two registers, if negative will set new min
+				b.mi set_min 											//Sets the new min value
+		Mid_Loop:	adrp x0, fmt 											//Adding high-order bits
+				add x0, x0, :lo12:fmt 										//Adding low-order bits
+				mov x1, i_r 											//Declaring x value
+				mov x2, c_r 											//Declaring y value
+				mov x3, x24 											//Declaring min
+				bl printf 											//Prints to standard output
+				add i_r, i_r, 1 										//Increments by 1 to traverse through loop
+		test:		cmp i_r, 7 											//Test to control flow of loop
+				b.eq Post_Loop 											//Moves to the post loop info
+				b Top_Of_Loop 											//Jumps to top of loop
+
+		set_min:	mov x24, c_r 											//Moves the value of x20 into x24
+				b Mid_Loop 											//Jumps back to the loop
+
+		Post_Loop:
+				adrp x0, fmt_r 											//Adding high-order bits
+				add x0, x0, :lo12:fmt_r 									//Adding low-order bits
+				mov x1, x24 											//Moving the minimum value into a temp register
+				bl printf 											//Prints to standard output
+				b done 												//Final branch to restore the stack
+
+		done:		ldp x29, x30, [sp], 16 										//Restores the stack and finializes the program
+				ret 												//Returns from sub-routine`
+	},
+	m17: {
+		type: 'arm',
+		code: `
+		//Created by Joshua Dow, 10150588
+		//PLEASE READ: Could not makes registers x19-x21 to be w19-w21 due to reoccuring mismatch errors.
+
+
+		define(mult_r, x19)					//Assigning macro to x19
+		define(mulc_r, x20)					//Assigning macro to x20
+		define(prod_r, x21)					//Assigning macro to x21
+		define(i_r, w22)					//Assigning macro to w22
+		define(n_r, w23)					//Assigning macro to w23
+		define(lire_r, x24)					//Assigning macro to x24
+		define(temp1_r, x25)					//Assigning macro to x25
+		define(temp2_r, x26)					//Assigning macro to x26
+
+		str1:   .string "multiplier = 0x%08x multiplicand = 0x%08x \n\n"//Assigning a string value
+			.balign 4						//Aligning bytes for the string
+			.global main						//Making accessible to main
+		str2:	.string "product = 0x%08x multiplier = 0x%08x\n"	//Assigning a string value
+			.balign 4						//Aligning bytes for the string
+			.global main						//Making accessible to main
+		str3:	.string "64-bit result = 0x%0161x %1d\n"		//Assigning a string value
+			.balign 4						//Aligning bytes for the string
+			.global main						//Making accessible to main
+		main:	stp x29, x30, [sp, -16]!				//Creating room in the stack
+			mov x29, sp						//Putting stack in a register
+			mov mulc_r, -268435456					//Giving x20 a value 
+			mov mult_r, 50						//Giving x19 a value
+			mov prod_r, 0						//Giving x21 a value
+		print1:	adrp x0, str1						//Gives x0 the address of str1
+			add x0, x0, :lo12:str1					//Places low order bits into x0
+			mov x1, mult_r						//Preparing to print x19
+			mov x2, mulc_r						//Preparing to print x20
+			bl printf						//Calls printf function
+			cmp mult_r, 0						//Compares the value of x19 to 0
+			b.ge neg0						//If x19 is >= 0, branch to neg0
+			mov n_r, 1						//Else set w23 to 1 (TRUE)
+			b loops							//Then branch to start of loop
+		neg0:	mov n_r, 0						//Else if set w23 to 0 (FALSE)
+		loops:	mov i_r, 0						//Initialize i to 0
+		loopb:	cmp i_r, 31						//Compare i to 31
+			b.gt loopf						//If > 31, branch to end of loop
+			and mult_r, mult_r, 1					//Else perform AND on x19 & 1
+			cmp mult_r, 0						//Compare x19 to 0
+			b.eq next						//If x19 == 0, branch to next
+			add prod_r, mult_r, prod_r				//Else add x21 to x19
+		next:	asr mult_r, mult_r, 1					//Arthitmetic shift right x19 by 1
+			and prod_r, prod_r, 1					//Perform AND on x21 & 1
+			cmp prod_r, 0						//Compare x21 to 0
+			b.eq else1						//If x21 == 0 branch to else1
+			orr mult_r, mult_r, 0x80000000				//Perform inclusive or on x19 and 0x80000000
+			b next2							//Branch to next2
+		else1:	bic mult_r, mult_r, 0x7FFFFFFF				//Bit clear x19 by 0x7FFFFFFF
+		next2:	add i_r, i_r, 1						//Incremement i by 1
+			b loopb							//Branch to loop body
+			asr prod_r, prod_r, 1					//Arthimetic shift right x21 by 1
+		loopf:	cmp n_r, 0						//Compare w23 to 0 (FALSE)
+			b.eq print2						//If w23 == 0, branch to print 2
+			sub prod_r, prod_r, mult_r				//Else subtract x19 from x21
+		print2: adrp x0, str2						//Gives x0 the value of str2
+			add  x0, x0, :lo12:str2					//Places low order bits of str2 into x0
+			mov x1, prod_r						//Places value of x21 into x1
+			mov x2, mult_r						//Places value of x19 to x2
+			bl printf						//Calls printf
+			and temp1_r, prod_r, 0xFFFFFFF				//Performs AND on x21 & 0xFFFFFFFF
+			lsl temp1_r, temp1_r, 32				//Logical shift left x25 by 32
+			and temp2_r, mult_r, 0xFFFFFFF				//performs AND on x19 & 0xFFFFFFFF
+			add lire_r, temp2_r, temp1_r				//Places the sum on x25 and x26 into results
+		print3:	adrp x0, str3						//Places value of str3 into x0
+			add x0, x0, :lo12:str3					//Places low order bits of str3 into x0
+			mov x1, lire_r						//Moves the final result into x1
+			bl printf						//Calls printf
+		done:	ldp x29, x30, [sp], 16					//Restores the stack
+			ret 							//Calls return and exits the program`
+	},
+	m18: {
+		type: 'arm',
+		code: `
+		//Created by Joshua Dow, 10150588.
+		define(v_s, w20)
+		define(i_s, w21)
+		define(j_s, w22)
+		define(offset_r, x19)
+		define(base_r, x23)
+		define(temp_r, w27)
+		alloc = -(16 + 160 + 12 + 32) & -16	//Allocating memory
+		dealloc = -alloc			//Will be used later to deallocate
+		fmt: 	.string "v[%d]: %d\n"		//Declaring string
+		fmt1:	.string "\nSorted array: \n"	//Declaring string
+		fmt2:	.string "v[%d]: %d\n"		//Declaring string
+			.balign 4			//Aligning memory
+			.global main			//Makes it available to main
+		main:
+			stp x29, x30, [sp, alloc]! 	//Allocated for main, array, temp, i, and j
+			mov x29, sp			//Moving Stack Pointer to point to FP
+			mov v_s, 77			//Initializing with random value
+			mov i_s, 0			//Setting i to 0
+			mov j_s, 1			//Setting j to 1
+			mov base_r, 24			//Setting base address of the array to 24
+			mov offset_r, 0			//Setting the initial offset to 0
+			str i_s, [x29,16]		//Storing value of i to stack
+			str j_s, [x29, 20]		//Storing value of j to stack
+			str v_s, [x29, base_r]		//Storing first value of array to base address
+			mov w25, 0x00000005		//Initializing arbitrary value
+			mov w24, 0x7FFFFFFF		//Initializing arbitrary value
+			add offset_r, offset_r, base_r	//Setting the offset to point to base address
+		tloop1:	tst w25, w25, lsl 2		//Doing bitwise operations on w25 --> Used in creating random integers
+			lsr w24, w24, 6			//Scrambling bits
+			mov w26, w24			//Moving value
+			adc w25, w25, w25		//Carrying w25 over by bit
+			eor w26, w26, w24, lsl 12	//Exclusive or with a shift
+			eor w24, w26, w26, lsl 2	//Exclusive or with a shift
+			ldr v_s, [x29, offset_r]	//Loading into array
+			and v_s, w26, 0xFF		//Doing AND with 0xFF to finalize random int
+			str v_s, [x29, offset_r]	//Storing this value into the array within the stack
+			ldr i_s, [x29, 16]		//Loading i from stack
+			ldr v_s, [x29, offset_r]	//Loading array element from stack
+			adrp x0, fmt			//Loading string to be printed
+			add x0, x0, :lo12:fmt		//Loading low order bits of string
+			mov w1, i_s			//Preparing variable to be printed
+			mov w2, v_s			//Preparing variable to be printed
+			bl printf			//Calling printf function
+			str v_s, [x29, offset_r]	//Storing element back into array
+			add offset_r, offset_r, 4	//Incrementing the offset to point to next index
+			add i_s, i_s, 1			//Incrementing i
+			str i_s, [x29, 16]		//Storing value of i
+			cmp i_s, 40			//Comparing i to the size of the array
+			b.lt tloop1			//If less than, branch back to the top of loop to fill the array
+		bloop1:	ldr i_s, [x29, 16]		//Loading value of i
+			mov i_s, 40			//Declaring i to be 40
+			add i_s, i_s, -1		//Declaring i to be 39
+			str i_s, [x29, 16]		//Storing value of i
+			ldr j_s, [x29, 20]		//Loading value of j
+			mov j_s, 1			//Declaring j to be 1
+			str j_s, [x29, 20]		//Storing value of j
+		tloop2:	mov offset_r, 0			//Setting offset to 0
+			add offset_r, base_r, offset_r	//Incrementing offset to point to base address
+		tloop3:	ldr v_s, [x29,offset_r]		//Loading element of array at offset
+			add offset_r, offset_r, 4	//Incrementing offset by 4 to point to next element
+			ldr temp_r, [x29, offset_r]	//Loading the element at offset into temp
+			str temp_r, [x29, offset_r]	//Storing temp at offset
+			add offset_r, offset_r, -4	//Decrementing offset by 4
+			str v_s, [x29, offset_r]	//Storing element of array at offset
+			cmp v_s, temp_r			//Comparing two elements
+			b.gt if1			//If greater than, go back to swap elements
+			b el1				//Else, carry on
+		if1:	ldr temp_r, [x29, offset_r]	//Loading element at offset into temp
+			add offset_r, offset_r, 4	//Incrementing offset by 4
+			ldr v_s, [x29, offset_r]	//Loading element at offset into array
+			str temp_r, [x29, offset_r]	//Storing temp into offset
+			add offset_r, offset_r, -4	//Decrementing offset by 4
+			str v_s, [x29, offset_r]	//Storing element of array into offset
+			add offset_r, offset_r, 4	//Incrementing offset for next iteration
+			ldr i_s, [x29, 16]		//Loading value of i
+			ldr j_s, [x29, 20]		//Loading value of j
+		el1:	add j_s, j_s, 1			//Incrementing j
+			str j_s, [x29, 20]		//Storing value of j
+			cmp j_s, i_s			//Comparing j to i
+			b.le tloop3			//Branching back to top of loop
+			add i_s, i_s, -1		//Decrementing i
+			str i_s, [x29, 16]		//Storing value of i
+			cmp i_s, 0			//Comparing i to 0
+			b.ge tloop3			//Branching back to loop after decrement
+			mov i_s, 0			//Setting i to 0
+			str i_s, [x29, 16]		//Storing value of i
+		printe:	adrp x0, fmt1			//Preparing to print string
+			add x0, x0, :lo12:fmt1		//Loading low order bits of string
+			bl printf			//Calling printf
+			mov offset_r, 0			//Setting offset to 0
+			add offset_r, offset_r, base_r	//Setting offset to base address
+		printl:	adrp x0, fmt2			//Preparing to print string
+			add x0, x0, :lo12:fmt2		//Loading low order bits of string
+			ldr i_s, [x29, 16]		//Loading value of i
+			ldr v_s, [x29, offset_r]	//Loading element of array at offset
+			mov w1, i_s			//Preparing to print variable
+			mov w2, v_s			//Preparing to print element of array
+			bl printf			//Calling printf
+			str v_s, [x29, offset_r]	//Storing element of array
+			add offset_r, offset_r, 4	//Incrementing offset by 4
+			add i_s, i_s, 1			//Incrementing i by 1
+			str i_s, [x29, 16]		//Storing value of i
+			cmp i_s, 40			//Comparing i to size
+			b.lt printl			//Branching to print from the loop
+		end:	ldp x29, x30, [sp], dealloc	//Deallocating memory
+			ret				//Return and end function`
+	},
+	m19: {
+		type: 'arm',
+		code: `
+		false = 0
+		true = 1
+		f_s = 16
+		s_s = 32
+		first_x_offset = 0
+		first_y_offset = 4
+		first_z_offset = 8
+		first_r_offset = 12
+		second_x_offset = 0
+		second_y_offset = 4
+		second_z_offset = 8
+		second_r_offset = 12
+
+		sphere_struct_size = 16
+
+		fmt:	.string "\nInitial sphere values:\n"
+		f_m:	.string "first"
+		s_m:	.string "second"
+		fmt1:	.string "\nChanged sphere values:\n"
+		f_m1:	.string "first"
+		s_m1:	.string "second"
+		fmt2:	.string "Sphere %s origin = (%d, %d, %d) radius = %d\n"
+
+		alloc = -(16 + 2*sphere_struct_size) & -16
+		.balign 4
+		.global main
+		main:	stp x29, x30, [sp, alloc]!
+			mov x29, sp
+		break1:	add x8, x29, 16
+			bl newSphere
+			ldr w0, [x8, first_x_offset]
+			str w0, [sp, first_x_offset]
+			str w0, [sp, second_x_offset]
+			ldr w0, [x8, first_y_offset]
+			str w0, [sp, first_y_offset]
+			str w0, [sp, second_y_offset]
+			ldr w0, [x8, first_z_offset]
+			str w0, [sp, first_z_offset]
+			str w0, [sp, second_z_offset]
+			ldr w0, [x8, first_r_offset]
+			str w0, [sp, first_r_offset]
+			str w0, [sp, second_r_offset]
+			adrp x0, fmt
+			add x0, x0, :lo12:fmt
+			bl printf
+			add x0, x29, 16
+			adrp x19, f_m
+			add x19, x19, :lo12:f_m
+			bl printSphere
+			adrp x19, s_m
+			add x19, x19, :lo12:s_m
+			add x0, x29, 32
+			bl printSphere
+			bl equal
+			cmp x0, true
+			b.eq ifm
+			b next
+		ifm:	add x0, x29, 16
+			mov x1, -5
+			mov x2, 3
+			mov x3, 2
+			bl move
+			add x0, x29, 32
+			mov x1, 8
+			bl expand
+		next:	adrp x0, fmt1
+			add x0, x0, :lo12:fmt1
+			bl printf
+			adrp x19, f_m
+			add x19, x19, :lo12:f_m
+			add x0, x29, 16
+			bl printSphere
+			adrp x19, s_m
+			add x19, x19, :lo12:s_m
+			add x0, x29, 32
+			bl printSphere
+			ldp x29, x30, [sp], -alloc
+			ret
+
+		sphere_alloc = -(16 + sphere_struct_size) & -16
+		newSphere:
+			stp x29, x30, [sp, sphere_alloc]!
+			mov x29, sp
+			mov w0, 0
+			str w0, [x29, 16 + first_x_offset]
+			mov w0, 0
+			str w0, [x29, 16 + first_y_offset]
+			mov w0, 0
+			str w0, [x29, 16 + first_z_offset]
+			mov w0, 1
+			str w0, [x29, 16 + first_r_offset]
+
+			ldr w0, [x29, 16 + first_x_offset]
+			str w0, [x8, first_x_offset]
+			ldr w0, [x29, 16 + first_y_offset]
+			str w0, [x8, first_y_offset]
+			ldr w0, [x29, 16 + first_z_offset]
+			str w0, [x8, first_z_offset]
+			ldr w0, [x29, 16 + first_r_offset]
+			str w0, [x8, first_r_offset]
+			ldp x29, x30, [sp], -sphere_alloc
+			ret
+
+		move:	stp x29, x30, [sp, -16]!
+			mov x29, sp
+			mov x10, x0
+			mov w11, w1
+			mov w12, w2
+			mov w13, w3
+			ldr w14, [sp, x10]
+			add w14, w14, w11
+			str w14, [sp, x10]
+			add x10, x10, 4
+			ldr w14, [sp, x10]
+			add w14, w14, w12
+			str w14, [sp, x10]
+			add x10, x10, 4
+			ldr w14, [sp, x10]
+			add w14, w14, w13
+			str w14, [sp, x10]
+			ldp x29, x30, [sp], 16
+			ret
+
+		expand:	stp x29, x30, [sp, -16]!
+			mov x29, sp
+			mov w10, w0
+			mov w11, w1
+			add w10, w10, 12
+			ldr w12, [sp, x10]
+			mul w12, w12, w11
+			str w12, [sp, x10]
+			ldp x29, x30, [sp], 16
+			ret
+
+
+		printSphere:
+			stp x29, x30, [sp, -16]!
+			mov x29, sp
+			mov x1, x19
+			ldr w2, [x0, first_x_offset]
+			ldr w3, [x0, first_y_offset]
+			ldr w4, [x0, first_z_offset]
+			ldr w5, [x0, first_r_offset]
+
+			adrp x0, fmt2
+			add x0, x0, :lo12:fmt2
+			bl printf
+			ldp x29, x30, [sp], 16
+			ret
+
+		equal:	stp x29, x30, [sp, -16]!
+			mov x29, sp
+			mov x0, false
+			ldr w13, [x29, 16 + first_x_offset]
+			ldr w14, [x29, 32 + second_x_offset]
+			cmp w13, w14
+			b.ne else
+			ldr w13, [x29, 16 + first_y_offset]
+			ldr w14, [x29, 32 + second_y_offset]
+			cmp w13, w14
+			b.ne else
+			ldr w13, [x29, 16 + first_z_offset]
+			ldr w14, [x29, 32 + second_z_offset]
+			cmp w13, w14
+			b.ne else
+			ldr w13, [x29, 16 + first_r_offset]
+			ldr w14, [x29, 32 + second_r_offset]
+			cmp w13, w14
+			mov x0, true
+		else:
+			ldp x29, x30, [sp], 16
+			ret`
+	},
+	m20: {
+		type: 'arm',
+		code: `
+		//Created by Joshua Dow, 10150588, 11/24/2016.
+
+		stacksize = 5								//Declaring stack size
+		FALSE = 0								//Declaring false
+		TRUE = 1								//Declaring true
+		define(i_s, w21)							//M4 macro for w21
+		i_s = 4									//Declaring i_s to 4
+			.data								//Beginning of data section
+			.global s_m							//Making variable global
+			.global t_m							//Making variable global
+		s_m:	.skip stacksize * 4						//Stack is the size of stacksize * 4
+		t_m:	.word -1							//Top of stack is a word and is initialized to -1
+
+			.text								//Beginning of text section
+		fmt:	.string "\nStack overflow! Cannot push value onto stack.\n"	//String
+		fmt1:	.string "\nStack underflow! Cannot pop an empty stack. \n"	//String
+		fmt2:	.string "\nEmpty stack\n"					//String
+		fmt3:	.string "\nCurrent stack contents: \n"				//String
+		fmt4:	.string "	%d"						//String
+		fmt5:	.string "<-- top of stack"					//String
+		fmt6:	.string "\n"							//String
+			.balign 4							//Word aligning instructions
+			.global push							//Making push global
+		push:
+			stp x29, x30, [sp, -16]!					//Storing pair
+			mov x29, sp							//Moving sp to fp
+			mov w9, w0							//Storing input in a register
+			bl stackFull							//Branch to subroutine
+			cmp w0, TRUE							//Compare return value to true
+			b.ne ep								//If not equal branch to else statement
+			adrp x0, fmt							//Load high order bits of fmt
+			add x0, x0, :lo12:fmt						//Load low order bits of fmt
+			bl printf							//Call printf
+
+		ep:
+			adrp x10, t_m							//Load high order bits of the address of top
+			add x10, x10, :lo12:t_m						//Load low order bits of the address of top
+			ldr w11, [x10]							//Store value of top into w11
+			add w11, w11, 1							//Increment w11 by 1
+			str w11, [x10]							//Store new value of w11
+
+			adrp x12, s_m							//Load high order bits of the address of the stack
+			add x12, x12, :lo12:s_m						//Load low order bits of the address of the stack
+			str w9, [x12, w11, SXTW 2]					//Logical shift left by 2, then store value into w9
+			ldp x29, x30, [sp], 16						//Restore pair of registers
+			ret								//Return to calling code
+
+		.global pop								//Makes pop global function
+		pop:
+			stp  x29, x30, [sp, -16]!					//Store pair of registers
+			mov x29, sp							//Moving sp to fp
+			mov w9, 0							//Initialize popped value to zero
+			bl stackEmpty							//Check if stack is empty
+			cmp w0, TRUE							//Compare result to true
+			b.ne ep1							//If false, branch to else statement
+			adrp x0, fmt1							//Load high order bits of fmt1
+			add x0, x0, :lo12:fmt1						//Load low order bits of fmt1
+			bl printf							//Call printf
+			mov x0, -1							//Set return value to -1
+			ldp x29, x30, [sp], 16						//Restore pair of registers
+			ret								//Return to calling code
+		ep1:
+			adrp x10, t_m							//Load high order bits of the address of top
+			add x10, x10, :lo12:t_m						//Load low order bits of the address of top
+			adrp x11, s_m							//Load high order bits of the address of the stack
+			add x11, x11, :lo12:s_m						//Load low order bits of the address of the stack
+			ldr w12, [x10]							//Load value of index into w12
+			ldr w9, [x11, w12, SXTW 2]					//Find value in stack according to index
+			add w12, w12, -1						//Decrement index
+			str w12, [x10]							//Store new value into address of top
+			mov w0, w9							//Move value to be returned
+			ldp x29, x30, [sp], 16						//Restore pair of register
+			ret								//Return to calling code
+
+		.global stackFull							//Make stackFull global
+		stackFull:
+			stp x29, x30, [sp, -16]!					//Store pair of registers
+			mov x29, sp							//Moving sp to fp
+			adrp x10, t_m							//Load high order bits of the address of top
+			add x10, x10, :lo12:t_m						//Load low order bits of the address of top
+			ldr w11, [x10]							//Load value of top into w11
+			mov w12, stacksize						//Move value of stacksize into w12
+			add w12, w12, -1						//Decrement w12 by -1
+			cmp w11, w12							//Compare w11 to w12
+			b.ne eps							//If not equal, branch to else
+			mov x0, TRUE							//Move return value to TRUE
+			ldp x29, x30, [sp], 16						//Restore pair of registers
+			ret								//Return to calling code
+		eps:
+			mov x0, FALSE							//Move return value to FALSE
+			ldp x29, x30, [sp], 16						//Restore pair of registers
+			ret								//Return to calling code
+
+		.global stackEmpty							//Make stackEmpty global
+		stackEmpty:
+			stp x29, x30, [sp, -16]!					//Store pair of registers
+			mov x29, sp							//Move sp to fp
+			adrp x10, t_m							//Load high order bits of top
+			add x10, x10, :lo12:t_m						//Load low order bits of top
+			ldr x11, [x10]							//Load value of top into w11
+			cmp x11, -1							//Compare top to -1
+			b.ne epse							//If not equal, branch to else
+			mov x0, TRUE							//Set return value to true
+			ldp x29, x30, [sp], 16						//Restore pair of registers
+			ret								//Return to calling code
+		epse:
+			mov x0, FALSE							//Set return value to false
+			ldp x29, x30, [sp], 16						//Restore pair of registers
+			ret								//Return to calling code
+
+		.global display								//Make display global
+		display:
+			stp x29, x30, [sp, -16]!					//Store pair of registers
+			mov x29, sp							//Move sp to fp
+			mov w14, 0							//Initialize local variable to 0
+			adrp x10, t_m							//Load high order bits of top
+			add x10, x10, :lo12:t_m						//Load low order bits of top
+			ldr w14, [x10]							//Set local variable to value of top
+			bl stackEmpty							//Check if stack empty
+			cmp x0, TRUE							//Compare returned value to true
+			b.ne eld							//If not equal, branch to else
+			adrp x0, fmt2							//Load high order bits of fmt2
+			add x0, x0, :lo12:fmt2						//Load low order bits of fmt2
+			bl printf							//Call to printf
+		eld:
+			adrp x0, fmt3							//Load high order bits of fmt3
+			add x0, x0, :lo12:fmt3						//Load low order bits of fmt3
+			bl printf							//Call to printf
+		ind:	adrp x10, t_m							//Load high order bits of top
+			add x10, x10, :lo12:t_m						//Load low order bits of top
+			ldr w19, [x10]							//Load value of top into w19
+		top_loop:
+			adrp x0, fmt4							//Load high order bits of ftm4
+			add x0, x0, :lo12:fmt4						//Load low order bits of fmt4
+			adrp x13, s_m							//Load high order bits of the address of the stack
+			add x13, x13, :lo12:s_m						//Load low order bits of the address of the stack
+			ldr w1, [x13, w19, SXTW 2]					//Load value inside stack at index
+			bl printf							//Call to printf
+			cmp w19, w14							//Compare index to top
+			b.ne sk								//If not equal, branch to sk
+			adrp x0, fmt5							//Load high order bits of fmt5
+			add x0, x0, :lo12:fmt5						//Load low order bits of fmt5
+			bl printf							//Call to printf
+		sk:
+			adrp x0, fmt6							//Load high order bits of fmt6
+			add x0, x0, :lo12:fmt6						//Load low order bits of fmt6
+			bl printf							//Call to printf
+			sub w19, w19, 1							//Decrement index by 1
+			str w19, [x10]							//Store value of index back into top
+			cmp w19, 0							//Compare top to 0
+			b.ge top_loop 							//If >=, branch to top_loop
+			ldp x29, x30, [sp], 16						//Restore pair of registers
+			ret								//Return to calling code`
+	},
+	m21: {
+		type: 'arm',
+		code: `
+		define(i_r, w19)
+		define(argc_r, w20)
+		define(argv_r, x21)
+		define(mon_r, w22)
+		define(day_r, w23)
+		define(year_r, w24)
+		jan_m:	.string "January"
+		feb_m:	.string "February"
+		mar_m:	.string "March"
+		apr_m:	.string	"April"
+		may_m:	.string "May"
+		jun_m:	.string "June"
+		jul_m:	.string "July"
+		aug_m:	.string "August"
+		sep_m:	.string "September"
+		oct_m:	.string "October"
+		nov_m:	.string "November"
+		dec_m:	.string "December"
+
+		errm:	.string "Invalid Month.\n"
+		errd:	.string "Invalid Day.\n"
+		erry:	.string "Invalid Year.\n"
+		fmt:	.string "%s %dst %d\n"
+		fmt1:	.string "%s %dnd %d\n"
+		fmt2:	.string "%s %drd %d\n"
+		fmt3:	.string "%s %dth %d\n"
+			.data
+			.balign 8
+		mon_m:	.dword jan_m, feb_m, mar_m, apr_m, may_m, jun_m, jul_m, aug_m, sep_m, oct_m, nov_m, dec_m
+
+			.text
+			.balign 4
+			.global main
+		main:
+			stp x29, x30, [sp, -16]!
+			mov x29, sp
+
+			mov argc_r, w0
+			mov argv_r, x1
+			mov i_r, 1
+
+			ldr x0, [argv_r, i_r, SXTW 3]
+			bl atoi
+			mov mon_r, w0
+			cmp mon_r, 12
+			b.gt erm
+			cmp mon_r, 0
+			b.le erm
+			sub mon_r, mon_r, 1
+
+			add i_r, i_r, 1
+			ldr x0, [argv_r, i_r, SXTW 3]
+			bl atoi
+			mov day_r, w0
+			cmp day_r, 31
+			b.gt erd
+			cmp day_r, 0
+			b.le erd
+
+			add i_r, i_r, 1
+			ldr x0, [argv_r, i_r, SXTW 3]
+			bl atoi
+			mov year_r, w0
+			cmp year_r, 0
+			b.lt ery
+
+			adrp x26, mon_m
+			add x26, x26, :lo12:mon_m
+		c1:	cmp day_r, 1
+			b.ne c2
+			adrp x0, fmt
+			add x0, x0, :lo12:fmt
+			b print
+
+		c2:	cmp day_r, 2
+			b.ne c3
+			adrp x0, fmt1
+			add x0, x0, :lo12:fmt1
+			b print
+		c3:
+			cmp day_r, 3
+			b.ne c4
+			adrp x0, fmt2
+			add x0, x0, :lo12:fmt2
+			b print
+		c4:
+			cmp day_r, 21
+			b.ne c5
+			adrp x0, fmt
+			add x0, x0, :lo12:fmt
+			b print
+		c5:
+			cmp day_r, 22
+			b.ne c6
+			adrp x0, fmt1
+			add x0, x0, :lo12:fmt1
+			b print
+		c6:
+			cmp day_r, 23
+			b.ne c7
+			adrp x0, fmt2
+			add x0, x0, :lo12:fmt2
+			b print
+		c7:
+			cmp day_r, 31
+			b.ne c8
+			adrp x0, fmt
+			add x0, x0, :lo12:fmt
+			b print
+		c8:
+			adrp x0, fmt3
+			add x0, x0, :lo12:fmt3
+			b print 
+		print:	ldr x1, [x26, mon_r, SXTW 3]
+			mov w2, day_r
+			mov w3, year_r
+			bl printf
+			ldp x29, x30, [sp], 16
+			ret
+
+		erm:
+			adrp x0, errm
+			add x0, x0, :lo12:errm
+			bl printf
+			ldp x29, x30, [sp], 16
+			ret
+		erd:
+			adrp x0, errd
+			add x0, x0, :lo12:errd
+			bl printf
+			ldp x29, x30, [sp], 16
+			ret
+		ery:
+			adrp x0, erry
+			add x0, x0, :lo12:erry
+			bl printf
+			ldp x29, x30, [sp], 16
+			ret`
+	},
+	m22: {
+		type: 'arm',
+		code: `
+		//Created by Joshua Dow, 10150588
+		
+		define(fd_r, w19)
+		define(nread_r, x20)
+		define(buf_base_r, x21)
+		define(argv_r, x23)									//Declaring m4 macros
+		define(in_r, x24)
+		define(i_r, w26)
+		buf_size = 8
+		alloc = -(16 + buf_size) & -16
+		dealloc = -alloc
+		buf_s = 16
+		AT_FDCWD = -100
+
+		fmt1:	.string "Error opening file: %s\nAborting.\n"
+		fmt2:	.string "x				e^x				e^-x\n"
+		fmt3:	.string "%9.10f			%9.10f			%9.10f\n"			//Declaring format strings
+		secon: 	.double 0r1.0e-10
+
+			.balign 4										//Aligning bits
+			.global main										//Declaring main global
+		main:
+			stp x29, x30, [sp, alloc]!								//Storing pair of register
+			mov x29, sp										//Point fp at sp
+
+			mov argv_r, x1										//Get input
+			mov i_r, 1										//Index of input file name
+
+			mov w0, AT_FDCWD									//Openat request
+			ldr x1, [argv_r, i_r, SXTW 3]								//Getting filename
+			mov w2, 0										//Unused
+			mov w3, 0										//Unused
+			mov x8, 56										//Openat
+		 	svc 0											//System call
+			mov fd_r, w0										//Store file descriptor
+
+			cmp fd_r, 0										//Compare file descriptor to 0
+			b.ge sopen										//If larger, go to open file
+			adrp x0, fmt1										//Loading error message
+			add x0, x0, :lo12:fmt1									//Loading low order bits of error message
+			ldr x1, [argv_r, i_r, SXTW 3]								//Load file name
+			bl printf										//Printf
+			mov w0, -1										//Set up parameters to exit
+			b exit											//branch to exit
+
+		sopen:
+			add buf_base_r, x29, buf_s								//Start at beginning of buffer base
+			adrp x0, fmt2										//Load high order bits
+			add x0, x0, :lo12:fmt2									//Load low order bits
+			bl printf										//Printf
+			fmov d14, 1.0										//Initializing
+			fmov d31, 1.0										//Initializing
+			fmov d16, 1.0										//Initializing
+			mov x25, 1										//Start count
+			adrp x22, secon										//High order bits of double
+			add x22, x22, :lo12:secon								//Low order bits of double
+			ldr d15, [x22]										//Load the value
+			mov x26, 0										//Initializing
+			fmov d13, 1.0										//Initializing
+			fmov d11, 1.0										//Initializing
+		top:
+			mov w0, fd_r										//Set up 1st arg
+			mov x1, buf_base_r									//Set up 2nd arg
+			mov x2, buf_size									//Set up 3rd arg
+			mov x8, 63										//Call to read
+			svc 0											//System call
+			mov nread_r, x0										//Record number of bits read
+			cmp nread_r, buf_size									//Compare to buffer size
+		 	b.ne end										//If less, means we have reached end of file
+
+			ldr d8, [buf_base_r]									//Value read from file
+			fmov d9, d8										//Move into temp d register
+			cmp x26, 0										//Used to alternate between + and -
+			b.eq subloop										//Branch
+			cmp x26, 1										//Used to alternate between + and -
+			b.eq subloop2										//Branch
+
+		subloop:
+			fmov d20, 1.0										//Setting up counter
+			fmov d21, 1.0										//Setting up counter
+			fmov d22, xzr										//Setting up comparison
+		pow1:
+			fcmp d9, d22										//Compare value read to 0 (first read), skip
+			b.eq skip1										//branch to skip
+			fmul d9, d9, d9										//Square number
+			fadd d20, d20, d21									//Add 1 to count
+			fcmp d20, d16										//Compare count to total count
+			b.le pow1										//Loop back to pow
+		skip1:
+			fadd d16, d16, d21 									//Add 1 to total count
+			fdiv d12, d9, d14									//Divide x by some factorial
+			fadd d13, d13, d12									//Add value to e
+			fsub d11, d11, d12									//Add value to -e
+			fmul d14, d14, d14									//Increment factorial
+			fcmp d14, d31										//Compare factorial to 1
+			fadd d14, d14, d31									//If is one, add 1 to it
+			add x25, x25, 1										//Add 1 to count
+			mov x26, 1										//Used to alternate between + and -
+			adrp x0, fmt3										//High order bits of string
+			add x0, x0, :lo12:fmt3									//Low order bits of string
+			fmov d0, d8										//1st arg (x)
+			fmov d1, d13										//2nd arg (e)
+			fmov d2, d11										//3rd arg (-e)
+			bl printf										//Printf
+			b top											//Loop back to top
+		subloop2:
+			fmov d20, 1.0										//Setting up counter
+			fmov d21, 1.0										//Setting up counter
+			fmov d22, xzr										//Setting up comparison
+		pow2:
+			fcmp d9, d22										//Compare value read to 0
+			b.eq skip2										//If 0, skip
+			fmul d9, d9, d9										//Square number
+			fadd d20, d20, d21									//Add 1 to count
+			fcmp d20, d16										//Compare to total count
+			b.le pow2										//loop back to pow
+		skip2:
+			fadd d16, d16, d21									//Add one to total count
+			fdiv d12, d9, d14									//Divide x by some factorial
+			fadd d13, d13, d12									//Add value to e
+			fadd d11, d11, d12									//Add value to -e
+			fmul d14, d14, d14									//Increment factorial
+			add x25, x25, 1										//Add 1 to count
+			mov x26, 0										//Used to alternate between + and -
+			adrp x0, fmt3										//High order bits of string
+			add x0, x0, :lo12:fmt3									//Low order bits of string
+			fmov d0, d8										//1st arg (x)
+			fmov d1, d13										//2nd arg (e)
+			fmov d2, d11										//3rd arg (-e)
+			bl printf										//Printf
+			b top											//Loop back to top
+
+		end:
+			mov w0, fd_r										//1st arg file descriptor
+			mov x8, 57										//Close request
+			svc 0											//System call
+
+			mov w0, 0										//Return 0
+		exit:
+			ldp x29, x30, [sp], dealloc								//Load pair of registers
+			ret											//Return`
 	}
 }

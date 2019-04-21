@@ -475,6 +475,10 @@ code {
   .mobile-nav {
     display: flex;
   }
+
+  code {
+    width: 138%;
+  }
 }
 
 

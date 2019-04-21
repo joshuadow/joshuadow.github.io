@@ -64,11 +64,9 @@ a:hover {
 
 .column {
 	float: left;
-	width: 50%;
-	padding: 0 2em;
-	min-height: 300px;
-	min-width: 320px;
+	width: 16%;
 	position: relative;
+	z-index: 10;
 }
 
 .column:nth-child(2) {
@@ -170,17 +168,15 @@ a:hover {
 	color: #89867e;
 }
 
-@media screen and (max-width: 46.0625em) {
+@media screen and (max-width: 1000px) {
 
 	.main {
 		padding: 0;
 	}
 
 	.column {
-		width: 100%;
-		min-width: auto;
-		min-height: auto;
-		padding: 3em 2em; 
+		width: 80%;
+		z-index: 10;
 	}
 
 	.column p {

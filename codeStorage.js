@@ -17791,5 +17791,1455 @@ var codeStore = {
 		exit:
 			ldp x29, x30, [sp], dealloc								//Load pair of registers
 			ret											//Return`
+	},
+	hs1: {
+		type: 'haskell',
+		code: `
+		module Main (
+	      -- * Main
+	      main, main'
+	      ) where
+
+		import Data.Maybe (fromJust, isNothing)
+		import System.Environment
+		import System.IO.Unsafe
+		import ApocTools
+		import ApocStrategyHumanSol
+		import StrategyUtils
+		import Rules
+		import Moves
+		import EndGame
+		import Upgrade
+
+		---Main-------------------------------------------------------------
+
+		-- | The main entry, which just calls 'main'' with the command line arguments.
+		main = main' (unsafePerformIO getArgs)
+
+		{- | We have a main' IO function so that we can either:
+
+		     1. call our program from GHCi in the usual way
+		     2. run from the command line by calling this function with the value from (getArgs)
+		-}
+		main'           :: [String] -> IO()
+		main' args = do
+		  if length args == 0 then do
+		      showStrategies
+		      strat1 <- getStrategyForPlayer "BLACK"
+		      strat2 <- getStrategyForPlayer "WHITE"
+		      
+		      if stratsValid strat1 strat2 == False then do
+		        showStrategies
+		      else do
+		        play strat1 strat2
+
+		  else do
+		    let strat1 = args!!0
+		    let strat2 = args!!1
+
+		    if stratsValid strat1 strat2 == False then do
+		      showStrategies
+		    else do
+		      play strat1 strat2
+
+		  return ()
+
+		-- | Given a Played and current penalties for the player, returns the new amount of penalties
+		checkPenalty :: Played -> Int -> Int
+		checkPenalty (Goofed (_)) penalties = penalties + 1
+		checkPenalty _ penalties = penalties
+
+		-- | If the second passed in GameState is not None, returns it, otherwise returns the first state
+		getRecentState :: Maybe GameState -> Maybe GameState -> IO GameState
+		getRecentState oldstate newstate = do
+		  if newstate /= Nothing then do
+		    return (fromJust newstate)
+		  else do
+		    return (fromJust oldstate)
+
+
+		-- | Main Recursive Game Loop
+		gameLoop :: Chooser -> Chooser -> GameState -> IO()
+		gameLoop blackstrat whitestrat state = do
+
+		  -- Get the move for black
+		  blackInputMove <- blackstrat state Normal Black
+
+		  let blackPenalties = blackPen state
+		  let blackMove = parseNormalMove Black blackInputMove state
+
+		  -- Get the move for white
+		  whiteInputMove <- whitestrat state Normal White
+
+		  let whitePenalties = whitePen state
+		  let whiteMove = parseNormalMove White whiteInputMove state
+
+		  let movedState = move (state {blackPlay = blackMove, blackPen = checkPenalty blackMove blackPenalties, whitePlay = whiteMove, whitePen = checkPenalty whiteMove whitePenalties})
+
+		  print movedState
+
+		  -- Check if we need to upgrade stuff
+		  upgradeState <- upgrade movedState blackstrat whitestrat
+
+		  if (upgradeState /= Nothing) then do
+		    -- Print the upgraded state
+		    print $ fromJust upgradeState
+		  else do
+		    return () -- ty haskell
+
+		  recentState <- getRecentState (Just movedState) (upgradeState)
+
+		  let isEndGame = isOver recentState
+
+		  if isEndGame == Nothing then
+		    gameLoop blackstrat whitestrat recentState
+		  else
+		    putStrLn (fromJust isEndGame)
+
+		  return ()
+
+		-- | Starts playing the two strategies (THEY MUST BE ALREADY VALID)
+		play :: String -> String -> IO()
+		play x y = do
+		  let strat1 = getStrategyFromString x
+		  let strat2 = getStrategyFromString y
+
+		  print initBoard
+		  
+		  gameLoop strat1 strat2 initBoard`
+	},
+	hs2: {
+		type: 'haskell',
+		code: `
+		module ApocStrategyHumanSol where
+		import Data.Maybe (fromJust, isNothing)
+		--import Data.List ((\\))
+		import Data.Foldable(find)
+		import Text.Read(readMaybe)
+		import ApocTools
+
+		-- | Human entry point
+		human                   :: Chooser
+		human board Normal player =
+		    do move <- readNPairs 2
+		                          ("Enter the move coordinates for player "
+		                           ++ (show player)
+		                           ++ " in the form 'srcX srcY destX destY'\\n"
+		                           ++ "[0 >= n >= 4, or just enter return for a 'pass'] "
+		                           ++ (if player==White then "W" else "B")
+		                           ++ "2:\\n")
+		                          (\\x -> x>=0 && x<=4)
+		       return move
+		human board PawnPlacement player =
+		    do move <- readNPairs 1
+		                          ("Enter the coordinates to place the pawn for player "
+		                           ++ (show player)
+		                           ++ " in the form 'destX destY':\\n"
+		                           ++ "[0 >= n >= 4] "
+		                           ++ (if player==White then "W" else "B")
+		                           ++ "1:\\n")
+		                          (\\x -> x>=0 && x<=4)
+		       return move
+
+		-- | Converts a given list to a list of tuple pairs
+		list2pairs            :: [a] -> [(a,a)]
+		list2pairs []         = []
+		list2pairs (x0:x1:xs) = (x0,x1):list2pairs xs
+
+		{- | Reads a pair of pairs from standard input in the form "int1 int2 int3 int4".  If user
+		     just types a return, Nothing is returned, otherwise if the user types other than
+		     4 well-formed integers, then a subsequent attempt is done until we get correct
+		     input.
+		-}
+		readNPairs        :: Int -> String -> (Int->Bool)-> IO (Maybe [(Int,Int)])
+		readNPairs n prompt f =
+		    do putStrLn prompt
+		       line <- getLine
+		       putStrLn line
+		       let lst = words line
+		        in if length lst == 0
+		           then return Nothing
+		           else
+		             if length lst < (2*n)
+		             then do putStrLn $ "Bad input! (" ++ line ++ ") \\nPlease enter "
+		                                ++ show (n*2) ++ " integers in the form '"
+		                                ++ (foldl (++) " " [show i++" "|i<-[1..n*2]]) ++ "'" -- count up to n
+		                     readNPairs n prompt f
+		             else case readInts (n*2) lst f of
+		                     Nothing   -> do putStrLn $ "Bad input: one or more integers is manformed! ("
+		                                              ++ line ++ ") \\nPlease enter "
+		                                              ++ show (n*2) ++ " integers in the form '"
+		                                              ++ (foldl (++) " " [show i++" "|i<-[1..n*2]]) ++ "'" -- count up to n
+		                                     readNPairs n prompt f
+		                     Just x    -> return $ Just $ list2pairs x
+
+
+		{- | Converts a list of Strings into a list of Ints that obey constraint f.
+		     If one or more of the strings does not parse into an Int, or if it fails constraint
+		     f, then return Nothing.
+		-}
+		readInts :: Int -> [String] -> (Int->Bool) -> Maybe [Int]
+		readInts n xs f = let ints = take n $ map (readMaybe :: String -> Maybe Int) xs -- convert each from String to Int
+		                                                                                -- setting each to Nothing if failure
+		                   in if find (isNothing) ints == Nothing -- check all reads were successful
+		                      then let ints2 = (map (fromJust) ints) -- strip the "Just" from each element
+		                            in if find (==False) (map f ints2) == Nothing -- check constraint
+		                               then Just ints2 -- success
+		                               else Nothing    -- failure (constraint f)
+		                      else Nothing             -- failure (int conversion)`
+	},
+	hs3: {
+		type: 'haskell',
+		code: `
+		module ApocTools (
+	    -- * Cell (A "square" on the board)
+	    Cell(WK,WP,BK,BP,E),
+	    cell2Char,
+	    char2Cell,
+	    putCell,
+	    -- * The board itself
+	    Board,
+	    initBoard,
+	    putBoard,
+	    board2Str,
+	    getFromBoard,
+	    -- * Players and pieces
+	    Player(Black,White),
+	    Piece(BlackKnight,BlackPawn,WhiteKnight,WhitePawn),
+	    pieceOf,
+	    playerOf,
+	    -- * Move descriptions
+	    Played(Played,Passed,Goofed,{-GoofedFromOther,GoofedFromInvalid,GoofedFromEmpty,-}Init,UpgradedPawn2Knight,PlacedPawn,BadPlacedPawn,NullPlacedPawn,None),
+	    PlayType(Normal,PawnPlacement),
+	    -- * The game state
+	    GameState(GameState,blackPlay,blackPen,whitePlay,whitePen,theBoard),
+	    -- * The interface for a strategy
+	    Chooser
+
+	    ) where
+		import Data.Char (isSpace)
+
+		---Cells-----------------------------------------------------------
+		---Cells are the state of a cell: contains White and Black Pawns and Knights or is Empty
+
+		{- | The possible contents of a cell: 'WK', 'BK', 'WP', 'BP', and Empty ('E').
+		     We do NOT include "deriving (Show)" here because we use the "instance Show ..."
+		     so we can customize it's display from (say) "Cell E" to "_" according to the
+		     'cell2Char' function.
+		-}
+		data Cell = WK   -- ^ White knight
+		          | WP   -- ^ White pawn
+		          | BK   -- ^ Black knight
+		          | BP   -- ^ Black pawn
+		          | E   -- ^ Empty
+		          deriving (Eq) --deriving (Show)
+
+		-- | Customized print form of Cell
+		instance {-# OVERLAPS #-}
+		         Show (Cell) where
+		         show c = [cell2Char c]
+
+		-- | Converts a 'Cell' to a displayable Char
+		cell2Char       :: Cell -> Char
+		cell2Char WK    =  'X'
+		cell2Char WP    =  '/'
+		cell2Char BK    =  '#'
+		cell2Char BP    =  '+'
+		cell2Char E     =  '_'
+
+		-- | Converts a 'Char' to a 'Cell'
+		char2Cell       :: Char -> Cell
+		char2Cell 'X'   = WK
+		char2Cell '/'   = WP
+		char2Cell '#'   = BK
+		char2Cell '+'   = BP
+		char2Cell '_'   = E
+
+		{- | IO function to print a 'Cell' in a 'Board', which is printed as '|' and the char
+		     representation of the 'Cell'.
+		-}
+		putCell         :: Cell -> IO()
+		putCell c       = do putChar '|'
+		                     putChar (cell2Char c)
+
+		---Boards--------------------------------------------------------
+		---A board is just a 2d (8x8) list of Cells
+
+		-- | The representation of the 'Board' (which is 5x5).
+		type Board      = [[Cell]]
+
+		-- | Customize the read function for 'Board' to coorespond with the show function.
+		instance {-# OVERLAPS #-}
+		         Read Board where
+		         readsPrec _ r = [(result, remainder)]
+		                             where
+		                             allLines = lines (dropWhile (isSpace) r)
+		                             lss = take 6 allLines
+		                             ls = tail lss
+		                             rows = map (filter (/='|')) ls
+		                             result = map (map char2Cell) rows
+		                             remainder = unlines $ drop 6 allLines
+
+		-- | Customized Show for 'Board' so it's more human-readable
+		instance {-# OVERLAPS #-} Show Board where show b = board2Str b
+
+		-- | The intial state of the board
+		initBoard       :: GameState
+		initBoard       = GameState Init 0 Init 0
+		                  [ [WK, WP, WP, WP, WK],
+		                    [WP, E , E , E , WP],
+		                    [E , E , E , E , E ],
+		                    [BP, E , E , E , BP],
+		                    [BK, BP, BP, BP, BK] ]
+
+		-- | Print out a row in a 'Board' in the for "|?|?|?|?|?|".
+		putRow          :: [Cell] -> IO()
+		putRow r        = do mapM_ putCell r
+		                     putStr "|\\n"
+
+		-- | return a row in a 'Board' in the for "|?|?|?|?|?|".
+		row2Str        :: [Cell] -> String
+		row2Str []     = []
+		row2Str (x:xs) = "|" ++ show x ++ row2Str xs
+
+		{- | IO function to print out a 'Board' in the form of:
+
+		@
+		 _ _ _ _ _
+		|?|?|?|?|?|
+		|?|?|?|?|?|
+		|?|?|?|?|?|
+		|?|?|?|?|?|
+		|?|?|?|?|?|
+		@
+		Where the question marks are replaced with the appropriate 'Cell' character (see
+		'cell2Char').
+		-}
+		putBoard        :: [[Cell]] -> IO()
+		putBoard a      = do
+		                    putStr " _ _ _ _ _\\n"
+		                    mapM_ putRow a
+		                    putStr ""
+
+		-- | Return a string representation of a 'Board' in the same form as 'putBoard', above.
+		board2Str         :: [[Cell]] -> String
+		board2Str b       = " _ _ _ _ _\\n" ++ board2Str' b
+		-- | Helper function for 'board2Str'.
+		board2Str'        :: [[Cell]] -> String
+		board2Str' []     = []
+		board2Str' (x:xs) = row2Str x ++ "|\\n" ++ board2Str' xs
+
+		-- | Return the 'Cell' at a point from a 'Board'.
+		getFromBoard             :: [[a]] -> (Int,Int) -> a
+		getFromBoard xs pt       = xs !! snd pt !! fst pt
+
+		---Game state-------------------------------------------------------
+
+		-- | Represents a Player (Black or White).
+		data Player    = Black | White deriving (Eq, Show, Read)
+
+		-- | Represents a Piece, which is slightly different from 'Cell' as a player can't be empty.
+		data Piece     = BlackKnight | BlackPawn | WhiteKnight | WhitePawn deriving (Eq, Show, Read)
+
+		-- | Given a 'Cell', return the corresponding 'Piece'.
+		pieceOf        :: Cell -> Piece
+		pieceOf  BK     = BlackKnight
+		pieceOf  BP     = BlackPawn
+		pieceOf  WK     = WhiteKnight
+		pieceOf  WP     = WhitePawn
+
+		-- | Given a 'Piece', return the corresponding 'Player'.
+		playerOf            :: Piece -> Player
+		playerOf BlackKnight = Black
+		playerOf BlackPawn   = Black
+		playerOf WhiteKnight = White
+		playerOf WhitePawn   = White
+
+		-- | Represents the type of move played in a 'GameState'.
+		data Played = Played ((Int, Int), (Int, Int)) -- ^ A "normal" move.
+		            | Passed                          -- ^ A (legal) pass.
+		            | Goofed ((Int, Int), (Int, Int)) -- ^ An illegal move, penalty applied.
+		--             | GoofedFromEmpty ((Int, Int), (Int, Int)) -- ^ An illegal move, penalty applied.
+		--             | GoofedFromOther ((Int, Int), (Int, Int)) -- ^ An illegal move, penalty applied.
+		--             | GoofedFromInvalid ((Int, Int), (Int, Int)) -- ^ An illegal move, penalty applied.
+		            | Init                            -- ^ No one has moved yet.
+		            | UpgradedPawn2Knight (Int,Int)   -- ^ A pawn reached the other side when <2 knights.
+		            | PlacedPawn ((Int, Int), (Int, Int)) -- ^ A pawn that's been placed in any empty space after having reached the far end of the board.
+		            | BadPlacedPawn ((Int, Int), (Int, Int)) -- ^ A strategy has attempted to do a pawn placement, but chose an invalid location.
+		            | NullPlacedPawn -- ^ A strategy has attempted to do a pawn placement, but returned Nothing
+		            | None -- ^ the legitimate 'pass' when the other player does a PlacedPawn
+		              deriving (Eq, Show, Read)
+
+		{- | Represents the current state of the game.  Contains:
+
+		     * what each Player Played
+		     * their penalties
+		     * the state of the board.
+		-}
+		data GameState = GameState { blackPlay :: Played  -- ^ The black player's play type
+		                           , blackPen  :: Int     -- ^ The black player's penalty
+		                           , whitePlay :: Played  -- ^ The white player's play type
+		                           , whitePen  :: Int     -- ^ The white player's penalty
+		                           , theBoard  :: Board   -- ^ The actual board.
+		                           } deriving (Eq)
+
+		-- | Customize the print form of 'GameState'.
+		instance Show (GameState) where
+		         show g = ">>>\\n"
+		                  ++ "(" ++ show (blackPlay g) ++ ", " ++ show (blackPen  g) ++ ")\\n"
+		                  ++ "(" ++ show (whitePlay g) ++ ", " ++ show (whitePen  g) ++ ")\\n"
+		                  ++ show (theBoard g)
+
+
+		-- | Customize the read function for 'Board' to coorespond with the show function.
+		instance Read GameState where
+		    readsPrec _ r =
+		      case readsPrec 0 (dropWhile (isSpace) (scanPastFlag r)) :: [((Played,Int),String)] of
+		        (((bPlay,bPen),rest1):_) ->
+		          case readsPrec 0 (dropWhile (isSpace) (tail rest1)) :: [((Played,Int),String)] of
+		            (((wPlay,wPen),rest3):_) ->
+		              case readsPrec 0 (tail rest3) :: [(Board,String)] of
+		                ((board,rest5):_) ->
+		                  [(GameState bPlay bPen wPlay wPen board, rest5)]
+		                e3 -> []
+		            e2 -> []
+		        e1 -> []
+
+		scanPastFlag :: String -> String
+		scanPastFlag []                    = ""
+		scanPastFlag ('>':'>':'>':'\\n':cs) = cs
+		scanPastFlag (c:cs)                = scanPastFlag cs
+
+		-- | The text version of a state for testing purposes.
+		testState = "some garbage\\n\
+		            \\>>>\\n\
+		            \\(PlacedPawn ((0,0),(3,2)), 1)\\n\\
+		            \\(None, 0)\\n\\
+		            \\ _ _ _ _ _\\n\\
+		            \\|_|_|_|_|X|\\n\\
+		            \\|_|_|_|_|/|\\n\\
+		            \\|_|_|_|+|_|\\n\\
+		            \\|+|_|_|_|+|\\n\\
+		            \\|#|_|+|+|#|"
+
+		---Strategies-------------------------------------------------------
+
+		{- | This type is used by 'Chooser' to tell the 'Chooser' strategy to generate either a
+		     'Normal' move (source and destination) or a 'PawnPlacement' move (just a destination).
+		-}
+		data PlayType = Normal -- ^ The 'Chooser' should return a list of 2 (x,y) coordinates.
+		              | PawnPlacement -- ^ The 'Chooser' should return a singleton list of (x,y) coordinates.
+		               deriving Eq
+
+		{- | This is the type for all player functions.  A player strategy function takes
+
+		    1. a 'GameState' on which to base it's decision
+		    2. 'PlayType', which may be 'Normal' to indicate that it must return both a source
+		       and destination coordinate in the form [(a,b),(c,d)] where the letters must be
+		       integers; or it may be 'PawnPlacement' to indicate that it must return just a
+		       singlton list containing an empty cell in the 'Board'.
+		    3. 'Player' which indicates that the strategy must work from the perspective of
+		       'Black' or 'White'.
+
+		    The return value can will be Just [(Int,Int)] with either one or two elements (see
+		    point 2 above), or it may return Nothing to indicate a "pass".
+		-}
+		type Chooser = GameState -> PlayType -> Player -> IO (Maybe [(Int,Int)])`
+	},
+	hs4: {
+		type: 'haskell',
+		code: `
+		module EndGame where
+
+		import ApocTools
+
+		-- | Checks for end of game
+		isOver :: GameState -> Maybe(String)
+		isOver gs
+		    | pawnEnd /= Nothing = pawnEnd -- Look for winner due to one player with no pawns first
+		    | penaltyEnd /= Nothing = penaltyEnd -- Look for winner due to one player with 2 penalties second
+		    | passingEnd /= Nothing = passingEnd -- Look for winner due to both players passing last
+		    | otherwise = Nothing
+		    where
+		        pawnEnd = noPawns gs
+		        penaltyEnd = twoPenalty gs
+		        passingEnd = doublePass gs
+
+		-- | Check for player with no pawns
+		noPawns :: GameState -> Maybe(String)
+		noPawns gs
+		    | blackPawn == 0 && whitePawn == 0 = findTieWinner gs
+		    | blackPawn == 0 = Just "White wins! Black has no pawns."
+		    | whitePawn == 0 = Just "Black wins! White has no pawns."
+		    | otherwise = Nothing
+		    where
+		        whitePawn = countPawns White (theBoard gs)
+		        blackPawn = countPawns Black (theBoard gs)
+
+		-- | Check for two penalty points
+		twoPenalty :: GameState -> Maybe(String)
+		twoPenalty gs
+		    | whitePenalty == 2 && blackPenalty == 2 = findTieWinner gs
+		    | whitePenalty == 2 = Just "Black wins! White has 2 penalty points."
+		    | blackPenalty == 2 = Just "White wins! Black has 2 penalty points."
+		    | otherwise = Nothing
+		    where
+		        whitePenalty = whitePen gs
+		        blackPenalty = blackPen gs
+
+		-- | Check for both players passing
+		doublePass :: GameState -> Maybe(String)
+		doublePass gs
+		    | whitePlayed == Passed && blackPlayed == Passed = findTieWinner gs
+		    | otherwise = Nothing
+		    where
+		        whitePlayed = whitePlay gs
+		        blackPlayed = blackPlay gs
+
+		-- | Evaluate winner in tie case
+		findTieWinner :: GameState -> Maybe(String)
+		findTieWinner gs
+		    | whitePawn > blackPawn = Just "White wins! White has more pawns than Black."
+		    | blackPawn > whitePawn = Just "Black wins! Black has more pawns than White."
+		    | whitePenalty > blackPenalty = Just "Black wins! White has more penalty points than Black."
+		    | blackPenalty > whitePenalty = Just "White wins! Black has more penalty points than White."
+		    | otherwise = Just "Tie game! Both players have the same number of pawns and penalty points."
+		    where
+		        whitePawn = countPawns White (theBoard gs)
+		        blackPawn = countPawns Black (theBoard gs)
+		        whitePenalty = whitePen gs
+		        blackPenalty = blackPen gs
+
+		-- | Counts the number of pawns a certain player has on the board
+		countPawns :: Player -> Board -> Int
+		countPawns player board
+		    | player == White = length (filter (==WP) (foldr (++) [] board))
+		    | player == Black = length (filter (==BP) (foldr (++) [] board))
+
+		-- | Counts the number of pawns a certain player has on the board
+		countKnights :: Player -> Board -> Int
+		countKnights player board
+		    | player == White = length (filter (==WK) (foldr (++) [] board))
+		    | player == Black = length (filter (==BK) (foldr (++) [] board))`
+	},
+	hs5: {
+		type: 'haskell',
+		code: `
+		module EndGameTests where
+
+		import ApocTools
+		import EndGame
+
+		-- | Produces an array of Strings that contains the results of the tests with each index corresponding the test condition in main
+		stringResults :: Int -> [Bool] -> [String]
+		stringResults _ [] = []
+		stringResults x (b:bs) = (prettyResults x b) : stringResults (x+1) bs
+
+		-- | Converts a boolean that describes if the test results matches the expected result to a string with the test number and the result
+		prettyResults :: Int -> Bool -> String
+		prettyResults x True = "Test " ++ (show x) ++ ": " ++ "Pass"
+		prettyResults x False = "Test " ++ (show x) ++ ": " ++ "Fail"
+
+		-- | Runs all the different test cases through the testing function
+		runEndGameTests :: [(GameState, Maybe(String))] -> [Bool]
+		runEndGameTests arr = map gameStateTestResult arr
+
+		-- | Tests if the EndGame produces the expected result for a given GameState
+		gameStateTestResult :: (GameState, Maybe(String)) -> Bool
+		gameStateTestResult (gs, expected)
+		    | (isOver gs) == expected = True
+		    | otherwise = False
+
+		-- | Describes the tests run on the EndGame module and prints the results
+		main = do
+		    mapM_ (putStrLn.show) $ stringResults 1 (runEndGameTests gss)
+		    where
+		        -- All of the tests as an array of (GameState, Expected Result) tuples
+		        gss = [
+		                -- Test 1: Initial Board
+		                ((GameState Init 0 Init 0 [
+		                [WK, WP, WP, WP, WK],
+		                [WP, E , E , E , WP],
+		                [E , E , E , E , E ],
+		                [BP, E , E , E , BP],
+		                [BK, BP, BP, BP, BK]]),
+		                
+		                Nothing),
+		                
+		                -- Test 2: No white pawns
+		                ((GameState Init 0 Init 0 [
+		                [WK, E , E , E , WK],
+		                [E , E , E , E , E ],
+		                [E , E , E , E , E ],
+		                [BP, E , E , E , BP],
+		                [BK, BP, BP, BP, BK]]),
+		                
+		                Just "Black wins! White has no pawns."),
+		                
+		                -- Test 3: No black pawns
+		                ((GameState Init 0 Init 0 [
+		                [WK, WP, WP, WP, WK],
+		                [WP, E , E , E , WP],
+		                [E , E , E , E , E ],
+		                [E , E , E , E , E ],
+		                [BK, E , E , E , BK]]),
+		                
+		                Just "White wins! Black has no pawns."),
+		                
+		                -- Test 4: No pawns at all, equal penalties
+		                ((GameState Init 0 Init 0 [
+		                [WK, E , E , E , WK],
+		                [E , E , E , E , E ],
+		                [E , E , E , E , E ],
+		                [E , E , E , E , E ],
+		                [BK, E , E , E , BK]]),
+		                
+		                Just "Tie game! Both players have the same number of pawns and penalty points."),
+		                
+		                -- Test 5: No pawns at all, black has more penalties
+		                ((GameState Init 1 Init 0 [
+		                [WK, E , E , E , WK],
+		                [E , E , E , E , E ],
+		                [E , E , E , E , E ],
+		                [E , E , E , E , E ],
+		                [BK, E , E , E , BK]]),
+		                
+		                Just "White wins! Black has more penalty points than White."),
+		                
+		                -- Test 6: No pawns at all, white has more penalties
+		                ((GameState Init 0 Init 1 [
+		                [WK, E , E , E , WK],
+		                [E , E , E , E , E ],
+		                [E , E , E , E , E ],
+		                [E , E , E , E , E ],
+		                [BK, E , E , E , BK]]),
+		                
+		                Just "Black wins! White has more penalty points than Black."),
+		                
+		                -- Test 7: No pawns at all, black has 2 penalties
+		                ((GameState Init 2 Init 0 [
+		                [WK, E , E , E , WK],
+		                [E , E , E , E , E ],
+		                [E , E , E , E , E ],
+		                [E , E , E , E , E ],
+		                [BK, E , E , E , BK]]),
+		                
+		                Just "White wins! Black has more penalty points than White."),
+		                
+		                -- Test 8: No pawns at all, white has 2 penalties
+		                ((GameState Init 0 Init 2 [
+		                [WK, E , E , E , WK],
+		                [E , E , E , E , E ],
+		                [E , E , E , E , E ],
+		                [E , E , E , E , E ],
+		                [BK, E , E , E , BK]]),
+		                
+		                Just "Black wins! White has more penalty points than Black."),
+		                
+		                -- Test 9: No pawns at all, both have 2 penalties
+		                ((GameState Init 2 Init 2 [
+		                [WK, E , E , E , WK],
+		                [E , E , E , E , E ],
+		                [E , E , E , E , E ],
+		                [E , E , E , E , E ],
+		                [BK, E , E , E , BK]]),
+		                
+		                Just "Tie game! Both players have the same number of pawns and penalty points."),
+		                
+		                -- Test 10: Black has 2 penalties
+		                ((GameState Init 2 Init 0 [
+		                [WK, WP, WP, WP, WK],
+		                [WP, E , E , E , WP],
+		                [E , E , E , E , E ],
+		                [BP, E , E , E , BP],
+		                [BK, BP, BP, BP, BK]]),
+		                
+		                Just "White wins! Black has 2 penalty points."),
+		                
+		                -- Test 11: White has 2 penalties
+		                ((GameState Init 0 Init 2 [
+		                [WK, WP, WP, WP, WK],
+		                [WP, E , E , E , WP],
+		                [E , E , E , E , E ],
+		                [BP, E , E , E , BP],
+		                [BK, BP, BP, BP, BK]]),
+		                
+		                Just "Black wins! White has 2 penalty points."),
+		                
+		                -- Test 12: Both have 2 penalties, same number of pawns
+		                ((GameState Init 2 Init 2 [
+		                [WK, WP, WP, WP, WK],
+		                [WP, E , E , E , WP],
+		                [E , E , E , E , E ],
+		                [BP, E , E , E , BP],
+		                [BK, BP, BP, BP, BK]]),
+		                
+		                Just "Tie game! Both players have the same number of pawns and penalty points."),
+		                
+		                -- Test 13: Both have 2 penalties, black has more pawns
+		                ((GameState Init 2 Init 2 [
+		                [WK, WP, WP, WP, WK],
+		                [E , E , E , E , E ],
+		                [E , E , E , E , E ],
+		                [BP, E , E , E , BP],
+		                [BK, BP, BP, BP, BK]]),
+		                
+		                Just "Black wins! Black has more pawns than White."),
+		                
+		                -- Test 14: Both have 2 penalties, white has more pawns
+		                ((GameState Init 2 Init 2 [
+		                [WK, WP, WP, WP, WK],
+		                [WP, E , E , E , WP],
+		                [E , E , E , E , E ],
+		                [E , E , E , E , E ],
+		                [BK, BP, BP, BP, BK]]),
+		                
+		                Just "White wins! White has more pawns than Black."),
+		                
+		                -- Test 15: Black passed
+		                ((GameState Passed 0 Init 0 [
+		                [WK, WP, WP, WP, WK],
+		                [WP, E , E , E , WP],
+		                [E , E , E , E , E ],
+		                [BP, E , E , E , BP],
+		                [BK, BP, BP, BP, BK]]),
+		                
+		                Nothing),
+		                
+		                -- Test 16: White passed
+		                ((GameState Init 0 Passed 0 [
+		                [WK, WP, WP, WP, WK],
+		                [WP, E , E , E , WP],
+		                [E , E , E , E , E ],
+		                [BP, E , E , E , BP],
+		                [BK, BP, BP, BP, BK]]),
+		                
+		                Nothing),
+		                
+		                -- Test 17: Both passed, same number of pawns
+		                ((GameState Passed 0 Passed 0 [
+		                [WK, WP, WP, WP, WK],
+		                [WP, E , E , E , WP],
+		                [E , E , E , E , E ],
+		                [BP, E , E , E , BP],
+		                [BK, BP, BP, BP, BK]]),
+		                
+		                Just "Tie game! Both players have the same number of pawns and penalty points."),
+		                
+		                -- Test 18: Both passed, black has more pawns
+		                ((GameState Passed 0 Passed 0 [
+		                [WK, WP, WP, WP, WK],
+		                [E , E , E , E , E ],
+		                [E , E , E , E , E ],
+		                [BP, E , E , E , BP],
+		                [BK, BP, BP, BP, BK]]),
+		                
+		                Just "Black wins! Black has more pawns than White."),
+		                
+		                -- Test 19: Both passed, white has more pawns
+		                ((GameState Passed 0 Passed 0 [
+		                [WK, WP, WP, WP, WK],
+		                [WP, E , E , E , WP],
+		                [E , E , E , E , E ],
+		                [E , E , E , E , E ],
+		                [BK, BP, BP, BP, BK]]),
+		                
+		                Just "White wins! White has more pawns than Black."),
+		                
+		                -- Test 20: Both have two penalties, both passed, same number of pawns
+		                ((GameState Passed 2 Passed 2 [
+		                [WK, WP, WP, WP, WK],
+		                [WP, E , E , E , WP],
+		                [E , E , E , E , E ],
+		                [BP, E , E , E , BP],
+		                [BK, BP, BP, BP, BK]]),
+		                
+		                Just "Tie game! Both players have the same number of pawns and penalty points."),
+		                
+		                -- Test 21: Both have two penalties, both passed, black has more pawns
+		                ((GameState Passed 2 Passed 2 [
+		                [WK, WP, WP, WP, WK],
+		                [E , E , E , E , E ],
+		                [E , E , E , E , E ],
+		                [BP, E , E , E , BP],
+		                [BK, BP, BP, BP, BK]]),
+		                
+		                Just "Black wins! Black has more pawns than White."),
+		                
+		                -- Test 22: Both have two penalties, both passed, white has more pawns
+		                ((GameState Passed 2 Passed 2 [
+		                [WK, WP, WP, WP, WK],
+		                [WP, E , E , E , WP],
+		                [E , E , E , E , E ],
+		                [E , E , E , E , E ],
+		                [BK, BP, BP, BP, BK]]),
+		                
+		                Just "White wins! White has more pawns than Black."),
+		                
+		                -- Test 23: Both have two penalties, black passed, same number of pawns
+		                ((GameState Passed 2 Init 2 [
+		                [WK, WP, WP, WP, WK],
+		                [WP, E , E , E , WP],
+		                [E , E , E , E , E ],
+		                [BP, E , E , E , BP],
+		                [BK, BP, BP, BP, BK]]),
+		                
+		                Just "Tie game! Both players have the same number of pawns and penalty points."),
+		                
+		                -- Test 24: Both have two penalties, black passed, black has more pawns
+		                ((GameState Passed 2 Init 2 [
+		                [WK, WP, WP, WP, WK],
+		                [E , E , E , E , E ],
+		                [E , E , E , E , E ],
+		                [BP, E , E , E , BP],
+		                [BK, BP, BP, BP, BK]]),
+		                
+		                Just "Black wins! Black has more pawns than White."),
+		                
+		                -- Test 25: Both have two penalties, black passed, white has more pawns
+		                ((GameState Passed 2 Init 2 [
+		                [WK, WP, WP, WP, WK],
+		                [WP, E , E , E , WP],
+		                [E , E , E , E , E ],
+		                [E , E , E , E , E ],
+		                [BK, BP, BP, BP, BK]]),
+		                
+		                Just "White wins! White has more pawns than Black."),
+		                
+		                -- Test 26: Both have two penalties, white passed, same number of pawns
+		                ((GameState Init 2 Passed 2 [
+		                [WK, WP, WP, WP, WK],
+		                [WP, E , E , E , WP],
+		                [E , E , E , E , E ],
+		                [BP, E , E , E , BP],
+		                [BK, BP, BP, BP, BK]]),
+		                
+		                Just "Tie game! Both players have the same number of pawns and penalty points."),
+		                
+		                -- Test 27: Both have two penalties, white passed, black has more pawns
+		                ((GameState Init 2 Passed 2 [
+		                [WK, WP, WP, WP, WK],
+		                [E , E , E , E , E ],
+		                [E , E , E , E , E ],
+		                [BP, E , E , E , BP],
+		                [BK, BP, BP, BP, BK]]),
+		                
+		                Just "Black wins! Black has more pawns than White."),
+		                
+		                -- Test 28: Both have two penalties, white passed, white has more pawns
+		                ((GameState Init 2 Passed 2 [
+		                [WK, WP, WP, WP, WK],
+		                [WP, E , E , E , WP],
+		                [E , E , E , E , E ],
+		                [E , E , E , E , E ],
+		                [BK, BP, BP, BP, BK]]),
+		                
+		                Just "White wins! White has more pawns than Black.")
+		            ]`
+	},
+	hs6: {
+		type: 'haskell',
+		code: `
+		module GreedyAI where
+
+		import Data.Maybe (fromJust, isNothing)
+		import ApocTools
+		import Utils
+		import Rules
+		import EndGame
+		import System.Random
+
+		-- | Defines a data structure that allows us to store a move's coords and it's "point" weighting
+		data GreedyMoveAndPoints = GreedyMoveAndPoints {
+		    src :: (Int, Int),
+		    dest :: (Int, Int), 
+		    points :: Int
+		}
+
+
+		-- | Given a Cell, returns how many greedy points its worth
+		getGreedyPoints :: Cell -> Int
+		getGreedyPoints WK = 2
+		getGreedyPoints BK = 2
+		getGreedyPoints WP = 1
+		getGreedyPoints BP = 1
+		getGreedyPoints E  = 0
+
+		-- | Returns a list of the most greedy moves on the board
+		getMostGreedy :: Board -> [((Int, Int), (Int, Int))] -> Player -> [GreedyMoveAndPoints]
+		getMostGreedy _ [] _ = [GreedyMoveAndPoints (0, 0) (0, 0) (-1)]
+		getMostGreedy board (x:xs) player =
+		    if (thispoints > nextPoints) then -- This has more points, return just this
+		        [GreedyMoveAndPoints src dest thispoints]
+		    else
+		        if (thispoints == nextPoints) then -- Same amount of points, add to the list
+		            (GreedyMoveAndPoints src dest thispoints):next
+		        else -- Less than the next, return next 
+		            next
+
+		    where
+		        src         = fst x
+		        dest        = snd x
+		        destCell    = getFromBoard board dest
+		        thispoints  = getGreedyPoints destCell
+		        next        = (getMostGreedy board xs player)
+		        nextPoints  = points (next!!0)
+
+
+		-- | Tries to find a move that can bring a pawn to the last rank
+		lookingForUpgrade :: Board -> (Int, Int) -> Player -> Maybe (((Int, Int), (Int, Int)))
+		lookingForUpgrade _ (0, 5) _ = Nothing
+		lookingForUpgrade board (x, y) player =
+		    if (cell == BP && player == Black && y == 1 && validMove board (x, y) (x, y-1) player) then Just ((x, y), (x, y-1)) -- We can upgrade this black pawn
+		    else 
+		        if (cell == WP && player == White && y == 3 && validMove board (x, y) (x, y+1) player) then Just ((x, y), (x, y+1)) -- We can upgrade this white pawn
+		        else lookingForUpgrade board newCoord player -- Try the next coord
+
+		    where 
+		        newCoord = (if x == 4 then 0 else x+1, if x == 4 then y+1 else y)
+		        cell = getFromBoard board (x, y)
+
+
+		-- | Entry point of the Greedy strategy
+		greedyMove                  :: Chooser
+		greedyMove gs Normal player = do
+		    possible <- getPossibleMoves board (0, 0) player
+
+		    if length possible == 0 then do
+		        -- No possible moves, pass
+		        return Nothing
+		    else do
+		        gen <- newStdGen
+		        let shouldGreedy = fst (randomR (0, 9) gen) :: Int
+
+		        let pawnUpgrade = if (pawnAmt > 1 && knightAmt < 2) then lookingForUpgrade board (0, 0) player else Nothing
+
+		        if isNothing pawnUpgrade == False then do
+		            -- Upgrade the pawn
+		            let nonJustPawn = fromJust pawnUpgrade
+		            return (Just [fst nonJustPawn, snd nonJustPawn])
+		        else do
+		            if (shouldGreedy > 0) then do
+		                -- Choose the greedy move 90% of the time
+
+		                let greedy = getMostGreedy board possible player
+		                let mostPoints = points (greedy!!0)
+
+		                -- Choose a random greedy move from the best moves
+		                gen <- newStdGen
+		                let randIndex = fst (randomR (0, length greedy-1) gen) :: Int
+		                return (Just [src (greedy!!randIndex), dest (greedy!!randIndex)])
+		            else do
+		                -- Choose a random move 10% of the time (to avoid infinite loops)
+		                gen <- newStdGen
+		                let randIndex = fst (randomR (0, length possible-1) gen) :: Int
+		                return (Just [fst (possible!!randIndex), snd (possible!!randIndex)])
+
+		    where
+		        board = (theBoard gs)
+		        pawnAmt = countPawns player board
+		        knightAmt = countKnights player board
+
+
+		greedyMove gs PawnPlacement player = do
+		    -- Get random pawn placement move
+		    emptyCoords <- getAllEmptyCoords (theBoard gs) (0, 0)
+
+		    gen <- newStdGen
+		    let randIndex = fst (randomR (0, length emptyCoords-1) gen) :: Int
+
+		    -- There is guaranteed to be at least one empty space, so we don't need to handle that
+		    return (Just [(emptyCoords!!randIndex)])`
+	},
+	hs7: {
+		type: 'haskell',
+		code: `
+		module Moves where
+
+		import ApocTools
+		import Utils
+
+		-- | Given a GameState with two unperformed moves, performs the valid moves
+		move :: GameState -> GameState
+		move gs
+		    | (isPlayed $ whitePlay gs) && (isPlayed $ blackPlay gs)    = processBoth gs
+		    | isPlayed $ whitePlay gs                                   = processSingle White gs
+		    | isPlayed $ blackPlay gs                                   = processSingle Black gs
+		    | otherwise                                                 = gs
+
+		-- | Given two unperformed valid moves in a GameState, executes the moves on the board and returns the new GameSate
+		processBoth :: GameState -> GameState
+		processBoth gs
+		    | whiteSource == blackDest  && blackSource == whiteDest             = swap
+		    | blackDest == whiteSource                                          = blackDestToWhiteSrc
+		    | whiteDest == blackSource                                          = whiteDestToBlackSrc
+		    | whiteDest == blackDest    && blPiece == BP    && whPiece == WP    = clash
+		    | whiteDest == blackDest    && blPiece == BK    && whPiece == WK    = clash
+		    | whiteDest == blackDest    && blPiece == BK    && whPiece == WP    = whitePawnKill
+		    | whiteDest == blackDest    && blPiece == BP    && whPiece == WK    = blackPawnKill
+		    | otherwise = moveBoth
+		    where
+		        board          = theBoard gs
+		        state          = GameState (blackPlay gs) (blackPen gs) (whitePlay gs) (whitePen gs)
+		        whiteSource    = fst $ justCord $ whitePlay gs
+		        whiteDest      = snd $ justCord $ whitePlay gs
+		        blackSource    = fst $ justCord $ blackPlay gs
+		        blackDest      = snd $ justCord $ blackPlay gs
+		        whPiece        = getFromBoard board whiteSource
+		        blPiece        = getFromBoard board blackSource
+		        blPlay         = blackPlay gs
+		        whPlay         = whitePlay gs
+
+		        -- If the piece is moving to the origin of the other piece that is moving, we ensure that we preserve the piece types and only clear the proper origin
+		        blackDestToWhiteSrc   = state $ replace2 (replace2 (replace2 board blackSource E) whiteDest whPiece) blackDest blPiece
+		        whiteDestToBlackSrc   = state $ replace2 (replace2 (replace2 board whiteSource E) blackDest blPiece) whiteDest whPiece
+
+		        swap           = state $ swapPieces board blackDest whiteDest blPiece whPiece
+		        clash          = state $ allEmpty board whiteSource blackSource
+		        moveBoth       = state $ movePiece (movePiece board whPlay) blPlay
+		        whitePawnKill  = state $ replace2 (replace2 (replace2 board whiteSource E) blackSource E) blackDest BK
+		        blackPawnKill  = state $ replace2 (replace2 (replace2 board whiteSource E) blackSource E) whiteDest WK
+
+		-- | Given a Player and GameState with a Played move for that player, performs the move and returns the new GameState
+		processSingle :: Player -> GameState -> GameState
+		processSingle p gs
+		    | p == White  = state $ movePiece (theBoard gs) (whitePlay gs)
+		    | p == Black  = state $ movePiece (theBoard gs) (blackPlay gs)
+		    where
+		        state = GameState (blackPlay gs) (blackPen gs) (whitePlay gs) (whitePen gs)
+		         
+		-- | Performs a given Played move on the Board and returns the new GameState
+		movePiece :: Board -> Played -> Board
+		movePiece board (Played (sourceCord, destCord)) = replace2 (replace2 board sourceCord E) destCord sourcePiece
+		    where
+		        sourcePiece = getFromBoard board (sourceCord)
+
+		-- | Given a Board and two piece coords and their Cell types, swaps the two pieces and returns the new state of the Board
+		swapPieces :: Board -> (Int, Int) -> (Int, Int) -> Cell -> Cell -> Board
+		swapPieces board (blCoord) (whCoord) blPiece whPiece = replace2 (replace2 board blCoord blPiece) whCoord whPiece
+
+		-- | Given a Board and two coords, removes the pieces on both tiles and returns the new Board
+		allEmpty :: Board -> (Int, Int) -> (Int, Int) -> Board
+		allEmpty board cord1 cord2 = replace2 (replace2 board cord1 E) cord2 E
+
+		-- | Given a Played data type, returns the source and destination tuples specifying the move coords
+		justCord :: Played -> ((Int,Int),(Int,Int))
+		justCord (Played (src, dest)) = (src, dest)
+
+		-- | Checks whether a Played data type is of a Played state
+		isPlayed :: Played -> Bool
+		isPlayed (Played((_,_),(_,_)))    = True
+		isPlayed x                        = False
+
+		-- | Moves a given upgraded piece from the given source coord to the dest coord on the board and returns it
+		moveUpgradePiece :: Board -> ((Int,Int),(Int,Int)) -> Board
+		moveUpgradePiece board move = (replace2 (replace2 board src E) dest srcPiece)
+		    where
+		        src = fst move
+		        dest = snd move
+		        srcPiece = getFromBoard board src`
+	},
+	hs8: {
+		type: 'haskell',
+		code: `
+		module RandomAI where
+
+		import ApocTools
+		import Utils
+		import Rules
+		import System.Random
+
+		-- | Random Move Entry Point
+		randomMove                  :: Chooser
+		randomMove gs Normal player = do
+		    possible <- getPossibleMoves (theBoard gs) (0, 0) player
+
+		    if length possible == 0 then do
+		        -- No possible moves, pass
+		        return Nothing
+		    else do
+		        gen <- newStdGen
+		        let randIndex = fst (randomR (0, length possible-1) gen)
+		        return (Just [fst (possible!!randIndex), snd (possible!!randIndex)])
+
+
+		randomMove gs PawnPlacement player = do
+		    emptyCoords <- getAllEmptyCoords (theBoard gs) (0, 0)
+
+		    gen <- newStdGen
+		    let randIndex = fst (randomR (0, length emptyCoords-1) gen)
+
+		    -- There is guaranteed to be at least one empty space, so we don't need to handle that
+		    return (Just [(emptyCoords!!randIndex)])`
+	},
+	hs9: {
+		type: 'haskell',
+		code: `
+		module Rules where
+
+		import Data.Maybe (fromJust, isNothing)
+		import ApocTools
+
+		-- | Returns a bool as to whether the player owns the piece at the tile
+		ownsPiece :: [[Cell]] -> (Int, Int) -> Player -> Bool
+		ownsPiece board (srcX, srcY) player
+		    | cell /= E && playerOf (pieceOf (cell)) == player = True -- Note: pieceOf doesn't have a case for E :(
+		    | otherwise = False
+		    where
+		        cell = getFromBoard board (srcX, srcY)
+
+		-- | Returns a bool as to whether the pawn move is valid directionally
+		validPawnDirection :: [[Cell]] -> (Int, Int) -> (Int, Int) -> Player -> Bool
+		validPawnDirection board (srcX, srcY) (destX, destY) player
+		    | abs deltaY > 1 = False -- They can only move 1 forward
+		    | deltaX /= 0 && abs deltaX /= 1 = False -- They can only move 0 sideways or 1 sideways
+		    | player == White && deltaY <= 0 = False -- Ensure they are moving in the right direction (if it is White, move down (larger index), else up)
+		    | player == Black && deltaY >= 0 = False
+		    -- Now we know that they are moving 1 forward and either 0 or 1 tiles sideways
+		    | deltaX == 0 && abs deltaY == 1 && destCell == E = True -- They are moving forward into an empty cell
+		    | deltaX == 0 && abs deltaY == 1 && destCell /= E = False -- They are moving forward into a opponent
+		    -- They must be moving diagonaly to be valid now
+		    | destCell == E = False -- You can't move diagonally to an empty cell
+		    | playerOf (pieceOf (destCell)) /= player = True -- Moving diagonally to a cell that is the not the player
+		    | otherwise = False
+		    where 
+		        srcCell = getFromBoard board (srcX, srcY)
+		        destCell = getFromBoard board (destX, destY)
+		        deltaX = destX - srcX
+		        deltaY = destY - srcY
+
+		-- | Returns a bool as to whether the knight move is valid directionally
+		validKnightDirection :: [[Cell]] -> (Int, Int) -> (Int, Int) -> Player -> Bool
+		validKnightDirection board (srcX, srcY) (destX, destY) player
+		    | abs deltaX == 1 && abs deltaY == 2 = True
+		    | abs deltaX == 2 && abs deltaY == 1 = True
+		    | otherwise = False
+		    where
+		        deltaX = destX - srcX
+		        deltaY = destY - srcY
+
+		-- | Returns bool as to whether the bounds are proper for a given move
+		validMoveBounds :: (Int, Int) -> (Int, Int) -> Bool
+		validMoveBounds (srcX, srcY) (destX, destY)
+		    | srcX < 0 || srcX > 4 = False
+		    | srcY < 0 || srcY > 4 = False
+		    | destX < 0 || destX > 4 = False
+		    | destY < 0 || destY > 4 = False
+		    | otherwise = True
+
+		-- | Returns whether that given move on the board is valid for player
+		validMove :: [[Cell]] -> (Int, Int) -> (Int, Int) -> Player -> Bool
+		validMove board (srcX, srcY) (destX, destY) player
+		    | validMoveBounds (srcX, srcY) (destX, destY) == False = False -- Ensure the bounds are valid (human handles this for us, but whatever)
+		    | isPawn == False && isKnight == False = False -- Ensure it is a pawn or knight
+		    | ownsPiece board (srcX, srcY) player == False = False -- Ensure they own the piece they're moving
+		    | ownsPiece board (destX, destY) player == True = False -- Ensure the piece destination is a tile they don't have a piece in
+		    | isPawn && validPawnDirection board (srcX, srcY) (destX, destY) player == True = True -- If it is a pawn, check if it is a valid direction
+		    | isKnight && validKnightDirection board (srcX, srcY) (destX, destY) player == True = True -- If it is a knight, check if it is a valid direction
+		    | otherwise = False
+		    where 
+		        srcCell = getFromBoard board (srcX, srcY)
+		        destCell = getFromBoard board (destX, destY)
+		        isPawn = srcCell == WP || srcCell == BP
+		        isKnight = srcCell == WK || srcCell == BK
+
+		-- | Parses and returns the proper Played var (Only works for standard moves -ex. Not pawn placements or whatever)
+		parseNormalMove :: Player -> Maybe [(Int, Int)] -> GameState -> Played
+		parseNormalMove player move state
+		    | isNothing move = Passed
+		    | validMove board (srcX, srcY) (destX, destY) player == False = Goofed ((srcX, srcY), (destX, destY)) -- Ensure the move is valid
+		    | otherwise = Played ((srcX, srcY), (destX, destY))
+		    where 
+		        board = theBoard state
+		        justMove = fromJust move
+		        srcX = fst (justMove!!0)
+		        srcY = snd (justMove!!0)
+		        destX = fst (justMove!!1)
+		        destY = snd (justMove!!1)
+
+		-- | Returns a bool as to whether the given pawn relocation move is valid
+		validRelocationMove :: Maybe [(Int, Int)] -> GameState -> Bool
+		validRelocationMove move gs
+		    | isNothing move = False
+		    | destCell == E = True
+		    | otherwise = False
+		    where 
+		        board = theBoard gs
+		        justMove = fromJust move
+		        destX = fst (justMove!!0)
+		        destY = snd (justMove!!0)
+		        destCell = getFromBoard board (destX, destY)`
+	},
+	hs10: {
+		type: 'haskell',
+		code: `
+		module StrategyUtils where
+
+		import ApocTools
+		import ApocStrategyHumanSol
+		import RandomAI
+		import GreedyAI
+
+		-- | Only human is necessary for now, but we need two other AI strategies
+		strategies = ["human", "random", "greedy"]
+
+		-- | Prints possible strategies in console
+		showStrategies = do
+		  putStrLn "Possible strategies:"
+		  mapM_ showStrategy strategies
+
+		-- | Prints the strategy with proper formatting in console
+		showStrategy :: String -> IO ()
+		showStrategy x = do
+		  putStrLn ("  " ++ x)
+
+		-- | Returns whether both strategies are valid
+		stratsValid :: String -> String -> Bool
+		stratsValid strat1 strat2
+		  | stratValid strat1 && stratValid strat2 = True
+		  | otherwise = False
+
+		-- | Returns whether the strat is valid
+		stratValid :: String -> Bool
+		stratValid strat
+		  | strat \`elem\` strategies = True
+		  | otherwise = False
+
+		-- | Given a strategy string, returns the strategy function
+		getStrategyFromString :: String -> Chooser
+		getStrategyFromString strat
+		  | strat == "human" = human
+		  | strat == "random" = randomMove
+		  | strat == "greedy" = greedyMove
+
+		-- | Prompts the user 
+		getStrategyForPlayer x = do
+		  putStrLn ("Enter the strategy for " ++ x ++ ":")
+		  strat <- getLine
+		  return strat`
+	},
+	hs11: {
+		type: 'haskell',
+		code: `
+		module Upgrade where
+
+		import Data.Maybe (fromJust, isNothing)
+		import ApocTools
+		import Utils
+		import Moves
+		import Rules
+
+		-- | Given a GameState with recent moves, performs necessary pawn upgrades and relocation
+		upgrade :: GameState -> Chooser -> Chooser -> IO (Maybe GameState)
+		upgrade gs blackstrat whitestrat = do
+		    if (blNeedUpgrade && whNeedUpgrade) then do
+		        newgs <- upgradeBoth gs blackstrat whitestrat
+		        return (Just newgs)
+		    else do
+		        if (blNeedUpgrade) then do -- Execute black if possible
+		            newgs <- upgradeSingle whiteClearPlay Black blackstrat
+		            return (Just newgs)
+		        else do
+		            if (whNeedUpgrade) then do -- Execute white if possible
+		                newgs <- upgradeSingle blackClearPlay White whitestrat
+		                return (Just newgs)
+		            else do
+		                return Nothing
+		    where
+		        board           = theBoard gs
+
+		        isBlPlay        = isPlayed $ blackPlay gs
+		        blDest          = snd $ fromPlayed $ blackPlay gs
+		        blDestY         = snd blDest
+		        blDestPiece     = getFromBoard board blDest
+		        blNeedUpgrade   = isBlPlay && blDestY == 0 && blDestPiece == BP
+
+		        isWhPlay        = isPlayed $ whitePlay gs
+		        whDest          = snd $ fromPlayed $ whitePlay gs
+		        whDestY         = snd whDest
+		        whDestPiece     = getFromBoard board whDest
+		        whNeedUpgrade   = isWhPlay && whDestY == 4 && whDestPiece == WP
+
+		        blackClearPlay  = gs {blackPlay = None}
+		        whiteClearPlay  = gs {whitePlay = None}
+
+		-- | Upgrades both moves on the GameState
+		upgradeBoth :: GameState -> Chooser -> Chooser -> IO GameState
+		upgradeBoth gs blackstrat whitestrat = do
+		    firstUpgrade <- upgradeSingle gs Black blackstrat
+		    secondUpgrade <- upgradeSingle firstUpgrade White whitestrat
+
+		    return secondUpgrade
+
+		-- | Prompts for relocation on the GameState for the given Player and returns the updated state
+		relocationPrompt :: GameState -> Player -> Chooser -> IO GameState
+		relocationPrompt gs player strat = do
+		    move <- strat gs PawnPlacement player
+
+
+		    if move /= Nothing && player == White then do
+		        let moveCoords = (whiteDest, fromJust move!!0)
+
+		        if validRelocationMove move gs then do
+		            let newBoard = moveUpgradePiece board moveCoords
+		            return (gs {whitePlay = PlacedPawn moveCoords, theBoard = newBoard})
+		        else do
+		            return (gs {whitePlay = BadPlacedPawn moveCoords, whitePen = (whitePen gs) + 1})
+		    else do
+		        if move /= Nothing then do
+		            -- Must be black
+		            let moveCoords = (blackDest, fromJust move!!0)
+
+		            if validRelocationMove move gs then do
+		                let newBoard = moveUpgradePiece board moveCoords
+		                return (gs {blackPlay = PlacedPawn moveCoords, theBoard = newBoard})
+		            else do
+		                return (gs {blackPlay = BadPlacedPawn moveCoords, blackPen = (blackPen gs) + 1})
+		        else do
+		            if player == White then do
+		                return (gs {whitePlay = NullPlacedPawn, whitePen = (whitePen gs) + 1})
+		            else do
+		                return (gs {blackPlay = NullPlacedPawn, blackPen = (blackPen gs) + 1})
+		    where
+		        board       = theBoard gs
+
+		        whiteCoords = fromPlayed (whitePlay gs)
+		        whiteDest   = snd whiteCoords
+
+		        blackCoords = fromPlayed (blackPlay gs)
+		        blackDest   = snd blackCoords
+
+		-- | Upgrades a single move for the player on the GameState, and returns the resultant state
+		upgradeSingle :: GameState -> Player -> Chooser -> IO GameState
+		upgradeSingle gs player strat = do
+		    if (player == Black && blDestY == 0 && blDestPiece == BP) then do
+		        if (elemCountMulti BK board < 2) then do
+		            return blackToKnight
+		        else do
+		            prompt <- blackPrompt
+		            return prompt
+		    else do
+		        if (player == White && whDestY == 4 && whDestPiece == WP) then do
+		            if (elemCountMulti WK board < 2) then do
+		                return whiteToKnight
+		            else do
+		                prompt <- whitePrompt
+		                return prompt
+		        else do
+		            return gs
+		    where
+		        whDest          = snd $ fromPlayed $ whitePlay gs
+		        whDestY         = snd whDest
+		        whDestPiece     = getFromBoard board whDest
+		        blDest          = snd $ fromPlayed $ blackPlay gs
+		        blDestY         = snd blDest
+		        blDestPiece     = getFromBoard board blDest
+		        board           = theBoard gs
+		        blackToKnight   = gs {theBoard = (replace2 board blDest BK), blackPlay = UpgradedPawn2Knight (blDest)}
+		        whiteToKnight   = gs {theBoard = (replace2 board whDest WK), whitePlay = UpgradedPawn2Knight (whDest)}
+		        whitePrompt     = relocationPrompt gs White strat
+		        blackPrompt     = relocationPrompt gs Black strat`
+	},
+	hs12: {
+		type: 'haskell',
+		code: `
+		module Utils where
+
+		import ApocTools
+		import Rules
+
+		---2D list utility functions-------------------------------------------------------
+
+		-- | Replaces the nth element in a row with a new element.
+		replace         :: [a] -> Int -> a -> [a]
+		replace xs n elem = let (ys,zs) = splitAt n xs
+		                     in (if null zs then (if null ys then [] else init ys) else ys)
+		                        ++ [elem]
+		                        ++ (if null zs then [] else tail zs)
+
+		-- | Replaces the (x,y)th element in a list of lists with a new element.
+		replace2        :: [[a]] -> (Int,Int) -> a -> [[a]]
+		replace2 xs (x,y) elem = replace xs y (replace (xs !! y) x elem)
+
+		-- | Returns the amount of elements == a in the list
+		elemCount :: Eq a => a -> [a] -> Int
+		elemCount elem a = length (filter (==elem) a)
+
+		-- | Returns the amount of elements == a in the 2 dimensional list
+		elemCountMulti :: Eq a => a -> [[a]] -> Int
+		elemCountMulti _ [] = 0
+		elemCountMulti elem (x:xs) = elemCount elem x + elemCountMulti elem xs
+
+		-- | Converts a Played data type to a regular (src, dest) tuple
+		fromPlayed :: Played -> ((Int, Int), (Int, Int))
+		fromPlayed (Played ((srcX, srcY), (destX, destY))) = ((srcX, srcY), (destX, destY))
+
+
+		-- AI Utility Functions
+
+		-- | Offsets for black pawn moves
+		pawnBlackMoves = [(0, -1), (-1, -1), (1, -1)]
+
+		-- | Offsets for white pawn moves
+		pawnWhiteMoves = [(0, 1), (-1, 1), (1, 1)]
+
+		-- | Offsets for knight moves
+		knightMoves = [(1, 2), (1, -2), (-1, -2), (-1, 2), (2, 1), (-2, 1), (2, -1), (-2, -1)]
+
+		-- | Returns the possible moves for a given piece
+		getPieceMoves :: Board -> (Int, Int) -> [(Int, Int)] -> Player -> [((Int, Int), (Int, Int))]
+		getPieceMoves _ _ [] _ = []
+		getPieceMoves board coord possible@(x:xs) player = 
+		    if validMove board (xCoord, yCoord) (xCoord+xOffset, yCoord+yOffset) player then
+		        ((xCoord, yCoord), (xCoord+xOffset, yCoord+yOffset)):[] ++ getPieceMoves board coord xs player
+		    else
+		        getPieceMoves board coord xs player
+		    where
+		        xCoord = fst coord
+		        yCoord = snd coord
+		        xOffset = fst x
+		        yOffset = snd x
+
+		-- | Returns move offets for a given piece
+		getMovesForPiece :: Cell -> [(Int, Int)]
+		getMovesForPiece WP = pawnWhiteMoves
+		getMovesForPiece BP = pawnBlackMoves
+		getMovesForPiece WK = knightMoves
+		getMovesForPiece BK = knightMoves
+		getMovesForPiece E  = []
+
+		-- | Gets possible moves for board (starting with (Int, Int))
+		getPossibleMoves :: Board -> (Int, Int) -> Player -> IO ([((Int, Int), (Int, Int))])
+		getPossibleMoves _ (0, 5) _ = do return []
+		getPossibleMoves board (x, y) player = do
+		    let newCoord = (if x == 4 then 0 else x+1, if x == 4 then y+1 else y)
+
+		    nextMoves <- getPossibleMoves board newCoord player
+
+		    if ownedByPlayer then do
+		        let offsets = getMovesForPiece cell
+		        return (getPieceMoves board (x, y) offsets player ++ nextMoves)
+		    else do
+		        return nextMoves
+
+		    where
+		        cell = getFromBoard board (x, y)
+		        ownedByPlayer = cell /= E && playerOf (pieceOf (cell)) == player
+		        isKnight = cell == WK || cell == BK
+		        isPawn = cell == WP || cell == BP
+
+		-- | Returns all of the empty cell coords
+		getAllEmptyCoords :: Board -> (Int, Int) -> IO ([(Int, Int)])
+		getAllEmptyCoords _ (0, 5) = do return []
+		getAllEmptyCoords board (x, y) = do
+		    let newCoord = (if x == 4 then 0 else x+1, if x == 4 then y+1 else y)
+
+		    next <- getAllEmptyCoords board newCoord
+		    if cell == E then do
+		        return ((x, y):[] ++ next)
+		    else do
+		        return (next)
+		    where
+		        cell = getFromBoard board (x, y)`
 	}
 }

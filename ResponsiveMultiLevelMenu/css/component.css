@@ -125,6 +125,7 @@
 	transform: translateY(10px);
 	-webkit-backface-visibility: hidden;
 	backface-visibility: hidden;
+	overflow-y: auto;
 }
 
 .dl-menuwrapper .dl-menu.dl-menu-toggle {
@@ -163,7 +164,6 @@ All this is done for any sub-level being entered.
 .dl-menu.dl-subview li.dl-subviewopen > .dl-submenu > li {
 	display: block;
 	max-height: 400px;
-	overflow-y: scroll;
 }
 
 /* Dynamically added submenu outside of the menu context */
